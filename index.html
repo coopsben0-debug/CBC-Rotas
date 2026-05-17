@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Craigavon Baptist Church — Rota Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet"/>
-<script src="supabase.js"></script>
+  <script src="supabase.js"></script>
   <style>
     :root {
       --bg-light: #f8fafc;
@@ -17,109 +17,96 @@
       --text-muted: #64748b;
       --border-color: #e2e8f0;
       --danger: #ef4444;
+      --success: #10b981;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Inter', sans-serif; background: var(--bg-light); color: var(--text-main); min-height: 100vh; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg-light); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; }
+    
+    #loading-screen { position: fixed; inset: 0; background: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; }
+    .spinner { border: 3px solid var(--border-color); border-top: 3px solid var(--navy); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 16px; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-    #auth-screen {
-      min-height: 100vh;
-      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-      display: flex; align-items: center; justify-content: center; padding: 24px;
-    }
-    .auth-card {
-      background: var(--card-bg); border-radius: 16px; padding: 40px; width: 100%; max-width: 440px;
-    }
-    .auth-header-text { text-align: center; margin-bottom: 24px; }
-    .auth-title { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: var(--navy); }
-    .field { margin-bottom: 18px; }
-    .field label { display: block; font-size: 12px; font-weight: 600; color: var(--navy-light); text-transform: uppercase; margin-bottom: 6px; }
-    .field input {
-      width: 100%; padding: 12px 16px; border: 1.5px solid var(--border-color); border-radius: 8px;
-    }
-    .btn-primary {
-      width: 100%; padding: 14px; background: var(--navy); color: #ffffff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;
-    }
-    .auth-error { background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 12px 16px; font-size: 14px; color: var(--danger); margin-bottom: 20px; }
+    #auth-screen { min-height: 100vh; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); display: flex; align-items: center; justify-content: center; padding: 24px; }
+    .auth-card { background: var(--card-bg); border-radius: 16px; padding: 40px; width: 100%; max-width: 440px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3); }
+    .auth-header-text { text-align: center; margin-bottom: 32px; }
+    .auth-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; color: var(--navy); }
+    .field { margin-bottom: 20px; }
+    .field label { display: block; font-size: 11px; font-weight: 700; color: var(--navy-light); text-transform: uppercase; tracking-ratio: 0.05em; margin-bottom: 8px; }
+    .field input { width: 100%; padding: 12px 16px; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 14px; transition: border-color 0.2s; }
+    .field input:focus { outline: none; border-color: var(--navy); }
+    .btn-primary { width: 100%; padding: 14px; background: var(--navy); color: #ffffff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s; font-size: 14px; }
+    .btn-primary:hover { background: #0f172a; }
+    .auth-error { background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 12px 16px; font-size: 14px; color: var(--danger); margin-bottom: 20px; display: none; }
 
-    header {
-      background: var(--navy); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 70px; color: #ffffff;
-    }
-    .header-title { font-family: 'Playfair Display', serif; font-size: 20px; }
-    .sign-out-btn {
-      background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #cbd5e1; padding: 6px 14px; border-radius: 6px; cursor: pointer;
-    }
+    header { background: var(--navy); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 72px; color: #ffffff; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    .header-brand { display: flex; align-items: center; gap: 12px; }
+    .header-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; }
+    .header-title span { color: var(--gold); font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; text-transform: uppercase; margin-left: 8px; vertical-align: middle; }
+    .sign-out-btn { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #cbd5e1; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; }
     .sign-out-btn:hover { background: rgba(255,255,255,0.1); color: #ffffff; }
 
     nav { background: #ffffff; border-bottom: 1px solid var(--border-color); display: flex; gap: 8px; padding: 0 32px; }
-    .nav-item {
-      padding: 18px 16px; font-size: 14px; font-weight: 600; color: var(--text-muted); cursor: pointer; border: none; border-bottom: 3px solid transparent; background: none;
-    }
+    .nav-item { padding: 20px 16px; font-size: 14px; font-weight: 600; color: var(--text-muted); cursor: pointer; border: none; border-bottom: 3px solid transparent; background: none; }
     .nav-item.active { color: var(--navy); border-bottom-color: var(--gold); }
 
-    main { padding: 40px 32px; max-width: 1040px; margin: 0 auto; width: 100%; }
-    .page-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
+    main { padding: 40px 32px; max-width: 1200px; margin: 0 auto; width: 100%; flex: 1; }
+    .page-section { display: none; }
+    .page-section.active { display: block; }
+    .page-title { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
     .page-sub { font-size: 14px; color: var(--text-muted); margin-bottom: 32px; }
 
-    .diagnostic-box {
-      background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 12px; padding: 24px; margin-bottom: 24px; font-family: monospace;
-    }
-    .diagnostic-title { font-weight: bold; color: var(--navy); margin-bottom: 12px; font-family: sans-serif; }
-    .diag-err { color: var(--danger); font-weight: bold; margin-top: 4px; }
-    .diag-ok { color: #10b981; font-weight: bold; margin-top: 4px; }
-    .rota-card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
-    .r-card { background: #ffffff; border: 1px solid var(--border-color); padding: 16px; border-radius: 8px; }
+    .grid-three { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; }
+    .card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+    .card-date { font-size: 18px; font-weight: 700; color: var(--navy); margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; }
+    .card-assignment { background: #f8fafc; border-radius: 8px; padding: 12px 16px; margin-bottom: 12px; border-left: 4px solid var(--gold); }
+    .role-title { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+    .member-name { font-size: 15px; font-weight: 600; color: var(--navy); margin-top: 2px; }
+    .empty-msg { color: var(--text-muted); font-size: 14px; font-style: italic; text-align: center; padding: 40px 0; }
   </style>
 </head>
 <body>
 
-  <div id="auth-screen">
+  <div id="loading-screen">
+    <div class="spinner"></div>
+    <div style="font-size:14px; color:var(--text-muted); font-weight:500;">Connecting to Craigavon Baptist...</div>
+  </div>
+
+  <div id="auth-screen" style="display:none">
     <div class="auth-card">
       <div class="auth-header-text">
         <div class="auth-title">Craigavon Baptist</div>
-        <div style="font-size:12px; color:var(--text-muted); text-transform:uppercase; font-weight:600; margin-top:4px;">System Debugger Mode</div>
+        <div style="font-size:12px; color:var(--text-muted); text-transform:uppercase; font-weight:600; margin-top:6px; letter-spacing:0.05em;">Church Rota Dashboard</div>
       </div>
-      <div id="auth-error" class="auth-error" style="display:none"></div>
+      <div id="auth-error" class="auth-error"></div>
       <div class="field"><label>Email Address</label><input type="email" id="login-email" value="coopsben0@gmail.com"/></div>
       <div class="field"><label>Password</label><input type="password" id="login-password" placeholder="••••••••"/></div>
-      <button class="btn-primary" onclick="signIn()">Sign In & Diagnose</button>
+      <button class="btn-primary" onclick="signIn()">Sign In</button>
     </div>
   </div>
 
-  <div id="app" style="display:none; flex-direction:column;">
+  <div id="app" style="display:none; flex-direction:column; min-height:100vh;">
     <header>
-      <div class="header-title">Craigavon Baptist Church <span>Dashboard Debugger</span></div>
-      <button class="sign-out-btn" onclick="signOut()">Sign Out Reset</button>
+      <div class="header-brand">
+        <div class="header-title">Craigavon Baptist Church<span>Rotas</span></div>
+      </div>
+      <button class="sign-out-btn" onclick="signOut()">Sign Out</button>
     </header>
     <nav>
-      <button class="nav-item active" onclick="showPage('my-slots')">Diagnostic Sync Logs</button>
-      <button class="nav-item" onclick="showPage('all-rotas')">Schedules Fallback Tab</button>
+      <button class="nav-item active" onclick="switchTab('my-slots')">My Assignments</button>
+      <button class="nav-item" onclick="switchTab('all-rotas')">All Schedules</button>
     </nav>
     <main>
       
-      <div id="page-my-slots">
-        <div class="page-title">Live System Diagnostic Logs</div>
-        <div class="page-sub">Checking database row access directly to see why the main application loader stalls.</div>
-        
-        <div class="diagnostic-box">
-          <div class="diagnostic-title">1. Connection Profiles Query Status:</div>
-          <div id="log-profile">Checking table access rules...</div>
-        </div>
-
-        <div class="diagnostic-box">
-          <div class="diagnostic-title">2. Rotas Category Query Status:</div>
-          <div id="log-rotas">Checking table access rules...</div>
-        </div>
-
-        <div class="diagnostic-box">
-          <div class="diagnostic-title">3. Service Dates Query Status:</div>
-          <div id="log-dates">Checking table access rules...</div>
-        </div>
+      <div id="tab-my-slots" class="page-section active">
+        <div class="page-title">My Upcoming Slots</div>
+        <div class="page-sub">Your personal schedule across serving teams.</div>
+        <div id="my-slots-container" class="grid-three"></div>
       </div>
 
-      <div id="page-all-rotas" style="display:none">
-        <div class="page-title">Database Rota Table Verification</div>
-        <div class="page-sub">If this list shows teams, your frontend file connections are correct.</div>
-        <div id="fallback-rotas-list" class="rota-card-grid"></div>
+      <div id="tab-all-rotas" class="page-section">
+        <div class="page-title">Master Rota Schedule</div>
+        <div class="page-sub">Comprehensive overview of all upcoming church service operations.</div>
+        <div id="all-rotas-container" class="grid-three"></div>
       </div>
 
     </main>
@@ -129,6 +116,8 @@
     const SUPABASE_URL = 'https://ojzwujpahfjmaeisnfez.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qend1anBhaGZqbWFlaXNuZmV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTA5NDMsImV4cCI6MjA5NDU4Njk0M30.VvszGR6MbUnBhKsmsXBikkrjok2-F1bnyS4zOwDX5hg';
     const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let appState = { user: null, profile: null, rotas: [], dates: [], slots: [] };
 
     async function signIn() {
       const email = document.getElementById('login-email').value.trim();
@@ -144,6 +133,7 @@
     }
 
     function signOut() {
+      showLoading(true);
       sb.auth.signOut().then(() => {
         localStorage.clear();
         location.reload();
@@ -152,69 +142,127 @@
 
     sb.auth.onAuthStateChange(async (event, session) => {
       if(session?.user) {
-        document.getElementById('auth-screen').style.display = 'none';
-        document.getElementById('app').style.display = 'flex';
-        await runDiagnostics(session.user.id);
+        appState.user = session.user;
+        await loadDashboardData();
       } else {
-        document.getElementById('auth-screen').style.display = 'flex';
         document.getElementById('app').style.display = 'none';
+        document.getElementById('auth-screen').style.display = 'flex';
+        showLoading(false);
       }
     });
 
-    async function runDiagnostics(userId) {
-      // Test Profiles Table
+    async function loadDashboardData() {
       try {
-        const { data, error } = await sb.from('profiles').select('*');
-        if(error) {
-          document.getElementById('log-profile').innerHTML = `<span class="diag-err">FAILED</span><br>Code: ${error.code}<br>Message: ${error.message}`;
-        } else {
-          document.getElementById('log-profile').innerHTML = `<span class="diag-ok">SUCCESS</span> — Found ${data.length} profile rows matching authentication.`;
-        }
-      } catch(e) {
-        document.getElementById('log-profile').innerHTML = `<span class="diag-err">CRASH</span> — ${e.message}`;
-      }
+        const [profileRes, rotaRes, dateRes, slotRes] = await Promise.all([
+          sb.from('profiles').select('*').eq('id', appState.user.id).maybeSingle(),
+          sb.from('rotas').select('*'),
+          sb.from('service_dates').select('*'),
+          sb.from('rota_slots').select('*')
+        ]);
 
-      // Test Rotas Table
-      try {
-        const { data, error } = await sb.from('rotas').select('*');
-        if(error) {
-          document.getElementById('log-rotas').innerHTML = `<span class="diag-err">FAILED</span><br>Code: ${error.code}<br>Message: ${error.message}`;
-        } else {
-          document.getElementById('log-rotas').innerHTML = `<span class="diag-ok">SUCCESS</span> — Found ${data.length} rota configuration fields.`;
-          buildFallbackList(data);
-        }
-      } catch(e) {
-        document.getElementById('log-rotas').innerHTML = `<span class="diag-err">CRASH</span> — ${e.message}`;
-      }
+        appState.profile = profileRes.data;
+        appState.rotas = rotaRes.data || [];
+        appState.dates = dateRes.data || [];
+        appState.slots = slotRes.data || [];
 
-      // Test Service Dates Table
-      try {
-        const { data, error } = await sb.from('service_dates').select('*');
-        if(error) {
-          document.getElementById('log-dates').innerHTML = `<span class="diag-err">FAILED</span><br>Code: ${error.code}<br>Message: ${error.message}`;
-        } else {
-          document.getElementById('log-dates').innerHTML = `<span class="diag-ok">SUCCESS</span> — Found ${data.length} structural dates scheduled.`;
-        }
-      } catch(e) {
-        document.getElementById('log-dates').innerHTML = `<span class="diag-err">CRASH</span> — ${e.message}`;
+        // Sort dates chronologically
+        appState.dates.sort((a,b) => new Date(a.date) - new Date(b.date));
+
+        renderDashboard();
+        
+        document.getElementById('auth-screen').style.display = 'none';
+        document.getElementById('app').style.display = 'flex';
+      } catch (err) {
+        console.error("Dashboard failed loading values: ", err);
+      } finally {
+        showLoading(false);
       }
     }
 
-    function buildFallbackList(rotas) {
-      const el = document.getElementById('fallback-rotas-list');
-      if(!rotas || !rotas.length) {
-        el.innerHTML = '<div>No team rows returned.</div>';
+    function renderDashboard() {
+      renderMySlots();
+      renderAllSchedules();
+    }
+
+    function renderMySlots() {
+      const container = document.getElementById('my-slots-container');
+      if (!appState.profile) {
+        container.innerHTML = `<div class="empty-msg">No authenticated profile setup found.</div>`;
         return;
       }
-      el.innerHTML = rotas.map(r => `<div class="r-card"><strong>Team:</strong> ${r.name}</div>`).join('');
+
+      // Filter slots for this user
+      const mySlots = appState.slots.filter(s => s.profile_id === appState.profile.id);
+
+      if(mySlots.length === 0) {
+        container.innerHTML = `<div class="empty-msg" style="grid-column: 1/-1;">You are not currently assigned to any upcoming slots.</div>`;
+        return;
+      }
+
+      // Group slots by date
+      let HTML = '';
+      appState.dates.forEach(d => {
+        const dateSlots = mySlots.filter(s => s.service_date_id === d.id);
+        if(dateSlots.length > 0) {
+          const formattedDate = new Date(d.date).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' });
+          HTML += `<div class="card">
+            <div class="card-date">${formattedDate}</div>`;
+          
+          dateSlots.forEach(s => {
+            const team = appState.rotas.find(r => r.id === s.rota_id);
+            HTML += `<div class="card-assignment">
+              <div class="role-title">Serving Team</div>
+              <div class="member-name">${team ? team.name : 'General Operations'}</div>
+            </div>`;
+          });
+          
+          HTML += `</div>`;
+        }
+      });
+      container.innerHTML = HTML || `<div class="empty-msg" style="grid-column: 1/-1;">No assignments found for upcoming dates.</div>`;
     }
 
-    function showPage(page) {
-      document.getElementById('page-my-slots').style.display = page === 'my-slots' ? 'block' : 'none';
-      document.getElementById('page-all-rotas').style.display = page === 'all-rotas' ? 'block' : 'none';
-      document.querySelectorAll('.nav-item').forEach((btn, i) => {
-        btn.classList.toggle('active', (i === 0 && page === 'my-slots') || (i === 1 && page === 'all-rotas'));
+    function renderAllSchedules() {
+      const container = document.getElementById('all-rotas-container');
+      if(!appState.dates.length) {
+        container.innerHTML = `<div class="empty-msg" style="grid-column: 1/-1;">No services scheduled in the database calendar.</div>`;
+        return;
+      }
+
+      let HTML = '';
+      appState.dates.forEach(d => {
+        const formattedDate = new Date(d.date).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' });
+        const serviceSlots = appState.slots.filter(s => s.service_date_id === d.id);
+
+        HTML += `<div class="card">
+          <div class="card-date">${formattedDate}</div>`;
+
+        if(serviceSlots.length === 0) {
+          HTML += `<div style="color:var(--text-muted); font-size:13px; font-style:italic;">No team schedules configured.</div>`;
+        } else {
+          serviceSlots.forEach(s => {
+            const team = appState.rotas.find(r => r.id === s.rota_id);
+            HTML += `<div class="card-assignment" style="border-left-color: var(--navy);">
+              <div class="role-title">${team ? team.name : 'Operational Assignment'}</div>
+              <div class="member-name" style="font-size:13px; color:var(--text-muted);">Assigned Personnel Scheduled</div>
+            </div>`;
+          });
+        }
+        HTML += `</div>`;
       });
+      container.innerHTML = HTML;
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      
+      document.getElementById(`tab-${tabId}`).classList.add('active');
+      event.target.classList.add('active');
+    }
+
+    function showLoading(show) {
+      document.getElementById('loading-screen').style.display = show ? 'flex' : 'none';
     }
   </script>
 </body>
