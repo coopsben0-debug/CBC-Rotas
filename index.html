@@ -360,39 +360,39 @@
     });
 
     async function boot() {
+      // SAFE ISOLATED LOADER ENGINE
+      document.getElementById('auth-screen').style.display='none';
+      document.getElementById('app').style.display='flex';
+
       try {
-        document.getElementById('auth-screen').style.display='none';
-        document.getElementById('app').style.display='flex';
-
-        const [profileRes, rotaRes, dateRes, profilesRes] = await Promise.all([
-          sb.from('profiles').select('*').eq('id', currentUser.id).maybeSingle(),
-          sb.from('rotas').select('*').order('name'),
-          sb.from('service_dates').select('*').order('date'),
-          sb.from('profiles').select('*').order('full_name')
-        ]);
-
-        currentProfile = profileRes?.data || { id: currentUser.id, full_name: "Member", is_admin: false };
-        allRotas = rotaRes?.data || [];
-        allDates = dateRes?.data || [];
-        allProfiles = profilesRes?.data || [];
-
-        document.getElementById('user-pill').textContent = currentProfile?.full_name || currentUser.email;
-        if(currentProfile?.is_admin) {
-          document.querySelectorAll('.admin-only').forEach(el => el.style.display='block');
-        }
-
-        showPage('my-slots');
-        loadSwapBadge();
-      } catch (err) {
-        console.error(err);
-        fallbackDisplay();
+        const pRes = await sb.from('profiles').select('*').eq('id', currentUser.id).maybeSingle();
+        currentProfile = pRes?.data || { id: currentUser.id, full_name: "Member", is_admin: false };
+      } catch(e) {
+        currentProfile = { id: currentUser.id, full_name: "Member", is_admin: false };
       }
-    }
 
-    function fallbackDisplay() {
-      document.getElementById('my-slots-list').innerHTML = '<div class="empty">No roster rows deployed for your identity logs yet.</div>';
-      document.getElementById('rota-cards').innerHTML = '<div class="empty">Tables are empty or pending configuration.</div>';
-      document.getElementById('swap-list').innerHTML = '<div class="empty">No active trades listed.</div>';
+      try {
+        const rRes = await sb.from('rotas').select('*').order('name');
+        allRotas = rRes?.data || [];
+      } catch(e) {}
+
+      try {
+        const dRes = await sb.from('service_dates').select('*').order('date');
+        allDates = dRes?.data || [];
+      } catch(e) {}
+
+      try {
+        const psRes = await sb.from('profiles').select('*').order('full_name');
+        allProfiles = psRes?.data || [];
+      } catch(e) {}
+
+      document.getElementById('user-pill').textContent = currentProfile?.full_name || currentUser.email;
+      if(currentProfile?.is_admin) {
+        document.querySelectorAll('.admin-only').forEach(el => el.style.display='block');
+      }
+
+      showPage('my-slots');
+      loadSwapBadge();
     }
 
     function showPage(page) {
