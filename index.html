@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Craigavon Baptist Church — Rota Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet"/>
-  <script src="supabase.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
       --bg-light: #f4f7f6;
@@ -16,12 +16,11 @@
       --text-muted: #666666;
       --border-color: #e2e8f0;
       --danger: #d9534f;
-      --success-green: #2ecc71;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Inter', sans-serif; background: var(--bg-light); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; }
     
-    #loading-screen { position: fixed; inset: 0; background: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; }
+    #loading-screen { position: fixed; inset: 0; background: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; display: none; }
     .spinner { border: 3px solid var(--border-color); border-top: 3px solid var(--cbc-blue); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 16px; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
@@ -58,9 +57,9 @@
     .page-title { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 700; color: var(--cbc-navy); margin-bottom: 6px; }
     .page-sub { font-size: 14px; color: var(--text-muted); margin-bottom: 32px; }
 
-    /* Admin Control Block */
+    /* Admin Styles */
     .admin-panel-box { background: #fff; border: 2px dashed var(--cbc-blue); border-radius: 8px; padding: 24px; margin-bottom: 40px; display: none; }
-    .admin-title { font-size: 18px; font-weight: 700; color: var(--cbc-navy); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+    .admin-title { font-size: 18px; font-weight: 700; color: var(--cbc-navy); margin-bottom: 16px; }
     .admin-form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) 150px; gap: 16px; align-items: flex-end; }
     .admin-btn { padding: 12px; background: var(--cbc-blue); color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px; transition: background 0.2s; }
     .admin-btn:hover { background: #4ca3d4; }
@@ -84,7 +83,7 @@
     <div style="font-size:14px; color:var(--text-muted); font-weight:500;">Connecting to Craigavon Baptist...</div>
   </div>
 
-  <div id="auth-screen" style="display:none">
+  <div id="auth-screen">
     <div class="auth-card">
       <div class="auth-header-text">
         <div class="auth-logo-placeholder">Craigavon<br>Baptist</div>
@@ -148,6 +147,8 @@
   <script>
     const SUPABASE_URL = 'https://ojzwujpahfjmaeisnfez.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qend1anBhaGZqbWFlaXNuZmV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTA5NDMsImV4cCI6MjA5NDU4Njk0M30.VvszGR6MbUnBhKsmsXBikkrjok2-F1bnyS4zOwDX5hg';
+    
+    // Direct initialization
     const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let appState = { user: null, profile: null, profilesList: [], rotas: [], dates: [], slots: [] };
@@ -159,8 +160,10 @@
       const errEl = document.getElementById('auth-error');
       errEl.style.display = 'none';
 
+      showLoading(true);
       const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
       if(error) {
+        showLoading(false);
         errEl.textContent = error.message;
         errEl.style.display = 'block';
       }
@@ -174,6 +177,7 @@
       });
     }
 
+    // Monitor authentications
     sb.auth.onAuthStateChange(async (event, session) => {
       if(session?.user) {
         appState.user = session.user;
@@ -186,13 +190,14 @@
     });
 
     async function loadDashboardData() {
+      showLoading(true);
       try {
         const [profileRes, allProfilesRes, rotaRes, dateRes, slotRes] = await Promise.all([
-          sb.from('profiles').select('*').eq('id', appState.user.id).maybeSingle().catch(() => ({data: null})),
-          sb.from('profiles').select('*').catch(() => ({data: []})),
-          sb.from('rotas').select('*').catch(() => ({data: []})),
-          sb.from('service_dates').select('*').catch(() => ({data: []})),
-          sb.from('rota_slots').select('*').catch(() => ({data: []}))
+          sb.from('profiles').select('*').eq('id', appState.user.id).maybeSingle(),
+          sb.from('profiles').select('*'),
+          sb.from('rotas').select('*'),
+          sb.from('service_dates').select('*'),
+          sb.from('rota_slots').select('*')
         ]);
 
         appState.profile = profileRes?.data || null;
@@ -211,7 +216,7 @@
         document.getElementById('auth-screen').style.display = 'none';
         document.getElementById('app').style.display = 'flex';
       } catch (err) {
-        console.error(err);
+        console.error("Data load error: ", err);
       } finally {
         showLoading(false);
       }
@@ -227,14 +232,12 @@
       if (appState.user && appState.user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
         adminBox.style.display = 'block';
         
-        // Populate dates dropdown
         const dateSelect = document.getElementById('admin-date-select');
         dateSelect.innerHTML = appState.dates.map(d => {
           const pretty = new Date(d.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
           return `<option value="${d.id}">${pretty}</option>`;
         }).join('');
 
-        // Populate rotas dropdown
         const rotaSelect = document.getElementById('admin-rota-select');
         rotaSelect.innerHTML = appState.rotas.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
       } else {
@@ -264,7 +267,6 @@
         showLoading(false);
       } else {
         document.getElementById('admin-name-input').value = '';
-        // Refresh local view data smoothly
         const { data: updatedSlots } = await sb.from('rota_slots').select('*');
         appState.slots = updatedSlots || [];
         renderDashboard();
