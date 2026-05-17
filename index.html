@@ -107,7 +107,6 @@
     let appState = { user: null, profile: null, rotas: [], dates: [], slots: [] };
     const ADMIN_EMAIL = 'coopsben0@gmail.com';
 
-    // 1. Instantly trigger initialization when browser window finishes parsing layout
     window.addEventListener('DOMContentLoaded', () => {
       try {
         if (!window.supabase) {
@@ -116,7 +115,6 @@
         }
         sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         
-        // Setup state listeners safely
         sb.auth.onAuthStateChange(async (event, session) => {
           if(session?.user) { 
             appState.user = session.user; 
@@ -135,10 +133,13 @@
     async function loadDashboardData() {
       showLoading(true);
       try {
-        // Run requests with individual fallbacks to catch exact database schema mismatch problems
-        const profileRes = await sb.from('profiles').select('*').eq('id', appState.user.id).maybeSingle().catch(e => ({error: e}));
-        if (profileRes.error) { console.warn("Profiles fetch skipped:", profileRes.error); }
-        appState.profile = profileRes?.data || null;
+        // Formatted with try-catch blocks to prevent functional syntax exceptions from stopping executions
+        try {
+          const profileRes = await sb.from('profiles').select('*').eq('id', appState.user.id).maybeSingle();
+          appState.profile = profileRes?.data || null;
+        } catch (e) {
+          console.warn("Profiles fetch skipped:", e);
+        }
 
         const rotaRes = await sb.from('rotas').select('*');
         if (rotaRes.error) { showError("Database Error on 'rotas' table fetch: " + rotaRes.error.message); return; }
