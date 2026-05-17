@@ -68,7 +68,7 @@
     .sidebar-nav-btn.active { background: var(--cbc-blue); color: #fff; }
     
     .user-profile-box { border-top: 1px solid #334155; padding-top: 20px; margin-top: auto; }
-    .user-profile-name { font-size: 14px; font-weight: 600; color: #f8fafc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-profile-name { font-size: 14px; font-weight: 600; color: #f8fafc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: capitalize; }
     .user-profile-email { font-size: 12px; color: #94a3b8; margin-bottom: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .sidebar-signout-btn { width: 100%; padding: 10px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #fca5a5; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
     .sidebar-signout-btn:hover { background: var(--danger); color: white; }
@@ -96,8 +96,8 @@
     .admin-btn:hover { background: #1e293b; }
 
     /* Notifications & Requests Panel */
-    .notifications-container { background: var(--warning-light); border: 1px solid #fde68a; border-radius: var(--radius); padding: 20px; margin-bottom: 40px; }
-    .notification-item { background: #fff; border-radius: 8px; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; margin-top: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+    .notifications-container { background: #fffbeb; border: 1px solid #fef3c7; border-radius: var(--radius); padding: 24px; margin-bottom: 40px; box-shadow: var(--shadow); border-left: 6px solid var(--warning); }
+    .notification-item { background: #fff; border-radius: 8px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; margin-top: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid var(--border-color); }
 
     /* Cards Responsive Grid Architecture */
     .grid-three { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 28px; }
@@ -180,12 +180,13 @@
     <div class="viewport">
       
       <div id="admin-notifications" class="notifications-container" style="display: none;">
-        <div class="admin-title" style="margin:0; color:#b45309;">⚠️ Open Cover Requests Needs Attention</div>
+        <div class="admin-title" style="margin:0; color:#b45309; font-size: 20px;">⚠️ Incoming Cover Requests</div>
+        <div style="font-size: 13px; color: #b45309; margin-top: 2px; margin-bottom: 12px;">Team members have flagged these slots as needing a replacement.</div>
         <div id="notifications-list"></div>
       </div>
 
-      <div id="admin-panel" class="admin-panel-box">
-        <div class="admin-title">⚡ Admin Management Panel (coopsben0)</div>
+      <div id="admin-panel" class="admin-panel-box" style="display: none;">
+        <div class="admin-title">⚡ Admin Management Panel</div>
         <div class="admin-form-row">
           <div class="field" style="margin:0;"><label>Date</label><select id="admin-date-select"></select></div>
           <div class="field" style="margin:0;"><label>Team</label><select id="admin-rota-select"></select></div>
@@ -252,6 +253,13 @@
       } catch (err) { showError("Initialization runtime exception: " + err.message); }
     });
 
+    function checkIsAdmin() {
+      if (!appState.user) return false;
+      const emailMatch = appState.user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+      const profileMatch = appState.profile && appState.profile.full_name?.toLowerCase() === 'ben';
+      return emailMatch || profileMatch;
+    }
+
     function toggleAuthMode() {
       isSignUpMode = !isSignUpMode;
       document.getElementById('signup-fields').style.display = isSignUpMode ? 'block' : 'none';
@@ -276,12 +284,10 @@
         if (!fullName) { alert("Please enter your full name."); showLoading(false); return; }
         if (accessKey !== SECRET_JOIN_KEY) { alert("Invalid Church Join Key. Registration blocked."); showLoading(false); return; }
 
-        // Register profile account inside Auth catalog
         const { data: authData, error: signUpErr } = await sb.auth.signUp({ email, password: pass });
         if (signUpErr) { alert("Registration issue: " + signUpErr.message); showLoading(false); return; }
 
         if (authData?.user) {
-          // Immediately project new down-profile record mapping inside tables
           await sb.from('profiles').insert({ id: authData.user.id, full_name: fullName });
           alert("Account successfully created and registered! Logging in...");
         }
@@ -356,7 +362,7 @@
       const myName = appState.profile.full_name?.toLowerCase();
       const mySlots = appState.slots.filter(s => s.member_name_text?.toLowerCase().includes(myName));
       
-      if (!mySlots.length) { container.innerHTML = `<div class="empty-msg">Welcome, ${appState.profile.full_name}! You don't have any slots assigned to you this month.</div>`; return; }
+      if (!mySlots.length) { container.innerHTML = `<div class="empty-msg">Welcome, ${appState.profile.full_name}! You don't have any slots assigned to you right now.</div>`; return; }
       
       let HTML = '';
       appState.dates.forEach(d => {
@@ -374,7 +380,7 @@
                 ${isSeekingCover ? `<span class="status-banner status-seeking">Cover Requested</span>` : ''}
                 
                 <div class="slot-actions">
-                  ${!isSeekingCover ? `<button class="action-badge-btn btn-cover-req" onclick="requestCover('${s.id}')">Request Cover / Swap</button>` : '<span style="font-size:12px; color:var(--text-muted);">Swap Alert Live</span>'}
+                  ${!isSeekingCover ? `<button class="action-badge-btn btn-cover-req" onclick="requestCover('${s.id}')">Request Cover / Swap</button>` : '<span style="font-size:12px; color:var(--text-muted); font-weight: 500;">Swap Request Pending Admin Help</span>'}
                 </div>
               </div>`;
           });
@@ -386,7 +392,7 @@
 
     function renderAllSchedules() {
       const container = document.getElementById('all-rotas-container');
-      const isAdmin = appState.user && appState.user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+      const isAdmin = checkIsAdmin();
       let HTML = '';
       
       appState.dates.forEach(d => {
@@ -426,7 +432,7 @@
     function renderAdminNotifications() {
       const notifyBox = document.getElementById('admin-notifications');
       const listEl = document.getElementById('notifications-list');
-      const isAdmin = appState.user && appState.user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+      const isAdmin = checkIsAdmin();
       
       if (!isAdmin) { notifyBox.style.display = 'none'; return; }
       
@@ -440,8 +446,8 @@
         const dateStr = d ? new Date(d.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '---';
         return `
           <div class="notification-item">
-            <div style="font-size:14px;">
-              <strong>${s.member_name_text}</strong> requests cover for <strong>${t?.name || 'Rota'} (${s.role_title})</strong> on <strong>${dateStr}</strong>
+            <div style="font-size:14px; color: var(--cbc-navy);">
+              <strong>${s.member_name_text}</strong> requests cover for <strong>${t?.name || 'Rota'} — ${s.role_title}</strong> on <strong>${dateStr}</strong>
             </div>
             <button class="action-badge-btn" style="background:var(--success); color:white;" onclick="resolveCover('${s.id}')">Mark Resolved</button>
           </div>`;
@@ -459,7 +465,7 @@
 
     function setupAdminForm() {
       const adminBox = document.getElementById('admin-panel');
-      if (appState.user && appState.user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
+      if (checkIsAdmin()) {
         adminBox.style.display = 'block';
         document.getElementById('admin-date-select').innerHTML = appState.dates.map(d => `<option value="${d.id}">${new Date(d.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</option>`).join('');
         document.getElementById('admin-rota-select').innerHTML = appState.rotas.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
@@ -488,7 +494,7 @@
     }
 
     async function deleteAssignment(slotId) {
-      if (!confirm("Delete this role row permanently?")) return;
+      if (!confirm("Delete this role role permanently?")) return;
       showLoading(true);
       await sb.from('rota_slots').delete().eq('id', slotId);
       const { data } = await sb.from('rota_slots').select('*');
