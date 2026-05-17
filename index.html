@@ -26,54 +26,40 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Inter', sans-serif; background: var(--bg-light); color: var(--text-main); min-height: 100vh; -webkit-font-smoothing: antialiased; }
 
-    /* ── AUTH SCREEN ── */
     #auth-screen {
       min-height: 100vh;
       background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
       display: flex; align-items: center; justify-content: center; padding: 24px;
     }
     .auth-card {
-      background: var(--card-bg);
-      border-radius: 16px;
-      padding: 40px;
-      width: 100%; max-width: 440px;
-      box-shadow: var(--shadow-lg);
+      background: var(--card-bg); border-radius: 16px; padding: 40px; width: 100%; max-width: 440px; box-shadow: var(--shadow-lg);
     }
     .auth-header-text { text-align: center; margin-bottom: 24px; }
-    .auth-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 26px; font-weight: 700;
-      color: var(--navy); margin-bottom: 6px;
-    }
+    .auth-title { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
     .auth-sub { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
     .tab-row { display: flex; background: #f1f5f9; border-radius: 8px; padding: 4px; margin-bottom: 24px; }
     .tab-btn {
       flex: 1; padding: 10px; border: none; background: transparent; border-radius: 6px;
-      font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; color: var(--text-muted);
-      cursor: pointer; transition: all 0.2s;
+      font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; color: var(--text-muted); cursor: pointer; transition: all 0.2s;
     }
     .tab-btn.active { background: var(--card-bg); color: var(--navy); box-shadow: var(--shadow-sm); }
     .field { margin-bottom: 18px; }
     .field label { display: block; font-size: 12px; font-weight: 600; color: var(--navy-light); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
     .field input {
       width: 100%; padding: 12px 16px; border: 1.5px solid var(--border-color); border-radius: 8px;
-      font-family: 'Inter', sans-serif; font-size: 14px; color: var(--text-main); background: #ffffff;
-      outline: none; transition: all 0.2s;
+      font-family: 'Inter', sans-serif; font-size: 14px; color: var(--text-main); background: #ffffff; outline: none; transition: all 0.2s;
     }
     .field input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(212,175,55,0.15); }
     .btn-primary {
-      width: 100%; padding: 14px; background: var(--navy); color: #ffffff;
-      border: none; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 14px;
-      font-weight: 600; cursor: pointer; transition: background 0.2s; margin-top: 6px;
+      width: 100%; padding: 14px; background: var(--navy); color: #ffffff; border: none; border-radius: 8px;
+      font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s; margin-top: 6px;
     }
     .btn-primary:hover { background: var(--navy-light); }
     .btn-primary:disabled { background: #cbd5e1; cursor: not-allowed; }
     .auth-error { background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 12px 16px; font-size: 14px; color: var(--danger); margin-bottom: 20px; }
 
-    /* ── APPLICATION HEADER ── */
     header {
-      background: var(--navy); padding: 0 32px;
-      display: flex; align-items: center; justify-content: space-between;
+      background: var(--navy); padding: 0 32px; display: flex; align-items: center; justify-content: space-between;
       height: 70px; position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow-md);
     }
     .header-left { display: flex; align-items: center; gap: 12px; }
@@ -87,7 +73,6 @@
     }
     .sign-out-btn:hover { background: rgba(255,255,255,0.1); color: #ffffff; border-color: #ffffff; }
 
-    /* ── NAVIGATION ── */
     nav { background: #ffffff; border-bottom: 1px solid var(--border-color); display: flex; gap: 8px; padding: 0 32px; overflow-x: auto; }
     .nav-item {
       padding: 18px 16px; font-size: 14px; font-weight: 600; color: var(--text-muted);
@@ -108,7 +93,6 @@
     .rota-card-name { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
     .rota-card-count { font-size: 13px; color: var(--text-muted); font-weight: 500; }
 
-    /* ── SLOTS DISPLAY ── */
     .slot-list { display: flex; flex-direction: column; gap: 14px; }
     .slot-card {
       background: var(--card-bg); border-radius: 12px; padding: 20px 24px; box-shadow: var(--shadow-sm); display: flex; align-items: center; justify-content: space-between; border: 1px solid var(--border-color); border-left: 4px solid var(--navy); gap: 16px; flex-wrap: wrap;
@@ -126,15 +110,12 @@
     }
     .btn-cancel:hover { background: #fef2f2; border-color: var(--danger); }
 
-    /* ── SECTIONS ── */
     .back-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 14px; font-family: 'Inter', sans-serif; font-weight: 600; margin-bottom: 20px; padding: 0; display: flex; align-items: center; gap: 6px; }
     .date-block { background: var(--card-bg); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow-sm); margin-bottom: 16px; border: 1px solid var(--border-color); }
     .date-header { background: #f8fafc; color: var(--navy); padding: 14px 24px; font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 700; border-bottom: 1px solid var(--border-color); }
     .date-people { padding: 18px 24px; display: flex; flex-wrap: wrap; gap: 10px; }
     .person-chip { background: #f1f5f9; border: 1px solid var(--border-color); border-radius: 20px; padding: 6px 16px; font-size: 14px; color: var(--navy-light); font-weight: 500; display: inline-flex; align-items: center; gap: 8px; }
-    .person-chip.swap-pending { background: #fef9c3; border-color: #fef08a; color: #713f12; }
 
-    /* ── SWAPS VIEWPORT ── */
     .swap-card { background: var(--card-bg); border-radius: 12px; padding: 24px; box-shadow: var(--shadow-sm); margin-bottom: 16px; border: 1px solid var(--border-color); border-left: 4px solid var(--gold); }
     .swap-meta { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
     .swap-desc { font-size: 15px; color: var(--text-main); margin-bottom: 6px; line-height: 1.5; }
@@ -143,7 +124,6 @@
     .btn-approve { padding: 10px 22px; background: var(--success); color: #ffffff; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; }
     .btn-decline { padding: 10px 22px; background: #ffffff; border: 1.5px solid var(--danger); color: var(--danger); border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; }
 
-    /* ── ADMIN PANEL ── */
     .admin-section { margin-bottom: 40px; }
     .section-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; color: var(--navy); margin-bottom: 18px; padding-bottom: 8px; border-bottom: 2px solid var(--border-color); }
     .admin-form { background: var(--card-bg); border-radius: 12px; padding: 28px; box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); }
@@ -156,7 +136,6 @@
     .member-role { color: var(--text-muted); font-size: 12px; }
     .btn-make-admin { padding: 6px 14px; background: #ffffff; border: 1.5px solid var(--border-color); color: var(--navy); border-radius: 6px; font-size: 12px; cursor: pointer; font-family: 'Inter', sans-serif; font-weight: 600; }
 
-    /* ── GENERAL OVERLAYS ── */
     .modal-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.6); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 24px; backdrop-filter: blur(4px); }
     .modal { background: var(--card-bg); border-radius: 16px; padding: 36px; width: 100%; max-width: 460px; box-shadow: var(--shadow-lg); }
     .modal-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
@@ -220,7 +199,7 @@
       </div>
       <div class="header-right">
         <span class="user-pill" id="user-pill">...</span>
-        <button class="sign-out-btn" onclick="signOut()">Sign Out</button>
+        <button class="sign-out-btn" onclick="forceAppReset()">Sign Out</button>
       </div>
     </header>
     <nav id="main-nav">
@@ -322,7 +301,7 @@
 
     function showAuthError(msg) {
       const el = document.getElementById('auth-error');
-      el.textContent = msg; el.style.display='block';
+      if (el) { el.textContent = msg; el.style.display='block'; }
     }
 
     async function signIn() {
@@ -346,7 +325,6 @@
       if(key !== 'CraigavonBaptist2026') return showAuthError('Incorrect Church Join Key.');
       
       document.getElementById('signup-btn').disabled=true;
-      
       const {data, error} = await sb.auth.signUp({
         email, password: pass, options: { data: { full_name: name } }
       });
@@ -359,14 +337,16 @@
       if (data?.user) {
         await sb.from('profiles').insert([{ id: data.user.id, full_name: name, is_admin: false }]);
       }
-      
       document.getElementById('signup-btn').disabled=false;
       showAuthError('✓ Account created! Confirm email notice, then choose Sign In tab.');
     }
 
-    async function signOut() {
-      await sb.auth.signOut();
-      location.reload();
+    function forceAppReset() {
+      sb.auth.signOut().then(() => {
+        localStorage.clear();
+        sessionStorage.clear();
+        location.href = location.origin + location.pathname + '?r=' + Math.random();
+      });
     }
 
     sb.auth.onAuthStateChange(async (event, session) => {
@@ -391,10 +371,10 @@
           sb.from('profiles').select('*').order('full_name')
         ]);
 
-        currentProfile = profileRes.data || { id: currentUser.id, full_name: "Member", is_admin: false };
-        allRotas = rotaRes.data || [];
-        allDates = dateRes.data || [];
-        allProfiles = profilesRes.data || [];
+        currentProfile = profileRes?.data || { id: currentUser.id, full_name: "Member", is_admin: false };
+        allRotas = rotaRes?.data || [];
+        allDates = dateRes?.data || [];
+        allProfiles = profilesRes?.data || [];
 
         document.getElementById('user-pill').textContent = currentProfile?.full_name || currentUser.email;
         if(currentProfile?.is_admin) {
@@ -404,9 +384,15 @@
         showPage('my-slots');
         loadSwapBadge();
       } catch (err) {
-        console.error("Booting process failed:", err);
-        toast("Connection or RLS structure sync issue.");
+        console.error(err);
+        fallbackDisplay();
       }
+    }
+
+    function fallbackDisplay() {
+      document.getElementById('my-slots-list').innerHTML = '<div class="empty">No roster rows deployed for your identity logs yet.</div>';
+      document.getElementById('rota-cards').innerHTML = '<div class="empty">Tables are empty or pending configuration.</div>';
+      document.getElementById('swap-list').innerHTML = '<div class="empty">No active trades listed.</div>';
     }
 
     function showPage(page) {
@@ -425,19 +411,17 @@
 
     async function loadMySlots() {
       const el = document.getElementById('my-slots-list');
-      el.innerHTML='<div class="loading">Searching row logs...</div>';
       try {
         const {data, error} = await sb.from('rota_slots')
           .select('id, rota_id, service_date_id, profile_id, rotas(name), service_dates(date)')
           .eq('profile_id', currentUser.id);
 
         if(error || !data || data.length === 0) {
-          el.innerHTML='<div class="empty">No roster assignments listed for your identity logs yet.</div>';
+          el.innerHTML='<div class="empty">No roster rows deployed for your identity logs yet.</div>';
           return;
         }
 
         const {data: swaps} = await sb.from('swap_requests').select('*').eq('requested_by', currentUser.id);
-
         const today = new Date().toISOString().split('T')[0];
         const upcoming = data.filter(s => s.service_dates && s.service_dates.date >= today);
 
@@ -461,14 +445,13 @@
           </div>`;
         }).join('');
       } catch(e) {
-        el.innerHTML='<div class="empty">No slots loaded. Ensure your database parameters match.</div>';
+        el.innerHTML='<div class="empty">No assignments found.</div>';
       }
     }
 
     async function loadRotaOverview() {
       showRotaOverview();
       const el = document.getElementById('rota-cards');
-      el.innerHTML='<div class="loading">Querying table rows...</div>';
       try {
         const {data} = await sb.from('rota_slots').select('rota_id');
         const counts = {};
@@ -485,7 +468,7 @@
             <div class="rota-card-count">${counts[r.id]||0} Listed Assignments</div>
           </div>`).join('');
       } catch(e) {
-        el.innerHTML='<div class="empty">Error loading overview categories.</div>';
+        el.innerHTML='<div class="empty">Error loading overview parameters.</div>';
       }
     }
 
@@ -499,7 +482,6 @@
       document.getElementById('rota-detail').style.display='block';
       document.getElementById('rota-detail-title').textContent = rotaName;
       const el = document.getElementById('rota-detail-dates');
-      el.innerHTML='<div class="loading">Compiling structure displays...</div>';
       
       try {
         const {data} = await sb.from('rota_slots')
@@ -509,10 +491,7 @@
         const byDate = {};
         (data||[]).forEach(s => {
           const d = s.service_dates?.date;
-          if(d) {
-            if(!byDate[d]) byDate[d]=[];
-            byDate[d].push(s);
-          }
+          if(d) { if(!byDate[d]) byDate[d]=[]; byDate[d].push(s); }
         });
 
         const datesKeys = Object.keys(byDate).sort();
@@ -532,13 +511,12 @@
             </div>
           </div>`).join('');
       } catch(e) {
-        el.innerHTML = '<div class="empty">Could not load structural parameters.</div>';
+        el.innerHTML = '<div class="empty">Could not load parameters.</div>';
       }
     }
 
     async function loadSwaps() {
       const el = document.getElementById('swap-list');
-      el.innerHTML='<div class="loading">Calling server vectors...</div>';
       try {
         let {data} = await sb.from('swap_requests').select('*').eq('status','pending');
         if(!data || !data.length) {
@@ -561,7 +539,7 @@
           </div>`;
         }).join('');
       } catch(e) {
-        el.innerHTML='<div class="empty">Error compiling trade swap items.</div>';
+        el.innerHTML='<div class="empty">Error compiling items.</div>';
       }
     }
 
@@ -619,15 +597,11 @@
     }
 
     async function loadAdmin() {
-      const rotaSel = document.getElementById('admin-rota');
-      rotaSel.innerHTML = '<option value="">Select rota team...</option>' + allRotas.map(r=>`<option value="${r.id}">${r.name}</option>`).join('');
-      const dateSel = document.getElementById('admin-date');
-      dateSel.innerHTML = '<option value="">Select service date...</option>' + allDates.map(d=>`<option value="${d.id}">${formatDate(d.date)}</option>`).join('');
-      const personSel = document.getElementById('admin-person');
-      personSel.innerHTML = '<option value="">Select church member...</option>' + allProfiles.map(p=>`<option value="${p.id}">${p.full_name}</option>`).join('');
+      document.getElementById('admin-rota').innerHTML = '<option value="">Select rota team...</option>' + allRotas.map(r=>`<option value="${r.id}">${r.name}</option>`).join('');
+      document.getElementById('admin-date').innerHTML = '<option value="">Select service date...</option>' + allDates.map(d=>`<option value="${d.id}">${formatDate(d.date)}</option>`).join('');
+      document.getElementById('admin-person').innerHTML = '<option value="">Select church member...</option>' + allProfiles.map(p=>`<option value="${p.id}">${p.full_name}</option>`).join('');
 
-      const el = document.getElementById('member-list');
-      el.innerHTML = allProfiles.map(p=>`
+      document.getElementById('member-list').innerHTML = allProfiles.map(p=>`
         <div class="member-row">
           <div><span class="member-name">${p.full_name}</span>${p.is_admin?'<span class="badge-admin">ADMIN CONTROL</span>':''}</div>
           <div class="member-role">${!p.is_admin?`<button class="btn-make-admin" onclick="makeAdmin('${p.id}')">Grant Admin Privileges</button>`:'System Administrator'}</div>
@@ -658,7 +632,7 @@
       const {error} = await sb.from('profiles').update({is_admin:true}).eq('id', profileId);
       if(error) return toast('Error: '+error.message);
       toast('Privileges authorized.');
-      boot();
+      location.reload();
     }
 
     function formatDate(d) {
@@ -668,8 +642,7 @@
 
     function toast(msg) {
       const el = document.getElementById('toast');
-      el.textContent = msg; el.classList.add('show');
-      setTimeout(()=>el.classList.remove('show'), 3000);
+      if (el) { el.textContent = msg; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'), 3000); }
     }
   </script>
 </body>
