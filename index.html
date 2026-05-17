@@ -7,46 +7,120 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet"/>
   <script src="https://unpkg.com/@supabase/supabase-js@2.39.8/dist/umd/supabase.js"></script>
   <style>
-    :root { --bg-light: #f4f7f6; --card-bg: #ffffff; --cbc-navy: #2d3b45; --cbc-blue: #5cb3e4; --text-main: #333333; --text-muted: #666666; --border-color: #e2e8f0; --danger: #d9534f; }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Inter', sans-serif; background: var(--bg-light); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; }
-    #loading-screen { position: fixed; inset: 0; background: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; }
-    .spinner { border: 3px solid var(--border-color); border-top: 3px solid var(--cbc-blue); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 16px; }
+    :root {
+      --bg-main: #f8fafc;
+      --sidebar-bg: #1e293b;
+      --sidebar-hover: #334155;
+      --card-bg: #ffffff;
+      --cbc-navy: #0f172a;
+      --cbc-blue: #0284c7;
+      --cbc-blue-light: #e0f2fe;
+      --text-main: #334155;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+      --danger: #ef4444;
+      --danger-light: #fee2e2;
+      --success: #10b981;
+      --success-light: #d1fae5;
+      --warning: #f59e0b;
+      --warning-light: #fef3c7;
+      --radius: 12px;
+      --shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+    body { background: var(--bg-main); color: var(--text-main); min-height: 100vh; display: flex; }
+
+    /* Loading Screen */
+    #loading-screen { position: fixed; inset: 0; background: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; transition: opacity 0.3s ease; }
+    .spinner { border: 3px solid var(--border-color); border-top: 3px solid var(--cbc-blue); border-radius: 50%; width: 46px; height: 46px; animation: spin 1s linear infinite; margin-bottom: 20px; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    #auth-screen { min-height: 100vh; background: linear-gradient(135deg, #2d3b45 0%, #1a242c 100%); display: flex; align-items: center; justify-content: center; padding: 24px; }
-    .auth-card { background: var(--card-bg); border-radius: 12px; padding: 40px; width: 100%; max-width: 440px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2); border-top: 5px solid var(--cbc-blue); }
-    .auth-header-text { text-align: center; margin-bottom: 32px; }
-    .auth-logo-placeholder { width: 70px; height: 70px; background: var(--cbc-navy); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; border: 2px solid var(--cbc-blue); color: #fff; font-size: 11px; font-weight: bold; text-align: center; line-height: 1.2; padding: 4px; }
-    .auth-title { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: var(--cbc-navy); }
+
+    /* Auth Gateway Screens */
+    #auth-screen { min-height: 100vh; width: 100vw; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); display: flex; align-items: center; justify-content: center; padding: 24px; }
+    .auth-card { background: var(--card-bg); border-radius: var(--radius); padding: 40px; width: 100%; max-width: 460px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); border-top: 6px solid var(--cbc-blue); }
+    .auth-logo-placeholder { width: 64px; height: 64px; background: var(--cbc-navy); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto; border: 2px solid var(--cbc-blue); color: #fff; font-size: 11px; font-weight: bold; text-align: center; line-height: 1.2; }
+    .auth-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; color: var(--cbc-navy); text-align: center; margin-bottom: 8px; }
+    .auth-subtitle { color: var(--text-muted); font-size: 14px; text-align: center; margin-bottom: 32px; }
+    
     .field { margin-bottom: 20px; }
-    .field label { display: block; font-size: 11px; font-weight: 700; color: var(--cbc-navy); text-transform: uppercase; margin-bottom: 8px; }
-    .field input, .field select { width: 100%; padding: 12px 16px; border: 1.5px solid var(--border-color); border-radius: 6px; font-size: 14px; background: #fff; }
-    header { background: #ffffff; padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 80px; border-bottom: 3px solid var(--cbc-blue); }
-    .header-brand { display: flex; align-items: center; gap: 14px; }
-    .header-logo { width: 48px; height: 48px; background: var(--cbc-navy); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8px; color: white; font-weight: bold; text-align: center; border: 1.5px solid var(--cbc-blue); padding: 2px; }
-    .header-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--cbc-navy); }
-    .header-title span { color: var(--text-muted); font-family: 'Inter', sans-serif; font-size: 13px; margin-left: 10px; }
-    .sign-out-btn { background: transparent; border: 1px solid var(--cbc-navy); color: var(--cbc-navy); padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; }
-    nav { background: #ffffff; border-bottom: 1px solid var(--border-color); display: flex; gap: 24px; padding: 0 32px; }
-    .nav-item { padding: 18px 4px; font-size: 14px; font-weight: 600; color: var(--text-muted); cursor: pointer; border: none; border-bottom: 3px solid transparent; background: none; }
-    .nav-item.active { color: var(--cbc-navy); border-bottom-color: var(--cbc-blue); }
-    main { padding: 40px 32px; max-width: 1200px; margin: 0 auto; width: 100%; flex: 1; }
+    .field label { display: block; font-size: 12px; font-weight: 600; color: var(--text-main); text-transform: uppercase; tracking: 0.05em; margin-bottom: 6px; }
+    .field input, .field select { width: 100%; padding: 12px 16px; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 14px; background: #fff; transition: border-color 0.2s; }
+    .field input:focus, .field select:focus { outline: none; border-color: var(--cbc-blue); }
+    
+    .auth-btn { width: 100%; padding: 14px; background: var(--cbc-blue); color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 15px; cursor: pointer; transition: background 0.2s; margin-top: 10px; }
+    .auth-btn:hover { background: #0274ae; }
+    .auth-toggle-link { text-align: center; margin-top: 20px; font-size: 14px; color: var(--cbc-blue); cursor: pointer; font-weight: 500; }
+
+    /* App Workspace Layout */
+    #app { display: none; width: 100%; min-height: 100vh; }
+    
+    /* Sidebar Layout */
+    sidebar { width: 280px; background: var(--sidebar-bg); color: #fff; display: flex; flex-direction: column; padding: 32px 24px; flex-shrink: 0; box-shadow: 4px 0 10px rgba(0,0,0,0.05); }
+    .sidebar-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 40px; }
+    .sidebar-logo { width: 44px; height: 44px; background: rgba(255,255,255,0.1); border: 1.5px solid var(--cbc-blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: bold; text-align: center; line-height: 1.2; color: #fff; }
+    .sidebar-brand-text { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; line-height: 1.2; }
+    .sidebar-brand-text span { display: block; font-family: 'Inter', sans-serif; font-size: 12px; color: var(--cbc-blue); font-weight: 500; }
+    
+    .nav-group { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+    .sidebar-nav-btn { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 16px; background: transparent; border: none; border-radius: 8px; color: #94a3b8; font-size: 14px; font-weight: 600; cursor: pointer; text-align: left; transition: all 0.2s; }
+    .sidebar-nav-btn:hover { background: var(--sidebar-hover); color: #fff; }
+    .sidebar-nav-btn.active { background: var(--cbc-blue); color: #fff; }
+    
+    .user-profile-box { border-top: 1px solid #334155; padding-top: 20px; margin-top: auto; }
+    .user-profile-name { font-size: 14px; font-weight: 600; color: #f8fafc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-profile-email { font-size: 12px; color: #94a3b8; margin-bottom: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sidebar-signout-btn { width: 100%; padding: 10px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #fca5a5; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+    .sidebar-signout-btn:hover { background: var(--danger); color: white; }
+
+    /* Main Dashboard Viewport */
+    .viewport { flex: 1; padding: 48px; max-width: 1400px; margin: 0 auto; width: 100%; overflow-y: auto; }
     .page-section { display: none; }
     .page-section.active { display: block; }
+    
+    .page-header { margin-bottom: 36px; }
     .page-title { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 700; color: var(--cbc-navy); }
-    .page-sub { font-size: 14px; color: var(--text-muted); margin-bottom: 32px; }
-    .admin-panel-box { background: #fff; border: 2px dashed var(--cbc-blue); border-radius: 8px; padding: 24px; margin-bottom: 40px; display: none; }
-    .admin-title { font-size: 18px; font-weight: 700; color: var(--cbc-navy); margin-bottom: 16px; }
-    .admin-form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) 150px; gap: 16px; align-items: flex-end; }
-    .admin-btn { padding: 12px; background: var(--cbc-blue); color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; }
-    .grid-three { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; }
-    .card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.03); }
-    .card-date { font-size: 18px; font-weight: 700; color: var(--cbc-navy); margin-bottom: 16px; border-bottom: 2px solid var(--bg-light); padding-bottom: 8px; }
-    .card-assignment { background: #fdfdfd; border: 1px solid var(--border-color); border-radius: 6px; padding: 12px 16px; margin-bottom: 12px; border-left: 4px solid var(--cbc-blue); position: relative; }
-    .role-title { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
-    .member-name { font-size: 15px; font-weight: 600; color: var(--cbc-navy); margin-top: 2px; }
-    .empty-msg { color: var(--text-muted); font-size: 14px; font-style: italic; text-align: center; padding: 40px 0; background: #ffffff; border: 1px solid var(--border-color); border-radius: 8px; }
-    .delete-slot-btn { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: transparent; border: none; color: #ccc; cursor: pointer; font-size: 16px; font-weight: bold; }
+    .page-sub { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
+
+    /* Dynamic Badges based on Church Teams */
+    .team-badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; uppercase; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.03em; }
+    .badge-music { background: var(--cbc-blue-light); color: var(--cbc-blue); }
+    .badge-kids { background: #dcfce7; color: #15803d; }
+    .badge-default { background: var(--border-color); color: var(--text-main); }
+
+    /* Admin Control Panel Layout */
+    .admin-panel-box { background: #fff; border: 1px solid var(--border-color); border-radius: var(--radius); padding: 28px; margin-bottom: 40px; box-shadow: var(--shadow); }
+    .admin-title { font-size: 18px; font-weight: 700; color: var(--cbc-navy); margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+    .admin-form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) 160px; gap: 16px; align-items: flex-end; }
+    .admin-btn { padding: 13px; background: var(--cbc-navy); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+    .admin-btn:hover { background: #1e293b; }
+
+    /* Notifications & Requests Panel */
+    .notifications-container { background: var(--warning-light); border: 1px solid #fde68a; border-radius: var(--radius); padding: 20px; margin-bottom: 40px; }
+    .notification-item { background: #fff; border-radius: 8px; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; margin-top: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+
+    /* Cards Responsive Grid Architecture */
+    .grid-three { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 28px; }
+    .card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); display: flex; flex-direction: column; transition: transform 0.2s, box-shadow 0.2s; }
+    .card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); }
+    .card-date { font-size: 18px; font-weight: 700; color: var(--cbc-navy); margin-bottom: 18px; border-bottom: 2px solid var(--bg-main); padding-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
+    
+    .card-assignment { background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; margin-bottom: 12px; position: relative; transition: border-color 0.2s; }
+    .card-assignment:last-child { margin-bottom: 0; }
+    .role-title { font-size: 13px; font-weight: 600; color: var(--text-main); margin-top: 2px; }
+    .member-name { font-size: 15px; font-weight: 700; color: var(--cbc-navy); margin-top: 2px; }
+    
+    /* Action Controls inside cards */
+    .slot-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border-color); }
+    .action-badge-btn { font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; transition: all 0.2s; }
+    .btn-cover-req { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+    .btn-cover-req:hover { background: #ffeeba; }
+    
+    .status-banner { font-size: 11px; font-weight: 700; text-transform: uppercase; display: inline-block; padding: 2px 6px; border-radius: 4px; margin-top: 6px; }
+    .status-seeking { background: var(--warning-light); color: #b45309; border: 1px solid #fde68a; }
+
+    .empty-msg { color: var(--text-muted); font-size: 14px; font-style: italic; text-align: center; padding: 48px 0; background: #ffffff; border: 1px dashed var(--border-color); border-radius: var(--radius); grid-column: 1 / -1; }
+    .delete-slot-btn { position: absolute; right: 16px; top: 16px; background: transparent; border: none; color: #94a3b8; cursor: pointer; font-size: 18px; line-height: 1; }
     .delete-slot-btn:hover { color: var(--danger); }
   </style>
 </head>
@@ -61,23 +135,55 @@
 
   <div id="auth-screen" style="display:none;">
     <div class="auth-card">
-      <div class="auth-header-text"><div class="auth-logo-placeholder">Craigavon<br>Baptist</div><div class="auth-title">Church Dashboard</div></div>
+      <div class="auth-logo-placeholder">Craigavon<br>Baptist</div>
+      <div id="auth-title" class="auth-title">Welcome Back</div>
+      <div id="auth-subtitle" class="auth-subtitle">Sign in to manage your serving schedule</div>
+      
+      <div id="signup-fields" style="display: none;">
+        <div class="field"><label>Full Name</label><input type="text" id="reg-name" placeholder="e.g. John Smith"/></div>
+      </div>
+      
       <div class="field"><label>Email Address</label><input type="email" id="login-email" value="coopsben0@gmail.com"/></div>
       <div class="field"><label>Password</label><input type="password" id="login-password" placeholder="••••••••"/></div>
-      <button style="width:100%; padding:14px; background:var(--cbc-navy); color:white; border:none; border-radius:6px; font-weight:600; cursor:pointer;" onclick="signIn()">Sign In</button>
+      
+      <div id="gatekeeper-field" style="display: none;">
+        <div class="field" style="border: 1px solid #fde68a; padding: 14px; background: #fffdf5; border-radius: 8px;">
+          <label style="color:#b45309;">Church Join Key</label>
+          <input type="text" id="reg-key" placeholder="Enter secret church access key"/>
+        </div>
+      </div>
+
+      <button id="auth-main-btn" class="auth-btn" onclick="handleAuthAction()">Sign In</button>
+      <div id="auth-toggle" class="auth-toggle-link" onclick="toggleAuthMode()">Don't have an account? Register here</div>
     </div>
   </div>
 
-  <div id="app" style="display:none; flex-direction:column; min-height:100vh;">
-    <header>
-      <div class="header-brand"><div class="header-logo">Craigavon<br>Baptist</div><div class="header-title">Craigavon Baptist Church<span>Rota Portal</span></div></div>
-      <button class="sign-out-btn" onclick="signOut()">Sign Out</button>
-    </header>
-    <nav>
-      <button id="nav-my-slots" class="nav-item active" onclick="switchTab('my-slots')">My Assignments</button>
-      <button id="nav-all-rotas" class="nav-item" onclick="switchTab('all-rotas')">All Schedules</button>
-    </nav>
-    <main>
+  <div id="app">
+    <sidebar>
+      <div class="sidebar-brand">
+        <div class="sidebar-logo">Craigavon<br>Baptist</div>
+        <div class="sidebar-brand-text">Craigavon Baptist<span>Rota Dashboard</span></div>
+      </div>
+      
+      <div class="nav-group">
+        <button id="nav-my-slots" class="sidebar-nav-btn active" onclick="switchTab('my-slots')"> My Assignments</button>
+        <button id="nav-all-rotas" class="sidebar-nav-btn" onclick="switchTab('all-rotas')"> Master Schedules</button>
+      </div>
+      
+      <div class="user-profile-box">
+        <div id="user-display-name" class="user-profile-name">Loading Profile...</div>
+        <div id="user-display-email" class="user-profile-email">---</div>
+        <button class="sidebar-signout-btn" onclick="signOut()">Sign Out</button>
+      </div>
+    </sidebar>
+
+    <div class="viewport">
+      
+      <div id="admin-notifications" class="notifications-container" style="display: none;">
+        <div class="admin-title" style="margin:0; color:#b45309;">⚠️ Open Cover Requests Needs Attention</div>
+        <div id="notifications-list"></div>
+      </div>
+
       <div id="admin-panel" class="admin-panel-box">
         <div class="admin-title">⚡ Admin Management Panel (coopsben0)</div>
         <div class="admin-form-row">
@@ -88,37 +194,43 @@
           <button class="admin-btn" onclick="addNewAssignment()">Add to Rota</button>
         </div>
       </div>
+
       <div id="tab-my-slots" class="page-section active">
-        <div class="page-title">My Upcoming Slots</div><div class="page-sub">Your personal schedule across serving teams.</div>
+        <div class="page-header">
+          <div class="page-title">My Upcoming Slots</div>
+          <div class="page-sub">Your personal personalized serving timeline.</div>
+        </div>
         <div id="my-slots-container" class="grid-three"></div>
       </div>
+
       <div id="tab-all-rotas" class="page-section">
-        <div class="page-title">Master Rota Schedule</div><div class="page-sub">Comprehensive overview of upcoming church service operations.</div>
+        <div class="page-header">
+          <div class="page-title">Master Rota Schedule</div>
+          <div class="page-sub">Comprehensive view of all upcoming church team operations.</div>
+        </div>
         <div id="all-rotas-container" class="grid-three"></div>
       </div>
-    </main>
+
+    </div>
   </div>
 
   <script>
     const SUPABASE_URL = 'https://ojzwujpahfjmaeisnfez.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qend1anBhaGZqbWFlaXNuZmV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTA5NDMsImV4cCI6MjA5NDU4Njk0M30.VvszGR6MbUnBhKsmsXBikkrjok2-F1bnyS4zOwDX5hg';
-    
-    let sb;
-    let appState = { user: null, profile: null, rotas: [], dates: [], slots: [] };
+    const SECRET_JOIN_KEY = 'CraigavonBaptist2026';
     const ADMIN_EMAIL = 'coopsben0@gmail.com';
+
+    let sb;
+    let isSignUpMode = false;
+    let appState = { user: null, profile: null, rotas: [], dates: [], slots: [] };
 
     window.addEventListener('load', async () => {
       try {
-        // Checking custom delivery build target window path handles
         const targetLib = window.supabase || (window.createClient ? window : null);
-        if (!targetLib) {
-          showError("System initialization failed: Supabase connection engine didn't mount down to browser path.");
-          return;
-        }
+        if (!targetLib) { showError("Connection engine failed to initialize setup packages."); return; }
         
         sb = targetLib.createClient(SUPABASE_URL, SUPABASE_KEY);
         
-        // Immediate baseline session checkpoint
         const sessionCheck = await sb.auth.getSession();
         const currentSession = sessionCheck?.data?.session;
         
@@ -129,7 +241,6 @@
           showAuthScreen();
         }
 
-        // Dynamically track any changes subsequent to this
         sb.auth.onAuthStateChange(async (event, session) => {
           if (event === 'SIGNED_IN' && session?.user) {
             appState.user = session.user;
@@ -138,33 +249,68 @@
             showAuthScreen();
           }
         });
-        
-      } catch (err) {
-        showError("Data Link Configuration Mismatch: " + err.message);
-      }
+      } catch (err) { showError("Initialization runtime exception: " + err.message); }
     });
+
+    function toggleAuthMode() {
+      isSignUpMode = !isSignUpMode;
+      document.getElementById('signup-fields').style.display = isSignUpMode ? 'block' : 'none';
+      document.getElementById('gatekeeper-field').style.display = isSignUpMode ? 'block' : 'none';
+      document.getElementById('auth-title').innerText = isSignUpMode ? 'Create Account' : 'Welcome Back';
+      document.getElementById('auth-subtitle').innerText = isSignUpMode ? 'Sign up with your church credential key' : 'Sign in to manage your serving schedule';
+      document.getElementById('auth-main-btn').innerText = isSignUpMode ? 'Register Account' : 'Sign In';
+      document.getElementById('auth-toggle').innerText = isSignUpMode ? 'Already have an account? Sign In' : "Don't have an account? Register here";
+    }
+
+    async function handleAuthAction() {
+      const email = document.getElementById('login-email').value.trim();
+      const pass = document.getElementById('login-password').value;
+      
+      if (!email || !pass) { alert("Please complete form credentials."); return; }
+      showLoading(true);
+
+      if (isSignUpMode) {
+        const fullName = document.getElementById('reg-name').value.trim();
+        const accessKey = document.getElementById('reg-key').value.trim();
+        
+        if (!fullName) { alert("Please enter your full name."); showLoading(false); return; }
+        if (accessKey !== SECRET_JOIN_KEY) { alert("Invalid Church Join Key. Registration blocked."); showLoading(false); return; }
+
+        // Register profile account inside Auth catalog
+        const { data: authData, error: signUpErr } = await sb.auth.signUp({ email, password: pass });
+        if (signUpErr) { alert("Registration issue: " + signUpErr.message); showLoading(false); return; }
+
+        if (authData?.user) {
+          // Immediately project new down-profile record mapping inside tables
+          await sb.from('profiles').insert({ id: authData.user.id, full_name: fullName });
+          alert("Account successfully created and registered! Logging in...");
+        }
+      } else {
+        const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+        if (error) { showLoading(false); alert("Access Denied: " + error.message); }
+      }
+    }
 
     async function loadDashboardData() {
       showLoading(true);
       try {
+        document.getElementById('user-display-email').innerText = appState.user.email;
+        
         try {
           const profileRes = await sb.from('profiles').select('*').eq('id', appState.user.id).maybeSingle();
           appState.profile = profileRes?.data || null;
-        } catch (e) {
-          console.warn("Profiles schema mapping pass bypassed.");
-        }
+          document.getElementById('user-display-name').innerText = appState.profile?.full_name || "Church Member";
+        } catch (e) { document.getElementById('user-display-name').innerText = "Church Member"; }
 
-        const rotaRes = await sb.from('rotas').select('*');
-        if (rotaRes.error) { showError("Table Connection Mismatch (rotas): " + rotaRes.error.message); return; }
-        appState.rotas = rotaRes?.data || [];
+        const [rRes, dRes, sRes] = await Promise.all([
+          sb.from('rotas').select('*'),
+          sb.from('service_dates').select('*'),
+          sb.from('rota_slots').select('*')
+        ]);
 
-        const dateRes = await sb.from('service_dates').select('*');
-        if (dateRes.error) { showError("Table Connection Mismatch (service_dates): " + dateRes.error.message); return; }
-        appState.dates = dateRes?.data || [];
-
-        const slotRes = await sb.from('rota_slots').select('*');
-        if (slotRes.error) { showError("Table Connection Mismatch (rota_slots): " + slotRes.error.message); return; }
-        appState.slots = slotRes?.data || [];
+        appState.rotas = rRes.data || [];
+        appState.dates = dRes.data || [];
+        appState.slots = sRes.data || [];
 
         if (appState.dates.length) appState.dates.sort((a,b) => new Date(a.date) - new Date(b.date));
         
@@ -174,9 +320,7 @@
         document.getElementById('auth-screen').style.display = 'none';
         document.getElementById('app').style.display = 'flex';
         showLoading(false);
-      } catch (err) { 
-        showError("Data stream parsing error: " + err.message); 
-      }
+      } catch (err) { showError("Data Stream Processing Failure: " + err.message); }
     }
 
     function showAuthScreen() {
@@ -189,20 +333,129 @@
       document.querySelector('.spinner').style.display = 'none';
       const textDiv = document.getElementById('loading-text');
       textDiv.style.color = 'var(--danger)';
-      textDiv.style.fontWeight = 'bold';
-      textDiv.innerHTML = `⚠️ Connection Blocked!<br/><br/><span style="font-family:monospace; font-weight:normal; font-size:12px; background:#fff0f0; padding:10px; border:1px solid var(--danger); display:block; border-radius:4px; text-align:left;">${msg}</span><br/>Drop this message code into our chat window to confirm verification!`;
+      textDiv.innerHTML = `⚠️ Pipeline Blocked!<br/><br/><span style="font-family:monospace; font-size:12px; background:#fff0f0; padding:10px; border:1px solid var(--danger); display:block; border-radius:4px; text-align:left;">${msg}</span>`;
     }
 
-    async function signIn() {
-      const email = document.getElementById('login-email').value.trim();
-      const pass = document.getElementById('login-password').value;
+    function getTeamBadgeClass(teamName) {
+      if (!teamName) return 'badge-default';
+      if (teamName.toLowerCase().includes('music')) return 'badge-music';
+      if (teamName.toLowerCase().includes('kids') || teamName.toLowerCase().includes('school')) return 'badge-kids';
+      return 'badge-default';
+    }
+
+    function renderDashboard() {
+      renderMySlots();
+      renderAllSchedules();
+      renderAdminNotifications();
+    }
+
+    function renderMySlots() {
+      const container = document.getElementById('my-slots-container');
+      if (!appState.profile) { container.innerHTML = `<div class="empty-msg">Complete your registration to link schedules.</div>`; return; }
+      
+      const myName = appState.profile.full_name?.toLowerCase();
+      const mySlots = appState.slots.filter(s => s.member_name_text?.toLowerCase().includes(myName));
+      
+      if (!mySlots.length) { container.innerHTML = `<div class="empty-msg">Welcome, ${appState.profile.full_name}! You don't have any slots assigned to you this month.</div>`; return; }
+      
+      let HTML = '';
+      appState.dates.forEach(d => {
+        const dSlots = mySlots.filter(s => s.service_date_id === d.id);
+        if (dSlots.length) {
+          HTML += `<div class="card"><div class="card-date">${new Date(d.date).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' })}</div>`;
+          dSlots.forEach(s => {
+            const team = appState.rotas.find(r => r.id === s.rota_id);
+            const isSeekingCover = s.status === 'seeking_cover';
+            HTML += `
+              <div class="card-assignment">
+                <span class="team-badge ${getTeamBadgeClass(team?.name)}">${team ? team.name : 'Serving Team'}</span>
+                <div class="role-title">${s.role_title}</div>
+                <div class="member-name" style="opacity: 0.6;">You are Assigned</div>
+                ${isSeekingCover ? `<span class="status-banner status-seeking">Cover Requested</span>` : ''}
+                
+                <div class="slot-actions">
+                  ${!isSeekingCover ? `<button class="action-badge-btn btn-cover-req" onclick="requestCover('${s.id}')">Request Cover / Swap</button>` : '<span style="font-size:12px; color:var(--text-muted);">Swap Alert Live</span>'}
+                </div>
+              </div>`;
+          });
+          HTML += `</div>`;
+        }
+      });
+      container.innerHTML = HTML;
+    }
+
+    function renderAllSchedules() {
+      const container = document.getElementById('all-rotas-container');
+      const isAdmin = appState.user && appState.user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+      let HTML = '';
+      
+      appState.dates.forEach(d => {
+        HTML += `<div class="card"><div class="card-date">${new Date(d.date).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' })}</div>`;
+        const dSlots = appState.slots.filter(s => s.service_date_id === d.id);
+        
+        if (!dSlots.length) { HTML += `<div class="empty-msg" style="padding:16px; border:none;">No roles populated.</div>`; } 
+        else {
+          dSlots.forEach(s => {
+            const team = appState.rotas.find(r => r.id === s.rota_id);
+            const isSeeking = s.status === 'seeking_cover';
+            HTML += `
+              <div class="card-assignment" style="border-left: 4px solid ${isSeeking ? 'var(--warning)' : 'var(--sidebar-bg)'}">
+                <span class="team-badge ${getTeamBadgeClass(team?.name)}">${team ? team.name : 'Team'}</span>
+                <div class="role-title">${s.role_title}</div>
+                <div class="member-name">${s.member_name_text}</div>
+                ${isSeeking ? `<span class="status-banner status-seeking">⚠️ Needs Cover</span>` : ''}
+                ${isAdmin ? `<button class="delete-slot-btn" onclick="deleteAssignment('${s.id}')">×</button>` : ''}
+              </div>`;
+          });
+        }
+        HTML += `</div>`;
+      });
+      container.innerHTML = HTML;
+    }
+
+    async function requestCover(slotId) {
+      if (!confirm("Flag this slot as needing cover? This will notify the admin group panel.")) return;
       showLoading(true);
-      const { error } = await sb.auth.signInWithPassword({ email, password: pass });
-      if(error) { showLoading(false); alert("Sign-in failed: " + error.message); }
+      await sb.from('rota_slots').update({ status: 'seeking_cover' }).eq('id', slotId);
+      const { data } = await sb.from('rota_slots').select('*');
+      appState.slots = data || [];
+      renderDashboard();
+      showLoading(false);
     }
 
-    function signOut() { sb.auth.signOut().then(() => { localStorage.clear(); location.reload(); }); }
-    function renderDashboard() { renderMySlots(); renderAllSchedules(); }
+    function renderAdminNotifications() {
+      const notifyBox = document.getElementById('admin-notifications');
+      const listEl = document.getElementById('notifications-list');
+      const isAdmin = appState.user && appState.user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+      
+      if (!isAdmin) { notifyBox.style.display = 'none'; return; }
+      
+      const flaggedSlots = appState.slots.filter(s => s.status === 'seeking_cover');
+      if (!flaggedSlots.length) { notifyBox.style.display = 'none'; return; }
+      
+      notifyBox.style.display = 'block';
+      listEl.innerHTML = flaggedSlots.map(s => {
+        const d = appState.dates.find(dt => dt.id === s.service_date_id);
+        const t = appState.rotas.find(rt => rt.id === s.rota_id);
+        const dateStr = d ? new Date(d.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '---';
+        return `
+          <div class="notification-item">
+            <div style="font-size:14px;">
+              <strong>${s.member_name_text}</strong> requests cover for <strong>${t?.name || 'Rota'} (${s.role_title})</strong> on <strong>${dateStr}</strong>
+            </div>
+            <button class="action-badge-btn" style="background:var(--success); color:white;" onclick="resolveCover('${s.id}')">Mark Resolved</button>
+          </div>`;
+      }).join('');
+    }
+
+    async function resolveCover(slotId) {
+      showLoading(true);
+      await sb.from('rota_slots').update({ status: 'normal' }).eq('id', slotId);
+      const { data } = await sb.from('rota_slots').select('*');
+      appState.slots = data || [];
+      renderDashboard();
+      showLoading(false);
+    }
 
     function setupAdminForm() {
       const adminBox = document.getElementById('admin-panel');
@@ -210,6 +463,8 @@
         adminBox.style.display = 'block';
         document.getElementById('admin-date-select').innerHTML = appState.dates.map(d => `<option value="${d.id}">${new Date(d.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</option>`).join('');
         document.getElementById('admin-rota-select').innerHTML = appState.rotas.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
+      } else {
+        adminBox.style.display = 'none';
       }
     }
 
@@ -218,9 +473,9 @@
       const rotaId = document.getElementById('admin-rota-select').value;
       const roleInput = document.getElementById('admin-role-input').value.trim();
       const nameInput = document.getElementById('admin-name-input').value.trim();
-      if (!nameInput || !roleInput) { alert('Please fill in both Role and Member Name fields.'); return; }
+      if (!nameInput || !roleInput) { alert('Please complete form entries.'); return; }
       showLoading(true);
-      const { error } = await sb.from('rota_slots').insert({ rota_id: rotaId, service_date_id: dateId, role_title: roleInput, member_name_text: nameInput });
+      const { error } = await sb.from('rota_slots').insert({ rota_id: rotaId, service_date_id: dateId, role_title: roleInput, member_name_text: nameInput, status: 'normal' });
       if (error) { alert(error.message); showLoading(false); } 
       else {
         document.getElementById('admin-name-input').value = '';
@@ -233,7 +488,7 @@
     }
 
     async function deleteAssignment(slotId) {
-      if (!confirm("Remove this row from schedule?")) return;
+      if (!confirm("Delete this role row permanently?")) return;
       showLoading(true);
       await sb.from('rota_slots').delete().eq('id', slotId);
       const { data } = await sb.from('rota_slots').select('*');
@@ -242,55 +497,13 @@
       showLoading(false);
     }
 
-    function renderMySlots() {
-      const container = document.getElementById('my-slots-container');
-      if (!appState.profile) { container.innerHTML = `<div class="empty-msg" style="grid-column:1/-1;">Log in to view personal filtering.</div>`; return; }
-      const mySlots = appState.slots.filter(s => s.member_name_text.toLowerCase().includes(appState.profile.full_name?.toLowerCase()));
-      if(!mySlots.length) { container.innerHTML = `<div class="empty-msg" style="grid-column:1/-1;">Welcome, ${appState.profile.full_name || 'User'}! You have no assignments assigned on paper this month.</div>`; return; }
-      let HTML = '';
-      appState.dates.forEach(d => {
-        const dSlots = mySlots.filter(s => s.service_date_id === d.id);
-        if(dSlots.length) {
-          HTML += `<div class="card"><div class="card-date">${new Date(d.date).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' })}</div>`;
-          dSlots.forEach(s => {
-            const team = appState.rotas.find(r => r.id === s.rota_id);
-            HTML += `<div class="card-assignment"><div class="role-title">${team ? team.name : 'Rota'} — ${s.role_title}</div><div class="member-name">Confirmed Assigned</div></div>`;
-          });
-          HTML += `</div>`;
-        }
-      });
-      container.innerHTML = HTML;
-    }
-
-    function renderAllSchedules() {
-      const container = document.getElementById('all-rotas-container');
-      const isAdmin = appState.user && appState.user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
-      let HTML = '';
-      appState.dates.forEach(d => {
-        HTML += `<div class="card"><div class="card-date">${new Date(d.date).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' })}</div>`;
-        const dSlots = appState.slots.filter(s => s.service_date_id === d.id);
-        if(!dSlots.length) { HTML += `<div class="empty-msg" style="padding:10px;">No positions added.</div>`; } 
-        else {
-          dSlots.forEach(s => {
-            const team = appState.rotas.find(r => r.id === s.rota_id);
-            HTML += `<div class="card-assignment" style="border-left-color:var(--cbc-navy)">
-              <div class="role-title">${team ? team.name : 'Team'} &bull; ${s.role_title}</div>
-              <div class="member-name">${s.member_name_text}</div>
-              ${isAdmin ? `<button class="delete-slot-btn" onclick="deleteAssignment('${s.id}')">×</button>` : ''}
-            </div>`;
-          });
-        }
-        HTML += `</div>`;
-      });
-      container.innerHTML = HTML;
-    }
-
     function switchTab(tabId) {
       document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
-      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.querySelectorAll('.sidebar-nav-btn').forEach(n => n.classList.remove('active'));
       document.getElementById(`tab-${tabId}`).classList.add('active');
       document.getElementById(`nav-${tabId}`).classList.add('active');
     }
+    function signOut() { sb.auth.signOut().then(() => { localStorage.clear(); location.reload(); }); }
     function showLoading(show) { document.getElementById('loading-screen').style.display = show ? 'flex' : 'none'; }
   </script>
 </body>
