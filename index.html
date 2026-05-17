@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Craigavon Baptist Church — Rota Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet"/>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://unpkg.com/@supabase/supabase-js@2.39.8/dist/umd/supabase.js"></script>
   <style>
     :root { --bg-light: #f4f7f6; --card-bg: #ffffff; --cbc-navy: #2d3b45; --cbc-blue: #5cb3e4; --text-main: #333333; --text-muted: #666666; --border-color: #e2e8f0; --danger: #d9534f; }
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -107,62 +107,82 @@
     let appState = { user: null, profile: null, rotas: [], dates: [], slots: [] };
     const ADMIN_EMAIL = 'coopsben0@gmail.com';
 
-    window.addEventListener('DOMContentLoaded', () => {
+    window.addEventListener('load', async () => {
       try {
-        if (!window.supabase) {
-          showError("Error: The external Supabase client library failed to load in your browser. Check internet connection.");
+        // Checking custom delivery build target window path handles
+        const targetLib = window.supabase || (window.createClient ? window : null);
+        if (!targetLib) {
+          showError("System initialization failed: Supabase connection engine didn't mount down to browser path.");
           return;
         }
-        sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         
+        sb = targetLib.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        // Immediate baseline session checkpoint
+        const sessionCheck = await sb.auth.getSession();
+        const currentSession = sessionCheck?.data?.session;
+        
+        if (currentSession?.user) {
+          appState.user = currentSession.user;
+          await loadDashboardData();
+        } else {
+          showAuthScreen();
+        }
+
+        // Dynamically track any changes subsequent to this
         sb.auth.onAuthStateChange(async (event, session) => {
-          if(session?.user) { 
-            appState.user = session.user; 
-            await loadDashboardData(); 
-          } else { 
-            document.getElementById('app').style.display = 'none'; 
-            document.getElementById('auth-screen').style.display = 'flex'; 
-            showLoading(false); 
+          if (event === 'SIGNED_IN' && session?.user) {
+            appState.user = session.user;
+            await loadDashboardData();
+          } else if (event === 'SIGNED_OUT') {
+            showAuthScreen();
           }
         });
+        
       } catch (err) {
-        showError("System Crash during configuration initialization: " + err.message);
+        showError("Data Link Configuration Mismatch: " + err.message);
       }
     });
 
     async function loadDashboardData() {
       showLoading(true);
       try {
-        // Formatted with try-catch blocks to prevent functional syntax exceptions from stopping executions
         try {
           const profileRes = await sb.from('profiles').select('*').eq('id', appState.user.id).maybeSingle();
           appState.profile = profileRes?.data || null;
         } catch (e) {
-          console.warn("Profiles fetch skipped:", e);
+          console.warn("Profiles schema mapping pass bypassed.");
         }
 
         const rotaRes = await sb.from('rotas').select('*');
-        if (rotaRes.error) { showError("Database Error on 'rotas' table fetch: " + rotaRes.error.message); return; }
+        if (rotaRes.error) { showError("Table Connection Mismatch (rotas): " + rotaRes.error.message); return; }
         appState.rotas = rotaRes?.data || [];
 
         const dateRes = await sb.from('service_dates').select('*');
-        if (dateRes.error) { showError("Database Error on 'service_dates' table fetch: " + dateRes.error.message); return; }
+        if (dateRes.error) { showError("Table Connection Mismatch (service_dates): " + dateRes.error.message); return; }
         appState.dates = dateRes?.data || [];
 
         const slotRes = await sb.from('rota_slots').select('*');
-        if (slotRes.error) { showError("Database Error on 'rota_slots' assignment table fetch: " + slotRes.error.message); return; }
+        if (slotRes.error) { showError("Table Connection Mismatch (rota_slots): " + slotRes.error.message); return; }
         appState.slots = slotRes?.data || [];
 
         if (appState.dates.length) appState.dates.sort((a,b) => new Date(a.date) - new Date(b.date));
         
         renderDashboard();
         setupAdminForm();
+        
         document.getElementById('auth-screen').style.display = 'none';
         document.getElementById('app').style.display = 'flex';
         showLoading(false);
       } catch (err) { 
-        showError("Data pipeline crash: " + err.message); 
+        showError("Data stream parsing error: " + err.message); 
       }
+    }
+
+    function showAuthScreen() {
+      document.getElementById('app').style.display = 'none'; 
+      document.getElementById('auth-screen').style.display = 'flex'; 
+      showLoading(false);
     }
 
     function showError(msg) {
@@ -170,7 +190,7 @@
       const textDiv = document.getElementById('loading-text');
       textDiv.style.color = 'var(--danger)';
       textDiv.style.fontWeight = 'bold';
-      textDiv.innerHTML = `⚠️ Connection Blocked!<br/><br/><span style="font-family:monospace; font-weight:normal; font-size:12px; background:#fff0f0; padding:10px; border:1px solid var(--danger); display:block; border-radius:4px; text-align:left;">${msg}</span><br/>Please copy this text and send it in our chat window so we can patch it!`;
+      textDiv.innerHTML = `⚠️ Connection Blocked!<br/><br/><span style="font-family:monospace; font-weight:normal; font-size:12px; background:#fff0f0; padding:10px; border:1px solid var(--danger); display:block; border-radius:4px; text-align:left;">${msg}</span><br/>Drop this message code into our chat window to confirm verification!`;
     }
 
     async function signIn() {
