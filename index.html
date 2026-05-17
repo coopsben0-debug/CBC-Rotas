@@ -26,7 +26,7 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Inter', sans-serif; background: var(--bg-light); color: var(--text-main); min-height: 100vh; -webkit-font-smoothing: antialiased; }
 
-  /* ── AUTH ── */
+  /* ── AUTH SCREEN ── */
   #auth-screen {
     min-height: 100vh;
     background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
@@ -48,7 +48,7 @@
     color: var(--navy); margin-bottom: 6px;
   }
   .auth-sub {
-    font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 500;
+    font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600;
   }
   .tab-row {
     display: flex; background: #f1f5f9; border-radius: 8px; padding: 4px; margin-bottom: 24px;
@@ -288,7 +288,8 @@
     <div id="signup-form" style="display:none">
       <div class="field"><label>Full Name</label><input type="text" id="signup-name" placeholder="John Smith"/></div>
       <div class="field"><label>Email Address</label><input type="email" id="signup-email" placeholder="name@domain.com"/></div>
-      <div class="field"><label>Password</label><input type="password" id="signup-password" placeholder="Minimum 6 parameters"/></div>
+      <div class="field"><label>Password</label><input type="password" id="signup-password" placeholder="Minimum 6 characters"/></div>
+      <div class="field"><label>Church Join Key</label><input type="text" id="signup-key" placeholder="Enter church access key"/></div>
       <button class="btn-primary" id="signup-btn" onclick="signUp()">Create Secure Profile</button>
     </div>
   </div>
@@ -422,12 +423,34 @@ async function signUp() {
   const name = document.getElementById('signup-name').value.trim();
   const email = document.getElementById('signup-email').value.trim();
   const pass = document.getElementById('signup-password').value;
-  if(!name||!email||!pass) return showAuthError('Please complete all form values completely.');
-  if(pass.length<6) return showAuthError('Password credentials require a minimum parameter lengths of 6.');
+  const key = document.getElementById('signup-key').value.trim();
+  
+  if(!name||!email||!pass||!key) return showAuthError('Please complete all form values completely.');
+  if(pass.length<6) return showAuthError('Password credentials require a minimum parameter length of 6.');
+  if(key !== 'CraigavonBaptist2026') return showAuthError('Incorrect Church Join Key.');
+  
   document.getElementById('signup-btn').disabled=true;
-  const {error} = await sb.auth.signUp({email, password: pass, options:{data:{full_name:name}}});
+  
+  // Sign up user in Supabase Auth
+  const {data, error} = await sb.auth.signUp({
+    email, 
+    password: pass, 
+    options: { data: { full_name: name } }
+  });
+  
+  if(error) {
+    document.getElementById('signup-btn').disabled=false;
+    return showAuthError(error.message);
+  }
+  
+  // Explicitly check and insert row to profile table to prevent join issues
+  if (data?.user) {
+    await sb.from('profiles').insert([
+      { id: data.user.id, full_name: name, is_admin: false }
+    ]);
+  }
+  
   document.getElementById('signup-btn').disabled=false;
-  if(error) return showAuthError(error.message);
   showAuthError('✓ Profile row configured! Confirm via email validation notice, then run Sign In.');
 }
 
