@@ -7,23 +7,12 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet"/>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    :root {
-      --bg-light: #f4f7f6;
-      --card-bg: #ffffff;
-      --cbc-navy: #2d3b45;
-      --cbc-blue: #5cb3e4;
-      --text-main: #333333;
-      --text-muted: #666666;
-      --border-color: #e2e8f0;
-      --danger: #d9534f;
-    }
+    :root { --bg-light: #f4f7f6; --card-bg: #ffffff; --cbc-navy: #2d3b45; --cbc-blue: #5cb3e4; --text-main: #333333; --text-muted: #666666; --border-color: #e2e8f0; --danger: #d9534f; }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Inter', sans-serif; background: var(--bg-light); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; }
-    
-    #loading-screen { position: fixed; inset: 0; background: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; display: none; }
+    #loading-screen { position: fixed; inset: 0; background: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; }
     .spinner { border: 3px solid var(--border-color); border-top: 3px solid var(--cbc-blue); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 16px; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
     #auth-screen { min-height: 100vh; background: linear-gradient(135deg, #2d3b45 0%, #1a242c 100%); display: flex; align-items: center; justify-content: center; padding: 24px; }
     .auth-card { background: var(--card-bg); border-radius: 12px; padding: 40px; width: 100%; max-width: 440px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2); border-top: 5px solid var(--cbc-blue); }
     .auth-header-text { text-align: center; margin-bottom: 32px; }
@@ -31,77 +20,53 @@
     .auth-title { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: var(--cbc-navy); }
     .field { margin-bottom: 20px; }
     .field label { display: block; font-size: 11px; font-weight: 700; color: var(--cbc-navy); text-transform: uppercase; margin-bottom: 8px; }
-    .field input, .field select { width: 100%; padding: 12px 16px; border: 1.5px solid var(--border-color); border-radius: 6px; font-size: 14px; transition: border-color 0.2s; background: #fff; }
-    .field input:focus, .field select:focus { outline: none; border-color: var(--cbc-blue); }
-    
-    .btn-primary { width: 100%; padding: 14px; background: var(--cbc-navy); color: #ffffff; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: background 0.2s; font-size: 14px; }
-    .btn-primary:hover { background: #1a242c; }
-    .auth-error { background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; padding: 12px 16px; font-size: 14px; color: var(--danger); margin-bottom: 20px; display: none; }
-
-    header { background: #ffffff; padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 80px; color: var(--cbc-navy); border-bottom: 3px solid var(--cbc-blue); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    .field input, .field select { width: 100%; padding: 12px 16px; border: 1.5px solid var(--border-color); border-radius: 6px; font-size: 14px; background: #fff; }
+    header { background: #ffffff; padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 80px; border-bottom: 3px solid var(--cbc-blue); }
     .header-brand { display: flex; align-items: center; gap: 14px; }
-    .header-logo { width: 48px; height: 48px; background: var(--cbc-navy); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8px; color: white; font-weight: bold; text-align: center; border: 1.5px solid var(--cbc-blue); padding: 2px; text-transform: uppercase; }
+    .header-logo { width: 48px; height: 48px; background: var(--cbc-navy); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8px; color: white; font-weight: bold; text-align: center; border: 1.5px solid var(--cbc-blue); padding: 2px; }
     .header-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--cbc-navy); }
-    .header-title span { color: var(--text-muted); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; margin-left: 10px; }
-    .sign-out-btn { background: transparent; border: 1px solid var(--cbc-navy); color: var(--cbc-navy); padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; }
-    .sign-out-btn:hover { background: var(--cbc-navy); color: #ffffff; }
-
+    .header-title span { color: var(--text-muted); font-family: 'Inter', sans-serif; font-size: 13px; margin-left: 10px; }
+    .sign-out-btn { background: transparent; border: 1px solid var(--cbc-navy); color: var(--cbc-navy); padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; }
     nav { background: #ffffff; border-bottom: 1px solid var(--border-color); display: flex; gap: 24px; padding: 0 32px; }
-    .nav-item { padding: 18px 4px; font-size: 14px; font-weight: 600; color: var(--text-muted); cursor: pointer; border: none; border-bottom: 3px solid transparent; background: none; transition: all 0.2s; }
-    .nav-item:hover { color: var(--cbc-blue); }
+    .nav-item { padding: 18px 4px; font-size: 14px; font-weight: 600; color: var(--text-muted); cursor: pointer; border: none; border-bottom: 3px solid transparent; background: none; }
     .nav-item.active { color: var(--cbc-navy); border-bottom-color: var(--cbc-blue); }
-
     main { padding: 40px 32px; max-width: 1200px; margin: 0 auto; width: 100%; flex: 1; }
     .page-section { display: none; }
     .page-section.active { display: block; }
-    .page-title { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 700; color: var(--cbc-navy); margin-bottom: 6px; }
+    .page-title { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 700; color: var(--cbc-navy); }
     .page-sub { font-size: 14px; color: var(--text-muted); margin-bottom: 32px; }
-
-    /* Admin Styles */
     .admin-panel-box { background: #fff; border: 2px dashed var(--cbc-blue); border-radius: 8px; padding: 24px; margin-bottom: 40px; display: none; }
     .admin-title { font-size: 18px; font-weight: 700; color: var(--cbc-navy); margin-bottom: 16px; }
-    .admin-form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) 150px; gap: 16px; align-items: flex-end; }
-    .admin-btn { padding: 12px; background: var(--cbc-blue); color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px; transition: background 0.2s; }
-    .admin-btn:hover { background: #4ca3d4; }
-
+    .admin-form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) 150px; gap: 16px; align-items: flex-end; }
+    .admin-btn { padding: 12px; background: var(--cbc-blue); color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; }
     .grid-three { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; }
-    .card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.03); position: relative; }
+    .card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.03); }
     .card-date { font-size: 18px; font-weight: 700; color: var(--cbc-navy); margin-bottom: 16px; border-bottom: 2px solid var(--bg-light); padding-bottom: 8px; }
     .card-assignment { background: #fdfdfd; border: 1px solid var(--border-color); border-radius: 6px; padding: 12px 16px; margin-bottom: 12px; border-left: 4px solid var(--cbc-blue); position: relative; }
     .role-title { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
     .member-name { font-size: 15px; font-weight: 600; color: var(--cbc-navy); margin-top: 2px; }
     .empty-msg { color: var(--text-muted); font-size: 14px; font-style: italic; text-align: center; padding: 40px 0; background: #ffffff; border: 1px solid var(--border-color); border-radius: 8px; }
-    
-    .delete-slot-btn { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: transparent; border: none; color: #ccc; cursor: pointer; font-size: 16px; font-weight: bold; transition: color 0.2s; padding: 4px 8px; }
+    .delete-slot-btn { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: transparent; border: none; color: #ccc; cursor: pointer; font-size: 16px; font-weight: bold; }
     .delete-slot-btn:hover { color: var(--danger); }
   </style>
 </head>
 <body>
 
-  <div id="loading-screen">
-    <div class="spinner"></div>
-    <div style="font-size:14px; color:var(--text-muted); font-weight:500;">Connecting to Craigavon Baptist...</div>
-  </div>
+  <div id="loading-screen"><div class="spinner"></div><div style="font-size:14px; color:var(--text-muted);">Connecting to Craigavon Baptist...</div></div>
 
   <div id="auth-screen">
     <div class="auth-card">
-      <div class="auth-header-text">
-        <div class="auth-logo-placeholder">Craigavon<br>Baptist</div>
-        <div class="auth-title">Church Dashboard</div>
-      </div>
+      <div class="auth-header-text"><div class="auth-logo-placeholder">Craigavon<br>Baptist</div><div class="auth-title">Church Dashboard</div></div>
       <div id="auth-error" class="auth-error"></div>
       <div class="field"><label>Email Address</label><input type="email" id="login-email" value="coopsben0@gmail.com"/></div>
       <div class="field"><label>Password</label><input type="password" id="login-password" placeholder="••••••••"/></div>
-      <button class="btn-primary" onclick="signIn()">Sign In</button>
+      <button style="width:100%; padding:14px; background:var(--cbc-navy); color:white; border:none; border-radius:6px; font-weight:600; cursor:pointer;" onclick="signIn()">Sign In</button>
     </div>
   </div>
 
   <div id="app" style="display:none; flex-direction:column; min-height:100vh;">
     <header>
-      <div class="header-brand">
-        <div class="header-logo">Craigavon<br>Baptist</div>
-        <div class="header-title">Craigavon Baptist Church<span>Rota Portal</span></div>
-      </div>
+      <div class="header-brand"><div class="header-logo">Craigavon<br>Baptist</div><div class="header-title">Craigavon Baptist Church<span>Rota Portal</span></div></div>
       <button class="sign-out-btn" onclick="signOut()">Sign Out</button>
     </header>
     <nav>
@@ -113,31 +78,21 @@
       <div id="admin-panel" class="admin-panel-box">
         <div class="admin-title">⚡ Admin Management Panel (coopsben0)</div>
         <div class="admin-form-row">
-          <div class="field" style="margin:0;">
-            <label>Select Date</label>
-            <select id="admin-date-select"></select>
-          </div>
-          <div class="field" style="margin:0;">
-            <label>Select Track / Team</label>
-            <select id="admin-rota-select"></select>
-          </div>
-          <div class="field" style="margin:0;">
-            <label>Member Name</label>
-            <input type="text" id="admin-name-input" placeholder="e.g. Pastor Tom"/>
-          </div>
+          <div class="field" style="margin:0;"><label>Date</label><select id="admin-date-select"></select></div>
+          <div class="field" style="margin:0;"><label>Team</label><select id="admin-rota-select"></select></div>
+          <div class="field" style="margin:0;"><label>Role / Position</label><input type="text" id="admin-role-input" placeholder="e.g. Pianist, Singer, Leader"/></div>
+          <div class="field" style="margin:0;"><label>Member Name(s)</label><input type="text" id="admin-name-input" placeholder="e.g. John Smith"/></div>
           <button class="admin-btn" onclick="addNewAssignment()">Add to Rota</button>
         </div>
       </div>
       
       <div id="tab-my-slots" class="page-section active">
-        <div class="page-title">My Upcoming Slots</div>
-        <div class="page-sub">Your personal schedule across serving teams.</div>
+        <div class="page-title">My Upcoming Slots</div><div class="page-sub">Your personal schedule across serving teams.</div>
         <div id="my-slots-container" class="grid-three"></div>
       </div>
 
       <div id="tab-all-rotas" class="page-section">
-        <div class="page-title">Master Rota Schedule</div>
-        <div class="page-sub">Comprehensive overview of upcoming church service operations.</div>
+        <div class="page-title">Master Rota Schedule</div><div class="page-sub">Comprehensive overview of upcoming church service operations.</div>
         <div id="all-rotas-container" class="grid-three"></div>
       </div>
 
@@ -147,179 +102,98 @@
   <script>
     const SUPABASE_URL = 'https://ojzwujpahfjmaeisnfez.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qend1anBhaGZqbWFlaXNuZmV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTA5NDMsImV4cCI6MjA5NDU4Njk0M30.VvszGR6MbUnBhKsmsXBikkrjok2-F1bnyS4zOwDX5hg';
-    
-    // Direct initialization
     const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-    let appState = { user: null, profile: null, profilesList: [], rotas: [], dates: [], slots: [] };
+    let appState = { user: null, profile: null, rotas: [], dates: [], slots: [] };
     const ADMIN_EMAIL = 'coopsben0@gmail.com';
 
     async function signIn() {
       const email = document.getElementById('login-email').value.trim();
       const pass = document.getElementById('login-password').value;
-      const errEl = document.getElementById('auth-error');
-      errEl.style.display = 'none';
-
       showLoading(true);
-      const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
-      if(error) {
-        showLoading(false);
-        errEl.textContent = error.message;
-        errEl.style.display = 'block';
-      }
+      const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+      if(error) { showLoading(false); alert(error.message); }
     }
 
-    function signOut() {
-      showLoading(true);
-      sb.auth.signOut().then(() => {
-        localStorage.clear();
-        location.reload();
-      });
-    }
+    function signOut() { sb.auth.signOut().then(() => { localStorage.clear(); location.reload(); }); }
 
-    // Monitor authentications
     sb.auth.onAuthStateChange(async (event, session) => {
-      if(session?.user) {
-        appState.user = session.user;
-        await loadDashboardData();
-      } else {
-        document.getElementById('app').style.display = 'none';
-        document.getElementById('auth-screen').style.display = 'flex';
-        showLoading(false);
-      }
+      if(session?.user) { appState.user = session.user; await loadDashboardData(); } 
+      else { document.getElementById('app').style.display = 'none'; document.getElementById('auth-screen').style.display = 'flex'; showLoading(false); }
     });
 
     async function loadDashboardData() {
-      showLoading(true);
       try {
-        const [profileRes, allProfilesRes, rotaRes, dateRes, slotRes] = await Promise.all([
+        const [profileRes, rotaRes, dateRes, slotRes] = await Promise.all([
           sb.from('profiles').select('*').eq('id', appState.user.id).maybeSingle(),
-          sb.from('profiles').select('*'),
           sb.from('rotas').select('*'),
           sb.from('service_dates').select('*'),
           sb.from('rota_slots').select('*')
         ]);
-
         appState.profile = profileRes?.data || null;
-        appState.profilesList = allProfilesRes?.data || [];
         appState.rotas = rotaRes?.data || [];
         appState.dates = dateRes?.data || [];
         appState.slots = slotRes?.data || [];
-
-        if (appState.dates && appState.dates.length) {
-          appState.dates.sort((a,b) => new Date(a.date) - new Date(b.date));
-        }
-
+        if (appState.dates.length) appState.dates.sort((a,b) => new Date(a.date) - new Date(b.date));
         renderDashboard();
         setupAdminForm();
-        
         document.getElementById('auth-screen').style.display = 'none';
         document.getElementById('app').style.display = 'flex';
-      } catch (err) {
-        console.error("Data load error: ", err);
-      } finally {
-        showLoading(false);
-      }
+      } catch (err) { console.error(err); } finally { showLoading(false); }
     }
 
-    function renderDashboard() {
-      renderMySlots();
-      renderAllSchedules();
-    }
+    function renderDashboard() { renderMySlots(); renderAllSchedules(); }
 
     function setupAdminForm() {
       const adminBox = document.getElementById('admin-panel');
       if (appState.user && appState.user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
         adminBox.style.display = 'block';
-        
-        const dateSelect = document.getElementById('admin-date-select');
-        dateSelect.innerHTML = appState.dates.map(d => {
-          const pretty = new Date(d.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-          return `<option value="${d.id}">${pretty}</option>`;
-        }).join('');
-
-        const rotaSelect = document.getElementById('admin-rota-select');
-        rotaSelect.innerHTML = appState.rotas.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
-      } else {
-        adminBox.style.display = 'none';
+        document.getElementById('admin-date-select').innerHTML = appState.dates.map(d => `<option value="${d.id}">${new Date(d.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</option>`).join('');
+        document.getElementById('admin-rota-select').innerHTML = appState.rotas.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
       }
     }
 
     async function addNewAssignment() {
       const dateId = document.getElementById('admin-date-select').value;
       const rotaId = document.getElementById('admin-rota-select').value;
+      const roleInput = document.getElementById('admin-role-input').value.trim();
       const nameInput = document.getElementById('admin-name-input').value.trim();
-
-      if (!nameInput) {
-        alert('Please enter a team member name.');
-        return;
-      }
-
+      if (!nameInput || !roleInput) { alert('Please fill in both Role and Member Name fields.'); return; }
       showLoading(true);
-      const { error } = await sb.from('rota_slots').insert({
-        rota_id: rotaId,
-        service_date_id: dateId,
-        member_name_text: nameInput
-      });
-
-      if (error) {
-        alert('Database error: ' + error.message);
-        showLoading(false);
-      } else {
+      const { error } = await sb.from('rota_slots').insert({ rota_id: rotaId, service_date_id: dateId, role_title: roleInput, member_name_text: nameInput });
+      if (error) { alert(error.message); showLoading(false); } 
+      else {
         document.getElementById('admin-name-input').value = '';
-        const { data: updatedSlots } = await sb.from('rota_slots').select('*');
-        appState.slots = updatedSlots || [];
+        document.getElementById('admin-role-input').value = '';
+        const { data } = await sb.from('rota_slots').select('*');
+        appState.slots = data || [];
         renderDashboard();
         showLoading(false);
       }
     }
 
     async function deleteAssignment(slotId) {
-      if (!confirm("Are you sure you want to clear this specific assignment track from the calendar?")) return;
-      
+      if (!confirm("Remove this specific row from schedule?")) return;
       showLoading(true);
-      const { error } = await sb.from('rota_slots').delete().eq('id', slotId);
-      
-      if (error) {
-        alert('Could not remove assignment: ' + error.message);
-        showLoading(false);
-      } else {
-        const { data: updatedSlots } = await sb.from('rota_slots').select('*');
-        appState.slots = updatedSlots || [];
-        renderDashboard();
-        showLoading(false);
-      }
+      await sb.from('rota_slots').delete().eq('id', slotId);
+      const { data } = await sb.from('rota_slots').select('*');
+      appState.slots = data || [];
+      renderDashboard();
+      showLoading(false);
     }
 
     function renderMySlots() {
       const container = document.getElementById('my-slots-container');
-      if (!appState.profile || !appState.slots.length) {
-        container.innerHTML = `<div class="empty-msg" style="grid-column: 1/-1;">No assignments found for your profile.</div>`;
-        return;
-      }
-
-      const mySlots = appState.slots.filter(s => 
-        s.profile_id === appState.profile.id || 
-        (s.member_name_text && s.member_name_text.toLowerCase() === appState.profile.full_name?.toLowerCase())
-      );
-
-      if(mySlots.length === 0) {
-        container.innerHTML = `<div class="empty-msg" style="grid-column: 1/-1;">Welcome, ${appState.profile.full_name || 'User'}! You are not personally scheduled to serve this week. Check the 'All Schedules' tab to see who is!</div>`;
-        return;
-      }
-
+      if (!appState.profile) return;
+      const mySlots = appState.slots.filter(s => s.member_name_text.toLowerCase().includes(appState.profile.full_name?.toLowerCase()));
+      if(!mySlots.length) { container.innerHTML = `<div class="empty-msg" style="grid-column:1/-1;">Welcome, ${appState.profile.full_name || 'User'}! You have no assignments assigned on paper this month.</div>`; return; }
       let HTML = '';
       appState.dates.forEach(d => {
-        const dateSlots = mySlots.filter(s => s.service_date_id === d.id);
-        if(dateSlots.length > 0) {
-          const formattedDate = new Date(d.date).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' });
-          HTML += `<div class="card"><div class="card-date">${formattedDate}</div>`;
-          dateSlots.forEach(s => {
+        const dSlots = mySlots.filter(s => s.service_date_id === d.id);
+        if(dSlots.length) {
+          HTML += `<div class="card"><div class="card-date">${new Date(d.date).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' })}</div>`;
+          dSlots.forEach(s => {
             const team = appState.rotas.find(r => r.id === s.rota_id);
-            HTML += `<div class="card-assignment">
-              <div class="role-title">Your Serving Assignment</div>
-              <div class="member-name">${team ? team.name : 'Church Operations'}</div>
-            </div>`;
+            HTML += `<div class="card-assignment"><div class="role-title">${team ? team.name : 'Rota'} — ${s.role_title}</div><div class="member-name">Confirmed Assigned</div></div>`;
           });
           HTML += `</div>`;
         }
@@ -329,37 +203,19 @@
 
     function renderAllSchedules() {
       const container = document.getElementById('all-rotas-container');
-      if(!appState.dates || !appState.dates.length) {
-        container.innerHTML = `<div class="empty-msg" style="grid-column: 1/-1;">No active calendars have been published.</div>`;
-        return;
-      }
-
-      const isUserAdmin = appState.user && appState.user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
-
+      const isAdmin = appState.user && appState.user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
       let HTML = '';
       appState.dates.forEach(d => {
-        const formattedDate = new Date(d.date).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' });
-        const serviceSlots = appState.slots.filter(s => s.service_date_id === d.id);
-
-        HTML += `<div class="card"><div class="card-date">${formattedDate}</div>`;
-        if(serviceSlots.length === 0) {
-          HTML += `<div style="color:var(--text-muted); font-size:13px; font-style:italic; text-align:center; padding: 10px 0;">No tracks configured for this date.</div>`;
-        } else {
-          serviceSlots.forEach(s => {
+        HTML += `<div class="card"><div class="card-date">${new Date(d.date).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' })}</div>`;
+        const dSlots = appState.slots.filter(s => s.service_date_id === d.id);
+        if(!dSlots.length) { HTML += `<div class="empty-msg" style="padding:10px;">No positions added.</div>`; } 
+        else {
+          dSlots.forEach(s => {
             const team = appState.rotas.find(r => r.id === s.rota_id);
-            
-            let nameToDisplay = 'Vacant Slot';
-            if (s.profile_id) {
-              const userProfile = appState.profilesList.find(p => p.id === s.profile_id);
-              if (userProfile) nameToDisplay = userProfile.full_name;
-            } else if (s.member_name_text) {
-              nameToDisplay = s.member_name_text;
-            }
-            
-            HTML += `<div class="card-assignment" style="border-left-color: var(--cbc-navy);">
-              <div class="role-title">${team ? team.name : 'Operational Team'}</div>
-              <div class="member-name" style="font-size:15px; color:var(--cbc-navy); font-weight:600;">${nameToDisplay}</div>
-              ${isUserAdmin ? `<button class="delete-slot-btn" onclick="deleteAssignment('${s.id}')" title="Delete Assignment">×</button>` : ''}
+            HTML += `<div class="card-assignment" style="border-left-color:var(--cbc-navy)">
+              <div class="role-title">${team ? team.name : 'Team'} &bull; ${s.role_title}</div>
+              <div class="member-name">${s.member_name_text}</div>
+              ${isAdmin ? `<button class="delete-slot-btn" onclick="deleteAssignment('${s.id}')">×</button>` : ''}
             </div>`;
           });
         }
@@ -371,15 +227,10 @@
     function switchTab(tabId) {
       document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
       document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-      
       document.getElementById(`tab-${tabId}`).classList.add('active');
-      if(tabId === 'my-slots') document.getElementById('nav-my-slots').classList.add('active');
-      if(tabId === 'all-rotas') document.getElementById('nav-all-rotas').classList.add('active');
+      document.getElementById(`nav-${tabId}`).classList.add('active');
     }
-
-    function showLoading(show) {
-      document.getElementById('loading-screen').style.display = show ? 'flex' : 'none';
-    }
+    function showLoading(show) { document.getElementById('loading-screen').style.display = show ? 'flex' : 'none'; }
   </script>
 </body>
 </html>
