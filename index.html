@@ -140,7 +140,7 @@
       <div id="auth-subtitle" class="auth-subtitle">Sign in to manage your serving schedule</div>
       
       <div id="signup-fields" style="display: none;">
-        <div class="field"><label>Full Name</label><input type="text" id="reg-name" placeholder="e.g. John Smith"/></div>
+        <div class="field"><label>Full Name</label><input type="text" id="reg-name" placeholder="e.g. Neil Keys"/></div>
       </div>
       
       <div class="field"><label>Email Address</label><input type="email" id="login-email" value="coopsben0@gmail.com"/></div>
@@ -355,12 +355,31 @@
       renderAdminNotifications();
     }
 
+    // Advanced, forgiving matching engine
+    function isMemberAssignedToSlot(profileName, rotaText) {
+      if (!profileName || !rotaText) return false;
+      
+      const cleanProfileName = profileName.toLowerCase().trim();
+      const cleanRotaText = rotaText.toLowerCase().trim();
+      
+      // 1. Direct contains check (e.g., profile "Neil Keys" matches rota "Neil Keys")
+      if (cleanRotaText.includes(cleanProfileName) || cleanProfileName.includes(cleanRotaText)) {
+        return true;
+      }
+      
+      // 2. Break down words (handles "Neil Keys" matching a rota that just says "Neil")
+      const profileParts = cleanProfileName.split(/\s+/);
+      const rotaParts = cleanRotaText.split(/[\s&,]+/); // Split by spaces, ampersands, commas
+      
+      return profileParts.some(part => part.length > 2 && rotaParts.includes(part));
+    }
+
     function renderMySlots() {
       const container = document.getElementById('my-slots-container');
       if (!appState.profile) { container.innerHTML = `<div class="empty-msg">Complete your registration to link schedules.</div>`; return; }
       
-      const myName = appState.profile.full_name?.toLowerCase();
-      const mySlots = appState.slots.filter(s => s.member_name_text?.toLowerCase().includes(myName));
+      const myName = appState.profile.full_name;
+      const mySlots = appState.slots.filter(s => isMemberAssignedToSlot(myName, s.member_name_text));
       
       if (!mySlots.length) { container.innerHTML = `<div class="empty-msg">Welcome, ${appState.profile.full_name}! You don't have any slots assigned to you right now.</div>`; return; }
       
@@ -376,7 +395,7 @@
               <div class="card-assignment">
                 <span class="team-badge ${getTeamBadgeClass(team?.name)}">${team ? team.name : 'Serving Team'}</span>
                 <div class="role-title">${s.role_title}</div>
-                <div class="member-name" style="opacity: 0.6;">You are Assigned</div>
+                <div class="member-name" style="opacity: 0.6;">You are Assigned (${s.member_name_text})</div>
                 ${isSeekingCover ? `<span class="status-banner status-seeking">Cover Requested</span>` : ''}
                 
                 <div class="slot-actions">
