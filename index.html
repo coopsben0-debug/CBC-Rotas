@@ -3,265 +3,267 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Craigavon Baptist Church — Rotas</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet"/>
+<title>Craigavon Baptist Church — Rota Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root {
-    --cream: #faf7f2;
-    --warm: #f0ebe0;
-    --gold: #b8860b;
-    --gold-light: #d4a017;
-    --gold-pale: #f5e6c0;
-    --brown: #3d2b1f;
-    --brown-mid: #6b4c37;
-    --brown-light: #9a7558;
-    --text: #2c1f14;
-    --muted: #8a7060;
-    --white: #ffffff;
-    --success: #2d6a4f;
-    --danger: #8b1a1a;
-    --shadow: 0 2px 20px rgba(60,30,10,0.10);
-    --shadow-lg: 0 8px 40px rgba(60,30,10,0.16);
+    --bg-light: #f8fafc;
+    --card-bg: #ffffff;
+    --navy: #1e293b;
+    --navy-light: #334155;
+    --gold: #d4af37;
+    --gold-dark: #aa8416;
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --border-color: #e2e8f0;
+    --success: #10b981;
+    --danger: #ef4444;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+    --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -2px rgba(0,0,0,0.04);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Lato', sans-serif; background: var(--cream); color: var(--text); min-height: 100vh; }
+  body { font-family: 'Inter', sans-serif; background: var(--bg-light); color: var(--text-main); min-height: 100vh; -webkit-font-smoothing: antialiased; }
 
   /* ── AUTH ── */
   #auth-screen {
     min-height: 100vh;
-    background: linear-gradient(160deg, #2c1f14 0%, #4a2e1a 50%, #3d2b1f 100%);
-    display: flex; align-items: center; justify-content: center; padding: 20px;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    display: flex; align-items: center; justify-content: center; padding: 24px;
   }
   .auth-card {
-    background: var(--cream);
+    background: var(--card-bg);
     border-radius: 16px;
-    padding: 48px 40px;
-    width: 100%; max-width: 420px;
+    padding: 40px;
+    width: 100%; max-width: 440px;
     box-shadow: var(--shadow-lg);
   }
-  .auth-cross {
-    text-align: center; font-size: 32px; margin-bottom: 8px; color: var(--gold);
+  .auth-header-text {
+    text-align: center; margin-bottom: 24px;
   }
   .auth-title {
     font-family: 'Playfair Display', serif;
-    font-size: 24px; font-weight: 700;
-    color: var(--brown); text-align: center; margin-bottom: 4px;
+    font-size: 26px; font-weight: 700;
+    color: var(--navy); margin-bottom: 6px;
   }
   .auth-sub {
-    text-align: center; font-size: 13px; color: var(--muted); margin-bottom: 32px; letter-spacing: 0.5px;
+    font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 500;
   }
   .tab-row {
-    display: flex; background: var(--warm); border-radius: 8px; padding: 3px; margin-bottom: 24px;
+    display: flex; background: #f1f5f9; border-radius: 8px; padding: 4px; margin-bottom: 24px;
   }
   .tab-btn {
-    flex: 1; padding: 9px; border: none; background: transparent; border-radius: 6px;
-    font-family: 'Lato', sans-serif; font-size: 13px; font-weight: 700; color: var(--muted);
-    cursor: pointer; transition: all 0.2s; letter-spacing: 0.5px;
+    flex: 1; padding: 10px; border: none; background: transparent; border-radius: 6px;
+    font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; color: var(--text-muted);
+    cursor: pointer; transition: all 0.2s;
   }
-  .tab-btn.active { background: var(--white); color: var(--brown); box-shadow: 0 1px 6px rgba(60,30,10,0.12); }
-  .field { margin-bottom: 16px; }
-  .field label { display: block; font-size: 11px; font-weight: 700; color: var(--brown-mid); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+  .tab-btn.active { background: var(--card-bg); color: var(--navy); box-shadow: var(--shadow-sm); }
+  .field { margin-bottom: 18px; }
+  .field label { display: block; font-size: 12px; font-weight: 600; color: var(--navy-light); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
   .field input {
-    width: 100%; padding: 12px 14px; border: 1.5px solid #d9cfc0; border-radius: 8px;
-    font-family: 'Lato', sans-serif; font-size: 14px; color: var(--text); background: var(--white);
-    outline: none; transition: border-color 0.2s;
+    width: 100%; padding: 12px 16px; border: 1.5px solid var(--border-color); border-radius: 8px;
+    font-family: 'Inter', sans-serif; font-size: 14px; color: var(--text-main); background: #ffffff;
+    outline: none; transition: all 0.2s;
   }
-  .field input:focus { border-color: var(--gold); }
+  .field input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(212,175,55,0.15); }
   .btn-primary {
-    width: 100%; padding: 13px; background: var(--gold); color: var(--white);
-    border: none; border-radius: 8px; font-family: 'Lato', sans-serif; font-size: 14px;
-    font-weight: 700; cursor: pointer; letter-spacing: 0.5px; transition: background 0.2s;
-    margin-top: 4px;
+    width: 100%; padding: 14px; background: var(--navy); color: #ffffff;
+    border: none; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 14px;
+    font-weight: 600; cursor: pointer; transition: background 0.2s; margin-top: 6px;
   }
-  .btn-primary:hover { background: var(--gold-light); }
-  .btn-primary:disabled { background: #c5b99a; cursor: not-allowed; }
-  .auth-error { background: #fdf0f0; border: 1px solid #e8b4b4; border-radius: 6px; padding: 10px 14px; font-size: 13px; color: var(--danger); margin-bottom: 16px; }
+  .btn-primary:hover { background: var(--navy-light); }
+  .btn-primary:disabled { background: #cbd5e1; cursor: not-allowed; }
+  .auth-error { background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 12px 16px; font-size: 14px; color: var(--danger); margin-bottom: 20px; }
 
-  /* ── APP SHELL ── */
-  #app { display: none; min-height: 100vh; flex-direction: column; }
+  /* ── SITE TOP HEADER ── */
   header {
-    background: var(--brown);
-    padding: 0 24px;
+    background: var(--navy);
+    padding: 0 32px;
     display: flex; align-items: center; justify-content: space-between;
-    height: 60px; position: sticky; top: 0; z-index: 100;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+    height: 70px; position: sticky; top: 0; z-index: 100;
+    box-shadow: var(--shadow-md);
   }
-  .header-left { display: flex; align-items: center; gap: 10px; }
-  .header-cross { color: var(--gold); font-size: 20px; }
-  .header-title { font-family: 'Playfair Display', serif; color: var(--cream); font-size: 17px; font-weight: 600; }
-  .header-right { display: flex; align-items: center; gap: 12px; }
+  .header-left { display: flex; align-items: center; gap: 12px; }
+  .header-title { font-family: 'Playfair Display', serif; color: #ffffff; font-size: 20px; font-weight: 600; }
+  .header-title span { color: var(--gold); font-weight: 400; font-family: 'Inter', sans-serif; font-size: 14px; margin-left: 8px; border-left: 1px solid rgba(255,255,255,0.2); padding-left: 8px; }
+  .header-right { display: flex; align-items: center; gap: 16px; }
   .user-pill {
-    background: rgba(255,255,255,0.1); border-radius: 20px; padding: 5px 14px;
-    font-size: 12px; color: var(--gold-pale); font-weight: 700; letter-spacing: 0.3px;
+    background: rgba(255,255,255,0.08); border-radius: 20px; padding: 6px 16px;
+    font-size: 13px; color: #ffffff; font-weight: 500; border: 1px solid rgba(255,255,255,0.1);
   }
   .sign-out-btn {
-    background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #c8b89a;
-    padding: 5px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; font-family: 'Lato', sans-serif;
+    background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #cbd5e1;
+    padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: 'Inter', sans-serif;
     transition: all 0.2s;
   }
-  .sign-out-btn:hover { background: rgba(255,255,255,0.1); color: var(--cream); }
+  .sign-out-btn:hover { background: rgba(255,255,255,0.1); color: #ffffff; border-color: #ffffff; }
 
+  /* ── NAVIGATION NAVIGATION ── */
   nav {
-    background: var(--warm); border-bottom: 1px solid #ddd5c5;
-    display: flex; gap: 0; padding: 0 24px; overflow-x: auto;
+    background: #ffffff; border-bottom: 1px solid var(--border-color);
+    display: flex; gap: 8px; padding: 0 32px; overflow-x: auto;
   }
   .nav-item {
-    padding: 14px 18px; font-size: 13px; font-weight: 700; color: var(--muted);
-    cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap;
-    transition: all 0.2s; letter-spacing: 0.3px; background: none; border-left: none; border-right: none; border-top: none;
-    font-family: 'Lato', sans-serif;
+    padding: 18px 16px; font-size: 14px; font-weight: 600; color: var(--text-muted);
+    cursor: pointer; border: none; border-bottom: 3px solid transparent; white-space: nowrap;
+    transition: all 0.2s; background: none; font-family: 'Inter', sans-serif;
   }
-  .nav-item.active { color: var(--gold); border-bottom-color: var(--gold); }
-  .nav-item:hover { color: var(--brown); }
+  .nav-item.active { color: var(--navy); border-bottom-color: var(--gold); }
+  .nav-item:hover { color: var(--text-main); }
 
-  main { flex: 1; padding: 28px 24px; max-width: 900px; margin: 0 auto; width: 100%; }
+  main { flex: 1; padding: 40px 32px; max-width: 1040px; margin: 0 auto; width: 100%; }
 
-  /* ── CARDS ── */
-  .page-title { font-family: 'Playfair Display', serif; font-size: 26px; color: var(--brown); margin-bottom: 4px; }
-  .page-sub { font-size: 13px; color: var(--muted); margin-bottom: 28px; }
+  /* ── CONTAINER STRUCTS ── */
+  .page-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
+  .page-sub { font-size: 14px; color: var(--text-muted); margin-bottom: 32px; }
 
-  .rota-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; margin-bottom: 32px; }
+  .rota-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 18px; margin-bottom: 32px; }
   .rota-card {
-    background: var(--white); border-radius: 12px; padding: 20px 18px;
-    border-left: 4px solid var(--gold); cursor: pointer;
-    box-shadow: var(--shadow); transition: transform 0.15s, box-shadow 0.15s;
+    background: var(--card-bg); border-radius: 12px; padding: 24px;
+    border-top: 4px solid var(--navy); cursor: pointer;
+    box-shadow: var(--shadow-sm); transition: all 0.2s; border-inline: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);
   }
-  .rota-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
-  .rota-card-name { font-family: 'Playfair Display', serif; font-size: 15px; color: var(--brown); margin-bottom: 4px; }
-  .rota-card-count { font-size: 12px; color: var(--muted); }
+  .rota-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); border-top-color: var(--gold); }
+  .rota-card-name { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
+  .rota-card-count { font-size: 13px; color: var(--text-muted); font-weight: 500; }
 
-  /* ── MY SLOTS ── */
-  .slot-list { display: flex; flex-direction: column; gap: 12px; }
+  /* ── ROTA SLOTS DISPLAY ── */
+  .slot-list { display: flex; flex-direction: column; gap: 14px; }
   .slot-card {
-    background: var(--white); border-radius: 12px; padding: 18px 20px;
-    box-shadow: var(--shadow); display: flex; align-items: center; justify-content: space-between;
-    border-left: 4px solid var(--gold-light); gap: 12px; flex-wrap: wrap;
+    background: var(--card-bg); border-radius: 12px; padding: 20px 24px;
+    box-shadow: var(--shadow-sm); display: flex; align-items: center; justify-content: space-between;
+    border: 1px solid var(--border-color); border-left: 4px solid var(--navy); gap: 16px; flex-wrap: wrap;
   }
-  .slot-card.has-swap { border-left-color: #d4820a; background: #fffbf2; }
-  .slot-info {}
-  .slot-rota { font-size: 11px; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
-  .slot-date { font-family: 'Playfair Display', serif; font-size: 17px; color: var(--brown); }
-  .slot-badge { font-size: 11px; color: #b8700a; background: #fef3d8; border-radius: 10px; padding: 2px 10px; margin-top: 6px; display: inline-block; }
+  .slot-card.has-swap { border-left-color: var(--gold); background: #fffdf5; }
+  .slot-rota { font-size: 12px; font-weight: 700; color: var(--gold-dark); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .slot-date { font-family: 'Playfair Display', serif; font-size: 19px; font-weight: 700; color: var(--navy); }
+  .slot-badge { font-size: 12px; color: #854d0e; background: #fef9c3; border-radius: 20px; padding: 4px 12px; margin-top: 8px; display: inline-block; font-weight: 500; }
   .btn-swap {
-    padding: 8px 18px; background: var(--white); border: 1.5px solid var(--gold);
-    color: var(--gold); border-radius: 7px; font-size: 12px; font-weight: 700; cursor: pointer;
-    font-family: 'Lato', sans-serif; letter-spacing: 0.3px; white-space: nowrap; transition: all 0.2s;
+    padding: 10px 20px; background: #ffffff; border: 1.5px solid var(--navy);
+    color: var(--navy); border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;
+    font-family: 'Inter', sans-serif; white-space: nowrap; transition: all 0.2s;
   }
-  .btn-swap:hover { background: var(--gold); color: var(--white); }
+  .btn-swap:hover { background: var(--navy); color: #ffffff; }
   .btn-cancel {
-    padding: 8px 18px; background: var(--white); border: 1.5px solid #c0a060;
-    color: #b8700a; border-radius: 7px; font-size: 12px; font-weight: 700; cursor: pointer;
-    font-family: 'Lato', sans-serif; white-space: nowrap; transition: all 0.2s;
+    padding: 10px 20px; background: #ffffff; border: 1.5px solid var(--border-color);
+    color: var(--danger); border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;
+    font-family: 'Inter', sans-serif; white-space: nowrap; transition: all 0.2s;
   }
-  .btn-cancel:hover { background: #fff3dc; }
+  .btn-cancel:hover { background: #fef2f2; border-color: var(--danger); }
 
-  /* ── ROTA DETAIL ── */
+  /* ── OVERVIEW PANELS ── */
   .back-btn {
-    background: none; border: none; color: var(--gold); cursor: pointer; font-size: 13px;
-    font-family: 'Lato', sans-serif; font-weight: 700; margin-bottom: 18px; padding: 0;
-    display: flex; align-items: center; gap: 5px;
+    background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 14px;
+    font-family: 'Inter', sans-serif; font-weight: 600; margin-bottom: 20px; padding: 0;
+    display: flex; align-items: center; gap: 6px; transition: color 0.2s;
   }
-  .date-block { background: var(--white); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); margin-bottom: 14px; }
-  .date-header { background: var(--brown); color: var(--gold-pale); padding: 12px 18px; font-family: 'Playfair Display', serif; font-size: 15px; }
-  .date-people { padding: 14px 18px; display: flex; flex-wrap: wrap; gap: 8px; }
+  .back-btn:hover { color: var(--navy); }
+  .date-block { background: var(--card-bg); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow-sm); margin-bottom: 16px; border: 1px solid var(--border-color); }
+  .date-header { background: #f8fafc; color: var(--navy); padding: 14px 24px; font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 700; border-bottom: 1px solid var(--border-color); }
+  .date-people { padding: 18px 24px; display: flex; flex-wrap: wrap; gap: 10px; }
   .person-chip {
-    background: var(--warm); border: 1px solid #d9cfc0; border-radius: 20px;
-    padding: 5px 14px; font-size: 13px; color: var(--brown);
+    background: #f1f5f9; border: 1px solid var(--border-color); border-radius: 20px;
+    padding: 6px 16px; font-size: 14px; color: var(--navy-light); font-weight: 500; display: inline-flex; align-items: center; gap: 8px;
   }
-  .person-chip.swap-pending { background: #fef3d8; border-color: #e0b860; color: #8b5e0a; }
+  .person-chip.swap-pending { background: #fef9c3; border-color: #fef08a; color: #713f12; }
 
-  /* ── SWAPS ── */
+  /* ── SWAPS VIEWPORT ── */
   .swap-card {
-    background: var(--white); border-radius: 12px; padding: 20px; box-shadow: var(--shadow);
-    margin-bottom: 14px; border-left: 4px solid #d4820a;
+    background: var(--card-bg); border-radius: 12px; padding: 24px; box-shadow: var(--shadow-sm);
+    margin-bottom: 16px; border: 1px solid var(--border-color); border-left: 4px solid var(--gold);
   }
-  .swap-meta { font-size: 11px; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
-  .swap-desc { font-size: 14px; color: var(--brown); margin-bottom: 6px; }
-  .swap-reason { font-size: 12px; color: var(--muted); font-style: italic; margin-bottom: 14px; }
-  .swap-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  .swap-meta { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .swap-desc { font-size: 15px; color: var(--text-main); margin-bottom: 6px; line-height: 1.5; }
+  .swap-reason { font-size: 13px; color: var(--text-muted); font-style: italic; background: #f8fafc; padding: 8px 12px; border-radius: 6px; margin-bottom: 16px; border-left: 2px solid var(--border-color); }
+  .swap-actions { display: flex; gap: 12px; flex-wrap: wrap; }
   .btn-approve {
-    padding: 8px 20px; background: var(--success); color: var(--white); border: none;
-    border-radius: 7px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'Lato', sans-serif;
+    padding: 10px 22px; background: var(--success); color: #ffffff; border: none;
+    border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; transition: opacity 0.2s;
   }
+  .btn-approve:hover { opacity: 0.9; }
   .btn-decline {
-    padding: 8px 20px; background: var(--white); border: 1.5px solid var(--danger); color: var(--danger);
-    border-radius: 7px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'Lato', sans-serif;
+    padding: 10px 22px; background: #ffffff; border: 1.5px solid var(--danger); color: var(--danger);
+    border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s;
   }
+  .btn-decline:hover { background: #fef2f2; }
 
-  /* ── ADMIN ── */
-  .admin-section { margin-bottom: 32px; }
-  .section-title { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--brown); margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #ddd5c5; }
-  .admin-form { background: var(--white); border-radius: 12px; padding: 24px; box-shadow: var(--shadow); }
-  .form-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
-  .form-row select, .form-row input {
-    flex: 1; min-width: 140px; padding: 10px 12px; border: 1.5px solid #d9cfc0; border-radius: 7px;
-    font-family: 'Lato', sans-serif; font-size: 13px; color: var(--text); background: var(--white); outline: none;
+  /* ── CONSOLE SYSTEM ── */
+  .admin-section { margin-bottom: 40px; }
+  .section-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; color: var(--navy); margin-bottom: 18px; padding-bottom: 8px; border-bottom: 2px solid var(--border-color); }
+  .admin-form { background: var(--card-bg); border-radius: 12px; padding: 28px; box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); }
+  .form-row { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 16px; }
+  .form-row select {
+    flex: 1; min-width: 180px; padding: 12px 16px; border: 1.5px solid var(--border-color); border-radius: 8px;
+    font-family: 'Inter', sans-serif; font-size: 14px; color: var(--text-main); background: #ffffff; outline: none; transition: border-color 0.2s;
   }
-  .form-row select:focus, .form-row input:focus { border-color: var(--gold); }
+  .form-row select:focus { border-color: var(--gold); }
   .btn-add {
-    padding: 10px 24px; background: var(--gold); color: var(--white); border: none;
-    border-radius: 7px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'Lato', sans-serif;
-    white-space: nowrap;
+    padding: 12px 28px; background: var(--navy); color: #ffffff; border: none;
+    border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif;
+    white-space: nowrap; transition: background 0.2s;
   }
-  .btn-add:hover { background: var(--gold-light); }
-  .member-list { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+  .btn-add:hover { background: var(--navy-light); }
+  .member-list { display: flex; flex-direction: column; gap: 10px; }
   .member-row {
     display: flex; align-items: center; justify-content: space-between;
-    background: var(--warm); border-radius: 8px; padding: 10px 16px; font-size: 13px;
+    background: var(--card-bg); border-radius: 10px; padding: 14px 20px; font-size: 14px; border: 1px solid var(--border-color);
   }
-  .member-name { color: var(--brown); font-weight: 700; }
-  .member-role { color: var(--muted); font-size: 11px; }
+  .member-name { color: var(--text-main); font-weight: 600; }
+  .member-role { color: var(--text-muted); font-size: 12px; }
   .btn-make-admin {
-    padding: 4px 12px; background: transparent; border: 1px solid var(--gold); color: var(--gold);
-    border-radius: 5px; font-size: 11px; cursor: pointer; font-family: 'Lato', sans-serif; font-weight: 700;
+    padding: 6px 14px; background: #ffffff; border: 1.5px solid var(--border-color); color: var(--navy);
+    border-radius: 6px; font-size: 12px; cursor: pointer; font-family: 'Inter', sans-serif; font-weight: 600; transition: all 0.2s;
   }
+  .btn-make-admin:hover { border-color: var(--navy); background: #f8fafc; }
 
-  /* ── MODAL ── */
+  /* ── BOXING OVERLAYS ── */
   .modal-overlay {
-    position: fixed; inset: 0; background: rgba(44,31,20,0.6); z-index: 200;
-    display: flex; align-items: center; justify-content: center; padding: 20px;
+    position: fixed; inset: 0; background: rgba(15,23,42,0.6); z-index: 200;
+    display: flex; align-items: center; justify-content: center; padding: 24px; backdrop-filter: blur(4px);
   }
   .modal {
-    background: var(--cream); border-radius: 16px; padding: 32px 28px;
-    width: 100%; max-width: 420px; box-shadow: var(--shadow-lg);
+    background: var(--card-bg); border-radius: 16px; padding: 36px;
+    width: 100%; max-width: 460px; box-shadow: var(--shadow-lg);
   }
-  .modal-title { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--brown); margin-bottom: 6px; }
-  .modal-sub { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
-  .modal-field { margin-bottom: 16px; }
-  .modal-field label { display: block; font-size: 11px; font-weight: 700; color: var(--brown-mid); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
-  .modal-field select, .modal-field textarea, .modal-field input {
-    width: 100%; padding: 11px 13px; border: 1.5px solid #d9cfc0; border-radius: 7px;
-    font-family: 'Lato', sans-serif; font-size: 14px; color: var(--text); background: var(--white); outline: none;
+  .modal-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
+  .modal-sub { font-size: 14px; color: var(--text-muted); margin-bottom: 24px; }
+  .modal-field { margin-bottom: 20px; }
+  .modal-field label { display: block; font-size: 12px; font-weight: 600; color: var(--navy-light); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .modal-field select, .modal-field textarea {
+    width: 100%; padding: 12px 16px; border: 1.5px solid var(--border-color); border-radius: 8px;
+    font-family: 'Inter', sans-serif; font-size: 14px; color: var(--text-main); background: #ffffff; outline: none; transition: border-color 0.2s;
   }
   .modal-field select:focus, .modal-field textarea:focus { border-color: var(--gold); }
-  .modal-field textarea { resize: vertical; min-height: 80px; }
-  .modal-actions { display: flex; gap: 10px; margin-top: 4px; }
+  .modal-field textarea { resize: vertical; min-height: 90px; }
+  .modal-actions { display: flex; gap: 12px; margin-top: 8px; }
   .btn-secondary {
-    flex: 1; padding: 11px; background: transparent; border: 1.5px solid #d9cfc0;
-    color: var(--muted); border-radius: 7px; font-size: 13px; font-weight: 700; cursor: pointer;
-    font-family: 'Lato', sans-serif;
+    flex: 1; padding: 12px; background: transparent; border: 1.5px solid var(--border-color);
+    color: var(--text-muted); border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer;
+    font-family: 'Inter', sans-serif; transition: all 0.2s;
   }
+  .btn-secondary:hover { background: #f8fafc; color: var(--text-main); }
 
-  /* ── TOAST ── */
+  /* ── ALERTS ── */
   #toast {
-    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
-    background: var(--brown); color: var(--gold-pale); padding: 12px 24px; border-radius: 8px;
-    font-size: 13px; font-weight: 700; box-shadow: var(--shadow-lg); z-index: 300;
+    position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%);
+    background: var(--navy); color: #ffffff; padding: 14px 28px; border-radius: 8px;
+    font-size: 14px; font-weight: 600; box-shadow: var(--shadow-lg); z-index: 300;
     opacity: 0; transition: opacity 0.3s; pointer-events: none; white-space: nowrap;
   }
   #toast.show { opacity: 1; }
 
-  .empty { color: var(--muted); font-size: 14px; padding: 32px 0; text-align: center; }
-  .loading { color: var(--muted); font-size: 13px; padding: 20px 0; text-align: center; }
-  .badge-admin { background: var(--gold-pale); color: var(--gold); font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; letter-spacing: 0.5px; margin-left: 6px; }
+  .empty { color: var(--text-muted); font-size: 14px; padding: 40px 0; text-align: center; font-weight: 500; }
+  .loading { color: var(--text-muted); font-size: 14px; padding: 30px 0; text-align: center; font-weight: 500; }
+  .badge-admin { background: #f1f5f9; color: var(--navy); font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 12px; border: 1px solid var(--border-color); margin-left: 8px; }
 
-  @media(max-width: 600px) {
-    main { padding: 20px 16px; }
+  @media(max-width: 640px) {
+    main { padding: 24px 16px; }
     header { padding: 0 16px; }
-    .header-title { font-size: 14px; }
+    nav { padding: 0 16px; }
     .auth-card { padding: 32px 20px; }
     .slot-card { flex-direction: column; align-items: flex-start; }
+    .btn-swap, .btn-cancel { width: 100%; text-align: center; }
   }
 </style>
 </head>
@@ -269,25 +271,25 @@
 
 <div id="auth-screen">
   <div class="auth-card">
-    <div class="auth-cross">✝</div>
-    <div class="auth-title">Craigavon Baptist</div>
-    <div class="auth-sub">SUNDAY ROTA SYSTEM</div>
+    <div class="auth-header-text">
+      <div class="auth-title">Craigavon Baptist</div>
+      <div class="auth-sub">Sunday Rota Management</div>
+    </div>
     <div class="tab-row">
       <button class="tab-btn active" onclick="switchTab('login')">Sign In</button>
-      <button class="tab-btn" onclick="switchTab('signup')">Join</button>
+      <button class="tab-btn" onclick="switchTab('signup')">Join System</button>
     </div>
     <div id="auth-error" class="auth-error" style="display:none"></div>
     <div id="login-form">
-      <div class="field"><label>Email</label><input type="email" id="login-email" placeholder="your@email.com"/></div>
+      <div class="field"><label>Email Address</label><input type="email" id="login-email" placeholder="name@domain.com"/></div>
       <div class="field"><label>Password</label><input type="password" id="login-password" placeholder="••••••••"/></div>
       <button class="btn-primary" id="login-btn" onclick="signIn()">Sign In</button>
     </div>
     <div id="signup-form" style="display:none">
-      <div class="field"><label>Full Name</label><input type="text" id="signup-name" placeholder="Your name"/></div>
-      <div class="field"><label>Email</label><input type="email" id="signup-email" placeholder="your@email.com"/></div>
-      <div class="field"><label>Password</label><input type="password" id="signup-password" placeholder="Min 6 characters"/></div>
-      <div class="field"><label>Church Join Key</label><input type="text" id="signup-key" placeholder="Enter church password"/></div>
-      <button class="btn-primary" id="signup-btn" onclick="signUp()">Create Account</button>
+      <div class="field"><label>Full Name</label><input type="text" id="signup-name" placeholder="John Smith"/></div>
+      <div class="field"><label>Email Address</label><input type="email" id="signup-email" placeholder="name@domain.com"/></div>
+      <div class="field"><label>Password</label><input type="password" id="signup-password" placeholder="Minimum 6 parameters"/></div>
+      <button class="btn-primary" id="signup-btn" onclick="signUp()">Create Secure Profile</button>
     </div>
   </div>
 </div>
@@ -295,36 +297,35 @@
 <div id="app" style="display:none;flex-direction:column;">
   <header>
     <div class="header-left">
-      <span class="header-cross">✝</span>
-      <span class="header-title">Craigavon Baptist Rotas</span>
+      <span class="header-title">Home | Craigavon Baptist Church <span>Rotas</span></span>
     </div>
     <div class="header-right">
       <span class="user-pill" id="user-pill">...</span>
-      <button class="sign-out-btn" onclick="signOut()">Sign out</button>
+      <button class="sign-out-btn" onclick="signOut()">Sign Out</button>
     </div>
   </header>
   <nav id="main-nav">
-    <button class="nav-item active" onclick="showPage('my-slots')">My Slots</button>
-    <button class="nav-item" onclick="showPage('all-rotas')">All Rotas</button>
-    <button class="nav-item" onclick="showPage('swaps')">Swaps <span id="swap-badge"></span></button>
-    <button class="nav-item admin-only" onclick="showPage('admin')" style="display:none">Admin</button>
+    <button class="nav-item active" onclick="showPage('my-slots')">My Assignments</button>
+    <button class="nav-item" onclick="showPage('all-rotas')">All Schedules</button>
+    <button class="nav-item" onclick="showPage('swaps')">Trades & Swaps <span id="swap-badge"></span></button>
+    <button class="nav-item admin-only" onclick="showPage('admin')" style="display:none">Admin Console</button>
   </nav>
   <main>
 
     <div id="page-my-slots">
       <div class="page-title">My Upcoming Slots</div>
-      <div class="page-sub">Your rota assignments for the coming weeks.</div>
-      <div id="my-slots-list" class="slot-list"><div class="loading">Loading…</div></div>
+      <div class="page-sub">Your personal assignments profile for the upcoming services.</div>
+      <div id="my-slots-list" class="slot-list"><div class="loading">Fetching data rows…</div></div>
     </div>
 
     <div id="page-all-rotas" style="display:none">
       <div id="rota-overview">
-        <div class="page-title">All Rotas</div>
-        <div class="page-sub">Select a rota to view the full schedule.</div>
-        <div id="rota-cards" class="rota-grid"><div class="loading">Loading…</div></div>
+        <div class="page-title">Church Serving Rotas</div>
+        <div class="page-sub">Select an assignment group category to view total structural calendar parameters.</div>
+        <div id="rota-cards" class="rota-grid"><div class="loading">Loading tables…</div></div>
       </div>
       <div id="rota-detail" style="display:none">
-        <button class="back-btn" onclick="showRotaOverview()">← Back to all rotas</button>
+        <button class="back-btn" onclick="showRotaOverview()">← Back to categories list</button>
         <div class="page-title" id="rota-detail-title"></div>
         <div class="page-sub" id="rota-detail-sub"></div>
         <div id="rota-detail-dates"></div>
@@ -332,30 +333,30 @@
     </div>
 
     <div id="page-swaps" style="display:none">
-      <div class="page-title">Swap Requests</div>
-      <div class="page-sub" id="swap-sub">Review pending swap requests.</div>
-      <div id="swap-list"><div class="loading">Loading…</div></div>
+      <div class="page-title">Pending Swaps & Trades</div>
+      <div class="page-sub" id="swap-sub">Review incoming and outgoing schedule modification requests.</div>
+      <div id="swap-list"><div class="loading">Syncing parameters…</div></div>
     </div>
 
     <div id="page-admin" style="display:none">
-      <div class="page-title">Admin Panel</div>
-      <div class="page-sub">Manage slots and members.</div>
+      <div class="page-title">Admin Management Console</div>
+      <div class="page-sub">System engine adjustments for database rows and authorization structures.</div>
 
       <div class="admin-section">
-        <div class="section-title">Add a Rota Slot</div>
+        <div class="section-title">Schedule New Rota Assignment</div>
         <div class="admin-form">
           <div class="form-row">
-            <select id="admin-rota"><option value="">Select rota…</option></select>
-            <select id="admin-date"><option value="">Select date…</option></select>
-            <select id="admin-person"><option value="">Select person…</option></select>
-            <button class="btn-add" onclick="addSlot()">Add</button>
+            <select id="admin-rota"><option value="">Select rota team…</option></select>
+            <select id="admin-date"><option value="">Select service date…</option></select>
+            <select id="admin-person"><option value="">Select church member…</option></select>
+            <button class="btn-add" onclick="addSlot()">Deploy Slot</button>
           </div>
         </div>
       </div>
 
       <div class="admin-section">
-        <div class="section-title">Members</div>
-        <div id="member-list" class="member-list"><div class="loading">Loading…</div></div>
+        <div class="section-title">Congregation Database Profiles</div>
+        <div id="member-list" class="member-list"><div class="loading">Reading tables…</div></div>
       </div>
     </div>
 
@@ -364,19 +365,19 @@
 
 <div id="swap-modal" class="modal-overlay" style="display:none" onclick="closeModal(event)">
   <div class="modal">
-    <div class="modal-title">Request a Swap</div>
+    <div class="modal-title">Initiate Trade Request</div>
     <div class="modal-sub" id="modal-slot-info"></div>
     <div class="modal-field">
-      <label>Swap with</label>
-      <select id="modal-swap-person"><option value="">Choose a person…</option></select>
+      <label>Propose Trade With</label>
+      <select id="modal-swap-person"><option value="">Select congregation profile…</option></select>
     </div>
     <div class="modal-field">
-      <label>Reason <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
-      <textarea id="modal-swap-reason" placeholder="e.g. Away on holiday"></textarea>
+      <label>Reasoning Notes <span style="font-weight:400;text-transform:none;letter-spacing:0">(Optional information details)</span></label>
+      <textarea id="modal-swap-reason" placeholder="e.g. Out of town, family gathering..."></textarea>
     </div>
     <div class="modal-actions">
-      <button class="btn-primary" onclick="submitSwap()" style="flex:1">Send Request</button>
-      <button class="btn-secondary" onclick="document.getElementById('swap-modal').style.display='none'">Cancel</button>
+      <button class="btn-primary" onclick="submitSwap()" style="flex:1">Dispatch Proposal</button>
+      <button class="btn-secondary" onclick="document.getElementById('swap-modal').style.display='none'">Dismiss</button>
     </div>
   </div>
 </div>
@@ -395,7 +396,6 @@ let allRotas = [];
 let allDates = [];
 let swapSlotId = null;
 
-// ── AUTH ──
 function switchTab(tab) {
   document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', (tab==='login'&&i===0)||(tab==='signup'&&i===1)));
   document.getElementById('login-form').style.display = tab==='login'?'block':'none';
@@ -411,7 +411,7 @@ function showAuthError(msg) {
 async function signIn() {
   const email = document.getElementById('login-email').value.trim();
   const pass = document.getElementById('login-password').value;
-  if(!email||!pass) return showAuthError('Please fill in all fields.');
+  if(!email||!pass) return showAuthError('Please input credentials details completely.');
   document.getElementById('login-btn').disabled=true;
   const {error} = await sb.auth.signInWithPassword({email, password: pass});
   document.getElementById('login-btn').disabled=false;
@@ -422,22 +422,13 @@ async function signUp() {
   const name = document.getElementById('signup-name').value.trim();
   const email = document.getElementById('signup-email').value.trim();
   const pass = document.getElementById('signup-password').value;
-  const joinKey = document.getElementById('signup-key').value.trim(); // Grab key
-
-  if(!name||!email||!pass||!joinKey) return showAuthError('Please fill in all fields.');
-  if(pass.length<6) return showAuthError('Password must be at least 6 characters.');
-
-  // ── CHURCH GATEKEEPER CHECK ──
-  const CORRECT_KEY = "CraigavonBaptist2026";
-  if (joinKey !== CORRECT_KEY) {
-    return showAuthError('❌ Incorrect Church Join Key. Registration blocked.');
-  }
-
+  if(!name||!email||!pass) return showAuthError('Please complete all form values completely.');
+  if(pass.length<6) return showAuthError('Password credentials require a minimum parameter lengths of 6.');
   document.getElementById('signup-btn').disabled=true;
   const {error} = await sb.auth.signUp({email, password: pass, options:{data:{full_name:name}}});
   document.getElementById('signup-btn').disabled=false;
   if(error) return showAuthError(error.message);
-  showAuthError('✓ Account created! Check your email to confirm, then sign in.');
+  showAuthError('✓ Profile row configured! Confirm via email validation notice, then run Sign In.');
 }
 
 async function signOut() {
@@ -445,7 +436,6 @@ async function signOut() {
   location.reload();
 }
 
-// ── BOOT ──
 sb.auth.onAuthStateChange(async (event, session) => {
   if(session?.user) {
     currentUser = session.user;
@@ -481,10 +471,10 @@ async function boot() {
   loadSwapBadge();
 }
 
-// ── NAV ──
 function showPage(page) {
   ['my-slots','all-rotas','swaps','admin'].forEach(p => {
-    document.getElementById('page-'+p).style.display = p===page?'block':'none';
+    const el = document.getElementById('page-'+p);
+    if(el) el.style.display = p===page?'block':'none';
   });
   document.querySelectorAll('.nav-item').forEach((btn,i) => {
     btn.classList.toggle('active', ['my-slots','all-rotas','swaps','admin'][i]===page);
@@ -495,18 +485,17 @@ function showPage(page) {
   if(page==='admin') loadAdmin();
 }
 
-// ── MY SLOTS ──
 async function loadMySlots() {
   const el = document.getElementById('my-slots-list');
-  el.innerHTML='<div class="loading">Loading…</div>';
+  el.innerHTML='<div class="loading">Searching row logs…</div>';
   const {data} = await sb.from('rota_slots')
     .select('*, rotas(name), service_dates(date), swap_requests(*)')
     .eq('profile_id', currentUser.id)
     .order('service_dates(date)');
-  if(!data||data.length===0){el.innerHTML='<div class="empty">No upcoming slots assigned to you yet.</div>';return;}
+  if(!data||data.length===0){el.innerHTML='<div class="empty">No roster assignments listed for your identity logs yet.</div>';return;}
   const today = new Date().toISOString().split('T')[0];
   const upcoming = data.filter(s => s.service_dates?.date >= today);
-  if(!upcoming.length){el.innerHTML='<div class="empty">No upcoming slots.</div>';return;}
+  if(!upcoming.length){el.innerHTML='<div class="empty">No assignments pending on future dates.</div>';return;}
   el.innerHTML = upcoming.map(slot => {
     const pending = slot.swap_requests?.find(r=>r.status==='pending');
     const swapWith = pending ? allProfiles.find(p=>p.id===pending.requested_with)?.full_name : null;
@@ -514,27 +503,26 @@ async function loadMySlots() {
       <div class="slot-info">
         <div class="slot-rota">${slot.rotas?.name}</div>
         <div class="slot-date">${formatDate(slot.service_dates?.date)}</div>
-        ${pending?`<div class="slot-badge">Swap pending with ${swapWith||'someone'}</div>`:''}
+        ${pending?`<div class="slot-badge">Trade verification processing with ${swapWith||'Member'}</div>`:''}
       </div>
       ${!pending
-        ? `<button class="btn-swap" onclick="openSwapModal('${slot.id}','${slot.rotas?.name}','${slot.service_dates?.date}')">Request Swap</button>`
-        : `<button class="btn-cancel" onclick="cancelSwap('${pending.id}')">Cancel Request</button>`}
+        ? `<button class="btn-swap" onclick="openSwapModal('${slot.id}','${slot.rotas?.name}','${slot.service_dates?.date}')">Trade Position</button>`
+        : `<button class="btn-cancel" onclick="cancelSwap('${pending.id}')">Retract Trade</button>`}
     </div>`;
   }).join('');
 }
 
-// ── ALL ROTAS ──
 async function loadRotaOverview() {
   showRotaOverview();
   const el = document.getElementById('rota-cards');
-  el.innerHTML='<div class="loading">Loading…</div>';
+  el.innerHTML='<div class="loading">Querying table rows…</div>';
   const {data} = await sb.from('rota_slots').select('rota_id');
   const counts = {};
   (data||[]).forEach(s => counts[s.rota_id]=(counts[s.rota_id]||0)+1);
   el.innerHTML = allRotas.map(r => `
     <div class="rota-card" onclick="showRotaDetail('${r.id}','${r.name}')">
       <div class="rota-card-name">${r.name}</div>
-      <div class="rota-card-count">${counts[r.id]||0} assignments</div>
+      <div class="rota-card-count">${counts[r.id]||0} Listed Assignments</div>
     </div>`).join('');
 }
 
@@ -547,9 +535,9 @@ async function showRotaDetail(rotaId, rotaName) {
   document.getElementById('rota-overview').style.display='none';
   document.getElementById('rota-detail').style.display='block';
   document.getElementById('rota-detail-title').textContent = rotaName;
-  document.getElementById('rota-detail-sub').textContent = 'Full schedule for this rota.';
+  document.getElementById('rota-detail-sub').textContent = 'Full transactional structure parameters.';
   const el = document.getElementById('rota-detail-dates');
-  el.innerHTML='<div class="loading">Loading…</div>';
+  el.innerHTML='<div class="loading">Compiling structure displays…</div>';
   const {data} = await sb.from('rota_slots')
     .select('*, profiles(full_name), service_dates(date), swap_requests(status)')
     .eq('rota_id', rotaId)
@@ -567,43 +555,42 @@ async function showRotaDetail(rotaId, rotaName) {
         ${byDate[date].map(s => {
           const hasPending = s.swap_requests?.some(r=>r.status==='pending');
           return `<span class="person-chip ${hasPending?'swap-pending':''}">${s.profiles?.full_name}${hasPending?' ↔':''}
-          ${currentProfile?.is_admin ? `<button onclick="deleteSlot('${s.id}')" style="background:none;border:none;color:#c0a060;cursor:pointer;margin-left:4px;font-size:11px">✕</button>` : ''}</span>`;
+          ${currentProfile?.is_admin ? `<button onclick="deleteSlot('${s.id}')" style="background:none;border:none;color:var(--danger);cursor:pointer;margin-left:6px;font-size:12px;font-weight:700">✕</button>` : ''}</span>`;
         }).join('')}
       </div>
-    </div>`).join('') || '<div class="empty">No slots scheduled.</div>';
+    </div>`).join('') || '<div class="empty">No roster rows deployed for this category.</div>';
 }
 
-// ── SWAPS ──
 async function loadSwaps() {
   const el = document.getElementById('swap-list');
   const sub = document.getElementById('swap-sub');
-  el.innerHTML='<div class="loading">Loading…</div>';
+  el.innerHTML='<div class="loading">Calling server vectors…</div>';
   let query = sb.from('swap_requests')
     .select('*, rota_slots(*, rotas(name), service_dates(date)), profiles!swap_requests_requested_by_fkey(full_name)')
     .eq('status','pending')
     .order('created_at');
   if(!currentProfile?.is_admin) {
     query = query.or(`requested_by.eq.${currentUser.id},requested_with.eq.${currentUser.id}`);
-    sub.textContent = 'Your pending swap requests.';
+    sub.textContent = 'Your pending schedule trades modifications.';
   } else {
-    sub.textContent = 'All pending swap requests. Approve or decline below.';
+    sub.textContent = 'Roster alteration verification rows dashboard.';
   }
   const {data} = await query;
-  if(!data||!data.length){el.innerHTML='<div class="empty">No pending swap requests.</div>';return;}
+  if(!data||!data.length){el.innerHTML='<div class="empty">No active alteration swaps pending presently.</div>';return;}
   el.innerHTML = data.map(req => {
     const byName = req['profiles']?.full_name || req.requested_by;
-    const withName = allProfiles.find(p=>p.id===req.requested_with)?.full_name || 'someone';
+    const withName = allProfiles.find(p=>p.id===req.requested_with)?.full_name || 'Member';
     const rota = req.rota_slots?.rotas?.name;
     const date = formatDate(req.rota_slots?.service_dates?.date);
     return `<div class="swap-card">
       <div class="swap-meta">${rota} · ${date}</div>
-      <div class="swap-desc"><strong>${byName}</strong> wants to swap with <strong>${withName}</strong></div>
-      ${req.reason?`<div class="swap-reason">"${req.reason}"</div>`:'<div style="margin-bottom:14px"></div>'}
+      <div class="swap-desc"><strong>${byName}</strong> proposes switch row with <strong>${withName}</strong></div>
+      ${req.reason?`<div class="swap-reason">"${req.reason}"</div>`:'<div style="margin-bottom:12px"></div>'}
       <div class="swap-actions">
         ${currentProfile?.is_admin
-          ? `<button class="btn-approve" onclick="resolveSwap('${req.id}','${req.rota_slots?.id}','${req.requested_by}','${req.requested_with}','approved')">✓ Approve</button>
-             <button class="btn-decline" onclick="resolveSwap('${req.id}','${req.rota_slots?.id}','${req.requested_by}','${req.requested_with}','declined')">✗ Decline</button>`
-          : `<div style="font-size:12px;color:var(--muted)">Waiting for admin approval</div>`}
+          ? `<button class="btn-approve" onclick="resolveSwap('${req.id}','${req.rota_slots?.id}','${req.requested_by}','${req.requested_with}','approved')">Approve Change</button>
+             <button class="btn-decline" onclick="resolveSwap('${req.id}','${req.rota_slots?.id}','${req.requested_by}','${req.requested_with}','declined')">Decline</button>`
+          : `<div style="font-size:13px;color:var(--text-muted);font-weight:500">Awaiting clearance authorization review</div>`}
       </div>
     </div>`;
   }).join('');
@@ -614,12 +601,11 @@ async function loadSwapBadge() {
   document.getElementById('swap-badge').textContent = count ? `(${count})` : '';
 }
 
-// ── SWAP MODAL ──
 function openSwapModal(slotId, rotaName, date) {
   swapSlotId = slotId;
   document.getElementById('modal-slot-info').textContent = `${rotaName} · ${formatDate(date)}`;
   const sel = document.getElementById('modal-swap-person');
-  sel.innerHTML = '<option value="">Choose a person…</option>' +
+  sel.innerHTML = '<option value="">Select congregation profile…</option>' +
     allProfiles.filter(p=>p.id!==currentUser.id).map(p=>`<option value="${p.id}">${p.full_name}</option>`).join('');
   document.getElementById('modal-swap-reason').value='';
   document.getElementById('swap-modal').style.display='flex';
@@ -632,21 +618,21 @@ function closeModal(e) {
 async function submitSwap() {
   const withId = document.getElementById('modal-swap-person').value;
   const reason = document.getElementById('modal-swap-reason').value.trim();
-  if(!withId) return toast('Please select a person.');
+  if(!withId) return toast('Please designate an identity target.');
   const {error} = await sb.from('swap_requests').insert({
     slot_id: swapSlotId, requested_by: currentUser.id, requested_with: withId, reason: reason||null
   });
-  if(error) return toast('Error: '+error.message);
+  if(error) return toast('Error logs: '+error.message);
   document.getElementById('swap-modal').style.display='none';
-  toast('Swap request sent!');
+  toast('Trade proposed successfully.');
   loadMySlots();
   loadSwapBadge();
 }
 
 async function cancelSwap(reqId) {
   const {error} = await sb.from('swap_requests').delete().eq('id', reqId);
-  if(error) return toast('Error: '+error.message);
-  toast('Swap request cancelled.');
+  if(error) return toast('Error logs: '+error.message);
+  toast('Trade modification request retracted.');
   loadMySlots();
   loadSwapBadge();
 }
@@ -656,25 +642,24 @@ async function resolveSwap(reqId, slotId, fromId, toId, status) {
     await sb.from('rota_slots').update({profile_id: toId}).eq('id', slotId);
   }
   await sb.from('swap_requests').update({status}).eq('id', reqId);
-  toast(status==='approved'?'Swap approved!':'Swap declined.');
+  toast(status==='approved'?'Swap allocation updated!':'Swap alteration declined.');
   loadSwaps();
   loadSwapBadge();
 }
 
-// ── ADMIN ──
 async function loadAdmin() {
   const rotaSel = document.getElementById('admin-rota');
-  rotaSel.innerHTML = '<option value="">Select rota…</option>' + allRotas.map(r=>`<option value="${r.id}">${r.name}</option>`).join('');
+  rotaSel.innerHTML = '<option value="">Select rota team…</option>' + allRotas.map(r=>`<option value="${r.id}">${r.name}</option>`).join('');
   const dateSel = document.getElementById('admin-date');
-  dateSel.innerHTML = '<option value="">Select date…</option>' + allDates.map(d=>`<option value="${d.id}">${formatDate(d.date)}</option>`).join('');
+  dateSel.innerHTML = '<option value="">Select service date…</option>' + allDates.map(d=>`<option value="${d.id}">${formatDate(d.date)}</option>`).join('');
   const personSel = document.getElementById('admin-person');
-  personSel.innerHTML = '<option value="">Select person…</option>' + allProfiles.map(p=>`<option value="${p.id}">${p.full_name}</option>`).join('');
+  personSel.innerHTML = '<option value="">Select church member…</option>' + allProfiles.map(p=>`<option value="${p.id}">${p.full_name}</option>`).join('');
 
   const el = document.getElementById('member-list');
   el.innerHTML = allProfiles.map(p=>`
     <div class="member-row">
-      <div><span class="member-name">${p.full_name}</span>${p.is_admin?'<span class="badge-admin">ADMIN</span>':''}</div>
-      <div class="member-role">${!p.is_admin?`<button class="btn-make-admin" onclick="makeAdmin('${p.id}')">Make Admin</button>`:'Administrator'}</div>
+      <div><span class="member-name">${p.full_name}</span>${p.is_admin?'<span class="badge-admin">ADMIN CONTROL</span>':''}</div>
+      <div class="member-role">${!p.is_admin?`<button class="btn-make-admin" onclick="makeAdmin('${p.id}')">Grant Admin Privileges</button>`:'System Administrator'}</div>
     </div>`).join('');
 }
 
@@ -682,30 +667,29 @@ async function addSlot() {
   const rotaId = document.getElementById('admin-rota').value;
   const dateId = document.getElementById('admin-date').value;
   const profileId = document.getElementById('admin-person').value;
-  if(!rotaId||!dateId||!profileId) return toast('Please select all fields.');
+  if(!rotaId||!dateId||!profileId) return toast('Please establish complete assignment parameters.');
   const {error} = await sb.from('rota_slots').insert({rota_id:rotaId, service_date_id:dateId, profile_id:profileId});
-  if(error) return toast('Error: '+error.message);
-  toast('Slot added!');
+  if(error) return toast('Error logs: '+error.message);
+  toast(' Rota slot deployment successful.');
 }
 
 async function deleteSlot(slotId) {
-  if(!confirm('Remove this person from this slot?')) return;
+  if(!confirm('Exterminate selected member parameters from slot row?')) return;
   const {error} = await sb.from('rota_slots').delete().eq('id', slotId);
-  if(error) return toast('Error: '+error.message);
-  toast('Slot removed.');
+  if(error) return toast('Error logs: '+error.message);
+  toast('Slot identity references wiped.');
   loadRotaOverview();
 }
 
 async function makeAdmin(profileId) {
-  if(!confirm('Grant admin access to this person?')) return;
+  if(!confirm('Authorize complete administrative console management powers for this person?')) return;
   const {error} = await sb.from('profiles').update({is_admin:true}).eq('id', profileId);
-  if(error) return toast('Error: '+error.message);
+  if(error) return toast('Error logs: '+error.message);
   allProfiles = allProfiles.map(p=>p.id===profileId?{...p,is_admin:true}:p);
-  toast('Admin access granted.');
+  toast('System parameters authorized.');
   loadAdmin();
 }
 
-// ── HELPERS ──
 function formatDate(d) {
   if(!d) return '';
   return new Date(d+'T12:00:00').toLocaleDateString('en-GB', {weekday:'short', day:'numeric', month:'long', year:'numeric'});
