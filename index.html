@@ -8,14 +8,15 @@
   <script src="supabase.js"></script>
   <style>
     :root {
-      --bg-light: #f4f7f6; /* Clean background similar to main site sections */
+      --bg-light: #f4f7f6;
       --card-bg: #ffffff;
-      --cbc-navy: #2d3b45; /* Dark slate navy from official header text */
-      --cbc-blue: #5cb3e4; /* Vibrant light sky blue from official accents */
+      --cbc-navy: #2d3b45;
+      --cbc-blue: #5cb3e4;
       --text-main: #333333;
       --text-muted: #666666;
       --border-color: #e2e8f0;
       --danger: #d9534f;
+      --success-green: #2ecc71;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Inter', sans-serif; background: var(--bg-light); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; }
@@ -31,8 +32,9 @@
     .auth-title { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: var(--cbc-navy); }
     .field { margin-bottom: 20px; }
     .field label { display: block; font-size: 11px; font-weight: 700; color: var(--cbc-navy); text-transform: uppercase; margin-bottom: 8px; }
-    .field input { width: 100%; padding: 12px 16px; border: 1.5px solid var(--border-color); border-radius: 6px; font-size: 14px; transition: border-color 0.2s; }
-    .field input:focus { outline: none; border-color: var(--cbc-blue); }
+    .field input, .field select { width: 100%; padding: 12px 16px; border: 1.5px solid var(--border-color); border-radius: 6px; font-size: 14px; transition: border-color 0.2s; background: #fff; }
+    .field input:focus, .field select:focus { outline: none; border-color: var(--cbc-blue); }
+    
     .btn-primary { width: 100%; padding: 14px; background: var(--cbc-navy); color: #ffffff; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: background 0.2s; font-size: 14px; }
     .btn-primary:hover { background: #1a242c; }
     .auth-error { background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; padding: 12px 16px; font-size: 14px; color: var(--danger); margin-bottom: 20px; display: none; }
@@ -56,13 +58,23 @@
     .page-title { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 700; color: var(--cbc-navy); margin-bottom: 6px; }
     .page-sub { font-size: 14px; color: var(--text-muted); margin-bottom: 32px; }
 
+    /* Admin Control Block */
+    .admin-panel-box { background: #fff; border: 2px dashed var(--cbc-blue); border-radius: 8px; padding: 24px; margin-bottom: 40px; display: none; }
+    .admin-title { font-size: 18px; font-weight: 700; color: var(--cbc-navy); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+    .admin-form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) 150px; gap: 16px; align-items: flex-end; }
+    .admin-btn { padding: 12px; background: var(--cbc-blue); color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px; transition: background 0.2s; }
+    .admin-btn:hover { background: #4ca3d4; }
+
     .grid-three { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; }
-    .card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.03); }
+    .card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.03); position: relative; }
     .card-date { font-size: 18px; font-weight: 700; color: var(--cbc-navy); margin-bottom: 16px; border-bottom: 2px solid var(--bg-light); padding-bottom: 8px; }
-    .card-assignment { background: #fdfdfd; border: 1px solid var(--border-color); border-radius: 6px; padding: 12px 16px; margin-bottom: 12px; border-left: 4px solid var(--cbc-blue); }
-    .role-title { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; tracking-spacing: 0.03em; }
+    .card-assignment { background: #fdfdfd; border: 1px solid var(--border-color); border-radius: 6px; padding: 12px 16px; margin-bottom: 12px; border-left: 4px solid var(--cbc-blue); position: relative; }
+    .role-title { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
     .member-name { font-size: 15px; font-weight: 600; color: var(--cbc-navy); margin-top: 2px; }
     .empty-msg { color: var(--text-muted); font-size: 14px; font-style: italic; text-align: center; padding: 40px 0; background: #ffffff; border: 1px solid var(--border-color); border-radius: 8px; }
+    
+    .delete-slot-btn { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: transparent; border: none; color: #ccc; cursor: pointer; font-size: 16px; font-weight: bold; transition: color 0.2s; padding: 4px 8px; }
+    .delete-slot-btn:hover { color: var(--danger); }
   </style>
 </head>
 <body>
@@ -98,6 +110,25 @@
       <button id="nav-all-rotas" class="nav-item" onclick="switchTab('all-rotas')">All Schedules</button>
     </nav>
     <main>
+
+      <div id="admin-panel" class="admin-panel-box">
+        <div class="admin-title">⚡ Admin Management Panel (coopsben0)</div>
+        <div class="admin-form-row">
+          <div class="field" style="margin:0;">
+            <label>Select Date</label>
+            <select id="admin-date-select"></select>
+          </div>
+          <div class="field" style="margin:0;">
+            <label>Select Track / Team</label>
+            <select id="admin-rota-select"></select>
+          </div>
+          <div class="field" style="margin:0;">
+            <label>Member Name</label>
+            <input type="text" id="admin-name-input" placeholder="e.g. Pastor Tom"/>
+          </div>
+          <button class="admin-btn" onclick="addNewAssignment()">Add to Rota</button>
+        </div>
+      </div>
       
       <div id="tab-my-slots" class="page-section active">
         <div class="page-title">My Upcoming Slots</div>
@@ -119,7 +150,8 @@
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qend1anBhaGZqbWFlaXNuZmV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTA5NDMsImV4cCI6MjA5NDU4Njk0M30.VvszGR6MbUnBhKsmsXBikkrjok2-F1bnyS4zOwDX5hg';
     const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    let appState = { user: null, profile: null, rotas: [], dates: [], slots: [] };
+    let appState = { user: null, profile: null, profilesList: [], rotas: [], dates: [], slots: [] };
+    const ADMIN_EMAIL = 'coopsben0@gmail.com';
 
     async function signIn() {
       const email = document.getElementById('login-email').value.trim();
@@ -155,15 +187,16 @@
 
     async function loadDashboardData() {
       try {
-        // Fallback-protected parallel promise array to bypass empty tables safely
-        const [profileRes, rotaRes, dateRes, slotRes] = await Promise.all([
-          sb.from('profiles').select('*').eq('id', appState.user.id).maybeSingle().catch(e => ({data: null})),
-          sb.from('rotas').select('*').catch(e => ({data: []})),
-          sb.from('service_dates').select('*').catch(e => ({data: []})),
-          sb.from('rota_slots').select('*').catch(e => ({data: []}))
+        const [profileRes, allProfilesRes, rotaRes, dateRes, slotRes] = await Promise.all([
+          sb.from('profiles').select('*').eq('id', appState.user.id).maybeSingle().catch(() => ({data: null})),
+          sb.from('profiles').select('*').catch(() => ({data: []})),
+          sb.from('rotas').select('*').catch(() => ({data: []})),
+          sb.from('service_dates').select('*').catch(() => ({data: []})),
+          sb.from('rota_slots').select('*').catch(() => ({data: []}))
         ]);
 
         appState.profile = profileRes?.data || null;
+        appState.profilesList = allProfilesRes?.data || [];
         appState.rotas = rotaRes?.data || [];
         appState.dates = dateRes?.data || [];
         appState.slots = slotRes?.data || [];
@@ -173,15 +206,12 @@
         }
 
         renderDashboard();
+        setupAdminForm();
         
         document.getElementById('auth-screen').style.display = 'none';
         document.getElementById('app').style.display = 'flex';
       } catch (err) {
-        console.error("Critical dashboard loading failure bypassed: ", err);
-        // Force layout display even if data structure breaks
-        document.getElementById('auth-screen').style.display = 'none';
-        document.getElementById('app').style.display = 'flex';
-        renderEmptyStates();
+        console.error(err);
       } finally {
         showLoading(false);
       }
@@ -192,21 +222,87 @@
       renderAllSchedules();
     }
 
-    function renderEmptyStates() {
-      document.getElementById('my-slots-container').innerHTML = `<div class="empty-msg" style="grid-column: 1/-1;">Welcome! Database synchronization is live. No tasks are currently assigned to your account profile.</div>`;
-      document.getElementById('all-rotas-container').innerHTML = `<div class="empty-msg" style="grid-column: 1/-1;">No team tracks or schedules have been populated inside the database calendar system yet.</div>`;
+    function setupAdminForm() {
+      const adminBox = document.getElementById('admin-panel');
+      if (appState.user && appState.user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
+        adminBox.style.display = 'block';
+        
+        // Populate dates dropdown
+        const dateSelect = document.getElementById('admin-date-select');
+        dateSelect.innerHTML = appState.dates.map(d => {
+          const pretty = new Date(d.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+          return `<option value="${d.id}">${pretty}</option>`;
+        }).join('');
+
+        // Populate rotas dropdown
+        const rotaSelect = document.getElementById('admin-rota-select');
+        rotaSelect.innerHTML = appState.rotas.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
+      } else {
+        adminBox.style.display = 'none';
+      }
+    }
+
+    async function addNewAssignment() {
+      const dateId = document.getElementById('admin-date-select').value;
+      const rotaId = document.getElementById('admin-rota-select').value;
+      const nameInput = document.getElementById('admin-name-input').value.trim();
+
+      if (!nameInput) {
+        alert('Please enter a team member name.');
+        return;
+      }
+
+      showLoading(true);
+      const { error } = await sb.from('rota_slots').insert({
+        rota_id: rotaId,
+        service_date_id: dateId,
+        member_name_text: nameInput
+      });
+
+      if (error) {
+        alert('Database error: ' + error.message);
+        showLoading(false);
+      } else {
+        document.getElementById('admin-name-input').value = '';
+        // Refresh local view data smoothly
+        const { data: updatedSlots } = await sb.from('rota_slots').select('*');
+        appState.slots = updatedSlots || [];
+        renderDashboard();
+        showLoading(false);
+      }
+    }
+
+    async function deleteAssignment(slotId) {
+      if (!confirm("Are you sure you want to clear this specific assignment track from the calendar?")) return;
+      
+      showLoading(true);
+      const { error } = await sb.from('rota_slots').delete().eq('id', slotId);
+      
+      if (error) {
+        alert('Could not remove assignment: ' + error.message);
+        showLoading(false);
+      } else {
+        const { data: updatedSlots } = await sb.from('rota_slots').select('*');
+        appState.slots = updatedSlots || [];
+        renderDashboard();
+        showLoading(false);
+      }
     }
 
     function renderMySlots() {
       const container = document.getElementById('my-slots-container');
       if (!appState.profile || !appState.slots.length) {
-        renderEmptyStates();
+        container.innerHTML = `<div class="empty-msg" style="grid-column: 1/-1;">No assignments found for your profile.</div>`;
         return;
       }
 
-      const mySlots = appState.slots.filter(s => s.profile_id === appState.profile.id);
+      const mySlots = appState.slots.filter(s => 
+        s.profile_id === appState.profile.id || 
+        (s.member_name_text && s.member_name_text.toLowerCase() === appState.profile.full_name?.toLowerCase())
+      );
+
       if(mySlots.length === 0) {
-        container.innerHTML = `<div class="empty-msg" style="grid-column: 1/-1;">Welcome, ${appState.profile.full_name || 'User'}! You are not currently scheduled for any upcoming service assignments.</div>`;
+        container.innerHTML = `<div class="empty-msg" style="grid-column: 1/-1;">Welcome, ${appState.profile.full_name || 'User'}! You are not personally scheduled to serve this week. Check the 'All Schedules' tab to see who is!</div>`;
         return;
       }
 
@@ -219,22 +315,24 @@
           dateSlots.forEach(s => {
             const team = appState.rotas.find(r => r.id === s.rota_id);
             HTML += `<div class="card-assignment">
-              <div class="role-title">Serving Team</div>
+              <div class="role-title">Your Serving Assignment</div>
               <div class="member-name">${team ? team.name : 'Church Operations'}</div>
             </div>`;
           });
           HTML += `</div>`;
         }
       });
-      container.innerHTML = HTML || `<div class="empty-msg" style="grid-column: 1/-1;">No assignments found for upcoming dates.</div>`;
+      container.innerHTML = HTML;
     }
 
     function renderAllSchedules() {
       const container = document.getElementById('all-rotas-container');
       if(!appState.dates || !appState.dates.length) {
-        container.innerHTML = `<div class="empty-msg" style="grid-column: 1/-1;">No active schedules have been published yet.</div>`;
+        container.innerHTML = `<div class="empty-msg" style="grid-column: 1/-1;">No active calendars have been published.</div>`;
         return;
       }
+
+      const isUserAdmin = appState.user && appState.user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
 
       let HTML = '';
       appState.dates.forEach(d => {
@@ -243,13 +341,23 @@
 
         HTML += `<div class="card"><div class="card-date">${formattedDate}</div>`;
         if(serviceSlots.length === 0) {
-          HTML += `<div style="color:var(--text-muted); font-size:13px; font-style:italic; text-align:center; padding: 10px 0;">No personnel scheduled yet for this date.</div>`;
+          HTML += `<div style="color:var(--text-muted); font-size:13px; font-style:italic; text-align:center; padding: 10px 0;">No tracks configured for this date.</div>`;
         } else {
           serviceSlots.forEach(s => {
             const team = appState.rotas.find(r => r.id === s.rota_id);
+            
+            let nameToDisplay = 'Vacant Slot';
+            if (s.profile_id) {
+              const userProfile = appState.profilesList.find(p => p.id === s.profile_id);
+              if (userProfile) nameToDisplay = userProfile.full_name;
+            } else if (s.member_name_text) {
+              nameToDisplay = s.member_name_text;
+            }
+            
             HTML += `<div class="card-assignment" style="border-left-color: var(--cbc-navy);">
-              <div class="role-title">${team ? team.name : 'Operational Assignment'}</div>
-              <div class="member-name" style="font-size:13px; color:var(--text-muted);">Personnel Pending</div>
+              <div class="role-title">${team ? team.name : 'Operational Team'}</div>
+              <div class="member-name" style="font-size:15px; color:var(--cbc-navy); font-weight:600;">${nameToDisplay}</div>
+              ${isUserAdmin ? `<button class="delete-slot-btn" onclick="deleteAssignment('${s.id}')" title="Delete Assignment">×</button>` : ''}
             </div>`;
           });
         }
