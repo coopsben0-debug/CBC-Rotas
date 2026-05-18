@@ -206,7 +206,15 @@
       </div>
 
       <div id="admin-panel" class="admin-panel-box" style="display: none;">
-        <div class="admin-title">⚡ Admin Management Panel</div>
+        <div class="admin-title">⚡ Admin Panel — Master Rota Push Engine</div>
+        <div style="margin-bottom:16px; background:#f0fdf4; border:1px solid #bbf7d0; padding:16px; border-radius:8px;">
+          <p style="font-size:14px; font-weight:600; color:#166534; margin-bottom:10px;">📦 Push Extracted Church Rotas directly to Database Tables:</p>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="admin-btn" style="background:#16a34a;" onclick="pushFullStructuredRotas()">
+              🚀 Clear & Push Full Church Rotas Now
+            </button>
+          </div>
+        </div>
         <div class="admin-form-row">
           <div class="field" style="margin:0;"><label>Date</label><select id="admin-date-select"></select></div>
           <div class="field" style="margin:0;"><label>Team / Rota Category</label><select id="admin-rota-select"></select></div>
@@ -230,9 +238,7 @@
           <div class="page-sub">Comprehensive view of all upcoming church team operations.</div>
         </div>
         
-        <div class="filter-container" id="rota-filter-pills">
-          </div>
-
+        <div class="filter-container" id="rota-filter-pills"></div>
         <div id="all-rotas-container" class="grid-three"></div>
       </div>
 
@@ -251,11 +257,25 @@
     const SUPABASE_URL = 'https://ojzwujpahfjmaeisnfez.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qend1anBhaGZqbWFlaXNuZmV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTA5NDMsImV4cCI6MjA5NDU4Njk0M30.VvszGR6MbUnBhKsmsXBikkrjok2-F1bnyS4zOwDX5hg';
     
-    // The Dual Gateway Key Security Setup
     const SECRET_MEMBER_KEY = 'CraigavonBaptist2026';
     const SECRET_ADMIN_KEY = 'CBCAdmin2026!';
-    
     const BACKUP_ADMIN_EMAIL = 'coopsben0@gmail.com';
+
+    // Structured Church Groups mapped identically from your image charts
+    const STRUCTURED_ROTAS = {
+      musicTeams: [
+        { team: "Music Team 1", members: ["Amelie", "Iris Argue", "Adam Cooper", "Dad", "Henry", "John", "Kathryn Beggs", "Niall Keys", "Charlotte McCabe", "Mervyn Scott", "Mum", "Nathanael McCabe", "Sarah Pogue"] },
+        { team: "Music Team 2", members: ["Paul Savage", "Emma Savage", "Carole Mckenna", "Rosemary T", "Godiya Bwala", "andrewbwala", "Janet McAuley", "Neil", "Andrew Ferguson", "Andrew Pogue", "Julie", "Elizabeth", "Stephen McAuley"] },
+        { team: "Music Team 3", members: ["Robert", "Tbelle", "Adrian Tomlinson", "Amy Verner", "Glynis", "Harry McCrum", "Lesley Quinn", "Paul", "Ann", "Margaret Jackson", "Ruth Hamilton", "Wes", "Karen Scott", "Janet"] },
+        { team: "Music Team 4", members: ["Oluwatosin Ogunkayode St", "Philip Bain", "Michael Quinn", "Cyril Nelson"] }
+      ],
+      kidsTeams: [
+        { team: "Kids Team 1", members: ["Amelie", "Iris Argue", "Adam Cooper", "Dad", "Henry", "John", "Kathryn Beggs"] },
+        { team: "Kids Team 2", members: ["Niall Keys", "Charlotte McCabe", "Mervyn Scott", "Mum", "Nathanael McCabe", "Sarah Pogue"] },
+        { team: "Kids Team 3", members: ["Paul Savage", "Emma Savage", "Carole Mckenna", "Rosemary T", "Godiya Bwala", "andrewbwala", "Janet McAuley"] },
+        { team: "Kids Team 4", members: ["Neil", "Andrew Ferguson", "Andrew Pogue", "Julie", "Elizabeth", "Stephen McAuley"] }
+      ]
+    };
 
     let sb;
     let isSignUpMode = false;
@@ -269,7 +289,6 @@
         
         sb = targetLib.createClient(SUPABASE_URL, SUPABASE_KEY);
         
-        // 1. Initial manual session validation on window load
         const sessionCheck = await sb.auth.getSession();
         const currentSession = sessionCheck?.data?.session;
         
@@ -280,16 +299,13 @@
           showAuthScreen();
         }
 
-        // 2. Upgraded active listener context to circumvent tab-focus loading freeze 
         sb.auth.onAuthStateChange(async (event, session) => {
           if (session?.user) {
             appState.user = session.user;
-            
-            // Only fire load mapping if view parameters are empty or screen is actively locked
             if (document.getElementById('loading-screen').style.display !== 'none' && !appState.slots.length) {
               await loadDashboardData();
             } else {
-              showLoading(false); // Cleanly drop visual spinner mask during silent token updates
+              showLoading(false);
             }
           } else if (event === 'SIGNED_OUT' || !session) {
             showAuthScreen();
@@ -300,9 +316,84 @@
 
     function checkIsAdmin() {
       if (!appState.user) return false;
-      const databaseAdminFlag = appState.profile && appState.profile.is_admin === true;
-      const emailSafeguard = appState.user.email.toLowerCase() === BACKUP_ADMIN_EMAIL.toLowerCase();
-      return databaseAdminFlag || emailSafeguard;
+      return (appState.profile && appState.profile.is_admin === true) || appState.user.email.toLowerCase() === BACKUP_ADMIN_EMAIL.toLowerCase();
+    }
+
+    // PUSH CONTROLLER FUNCTION - Populates scheduling tables properly across the calendar weeks
+    async function pushFullStructuredRotas() {
+      if (!appState.dates.length || !appState.rotas.length) {
+        alert("Database dates or tracking tables have not loaded yet.");
+        return;
+      }
+      if (!confirm("Are you sure you want to push the full rota? This will clear out old database slots and seed fresh schedules for all calendar Sundays!")) return;
+
+      showLoading(true);
+      try {
+        // Clear out legacy records
+        await sb.from('rota_slots').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+
+        const musicRotaId = appState.rotas.find(r => r.name.toLowerCase().includes('music'))?.id || appState.rotas[0].id;
+        const kidsRotaId = appState.rotas.find(r => r.name.toLowerCase().includes('kids'))?.id || appState.rotas[1]?.id || appState.rotas[0].id;
+
+        let payload = [];
+
+        // Loop through all dates setup in your database tables
+        appState.dates.forEach((dateObj, dateIndex) => {
+          // Dynamic team rotations across matching calendar days
+          const musicTeamIndex = dateIndex % STRUCTURED_ROTAS.musicTeams.length;
+          const kidsTeamIndex = dateIndex % STRUCTURED_ROTAS.kidsTeams.length;
+
+          const selectedMusicTeam = STRUCTURED_ROTAS.musicTeams[musicTeamIndex];
+          const selectedKidsTeam = STRUCTURED_ROTAS.kidsTeams[kidsTeamIndex];
+
+          // Push Music Group details onto this specific Sunday date
+          selectedMusicTeam.members.forEach((memberName, idx) => {
+            let role = "Vocalist / Singer";
+            if (idx === 0) role = "Worship Leader";
+            else if (idx === 1) role = "Pianist";
+            else if (idx === 2) role = "Acoustic Guitar";
+            else if (idx === 3) role = "Drums / Percussion";
+
+            payload.push({
+              rota_id: musicRotaId,
+              service_date_id: dateObj.id,
+              role_title: `${role} (${selectedMusicTeam.team})`,
+              member_name_text: memberName,
+              status: 'normal'
+            });
+          });
+
+          // Push Kids Ministry details onto this specific Sunday date
+          selectedKidsTeam.members.forEach((memberName, idx) => {
+            let role = "Creche / Kids Worker";
+            if (idx === 0) role = "Team Supervisor";
+            else if (idx === 1) role = "Lesson Coordinator";
+
+            payload.push({
+              rota_id: kidsRotaId,
+              service_date_id: dateObj.id,
+              role_title: `${role} (${selectedKidsTeam.team})`,
+              member_name_text: memberName,
+              status: 'normal'
+            });
+          });
+        });
+
+        // Batch upload straight into live storage tables
+        const { error } = await sb.from('rota_slots').insert(payload);
+        if (error) throw error;
+
+        alert(`Successfully generated and pushed ${payload.length} assigned positions directly to your live database!`);
+        
+        // Refresh local cache view
+        const { data } = await sb.from('rota_slots').select('*');
+        appState.slots = data || [];
+        renderDashboard();
+      } catch (err) {
+        alert("Push process halted due to database error: " + err.message);
+      } finally {
+        showLoading(false);
+      }
     }
 
     function toggleAuthMode() {
@@ -318,36 +409,24 @@
     async function handleAuthAction() {
       const email = document.getElementById('login-email').value.trim();
       const pass = document.getElementById('login-password').value;
-      
       if (!email || !pass) { alert("Please complete form credentials."); return; }
       showLoading(true);
 
       if (isSignUpMode) {
         const fullName = document.getElementById('reg-name').value.trim();
         const accessKey = document.getElementById('reg-key').value.trim();
-        
         if (!fullName) { alert("Please enter your full name."); showLoading(false); return; }
         
-        // Evaluate Key Clearances
-        let grantAdminClearance = false;
-        if (accessKey === SECRET_ADMIN_KEY) {
-          grantAdminClearance = true;
-        } else if (accessKey !== SECRET_MEMBER_KEY) {
-          alert("Invalid Church Key. Registration blocked.");
-          showLoading(false);
-          return;
-        }
+        let grantAdmin = false;
+        if (accessKey === SECRET_ADMIN_KEY) grantAdmin = true;
+        else if (accessKey !== SECRET_MEMBER_KEY) { alert("Invalid Key."); showLoading(false); return; }
 
         const { data: authData, error: signUpErr } = await sb.auth.signUp({ email, password: pass });
-        if (signUpErr) { alert("Registration issue: " + signUpErr.message); showLoading(false); return; }
+        if (signUpErr) { alert(signUpErr.message); showLoading(false); return; }
 
         if (authData?.user) {
-          await sb.from('profiles').insert({ 
-            id: authData.user.id, 
-            full_name: fullName,
-            is_admin: grantAdminClearance 
-          });
-          alert(grantAdminClearance ? "Admin Account successfully registered! Logging in..." : "Member Account successfully registered! Logging in...");
+          await sb.from('profiles').insert({ id: authData.user.id, full_name: fullName, is_admin: grantAdmin });
+          alert("Account created!");
         }
       } else {
         const { error } = await sb.auth.signInWithPassword({ email, password: pass });
@@ -360,17 +439,9 @@
       try {
         document.getElementById('user-display-email').innerText = appState.user.email;
         
-        try {
-          const { data: profileData, error: profileErr } = await sb.from('profiles')
-            .select('*')
-            .eq('id', appState.user.id)
-            .maybeSingle();
-            
-          appState.profile = profileData || null;
-          document.getElementById('user-display-name').innerText = appState.profile?.full_name || "Church Member";
-        } catch (e) { 
-          document.getElementById('user-display-name').innerText = "Church Member"; 
-        }
+        const { data: pData } = await sb.from('profiles').select('*').eq('id', appState.user.id).maybeSingle();
+        appState.profile = pData || null;
+        document.getElementById('user-display-name').innerText = appState.profile?.full_name || "Church Member";
 
         const badgeEl = document.getElementById('user-clearance-badge');
         if (checkIsAdmin()) {
@@ -411,9 +482,7 @@
 
     function showError(msg) {
       document.querySelector('.spinner').style.display = 'none';
-      const textDiv = document.getElementById('loading-text');
-      textDiv.style.color = 'var(--danger)';
-      textDiv.innerHTML = `⚠️ Pipeline Blocked!<br/><br/><span style="font-family:monospace; font-size:12px; background:#fff0f0; padding:10px; border:1px solid var(--danger); display:block; border-radius:4px; text-align:left;">${msg}</span>`;
+      document.getElementById('loading-text').innerHTML = `⚠️ Pipeline Blocked!<br/><br/><span style="font-family:monospace; font-size:12px; background:#fff0f0; padding:10px; border:1px solid var(--danger); display:block; border-radius:4px;">${msg}</span>`;
     }
 
     function getTeamBadgeClass(teamName) {
@@ -426,18 +495,13 @@
     function buildFilterPills() {
       const container = document.getElementById('rota-filter-pills');
       let html = `<button class="filter-btn ${selectedRotaFilter === 'all' ? 'active' : ''}" onclick="setRotaFilter('all')">All Rotas</button>`;
-      
       appState.rotas.forEach(r => {
         html += `<button class="filter-btn ${selectedRotaFilter === r.id ? 'active' : ''}" onclick="setRotaFilter('${r.id}')">${r.name}</button>`;
       });
       container.innerHTML = html;
     }
 
-    function setRotaFilter(filterValue) {
-      selectedRotaFilter = filterValue;
-      buildFilterPills();
-      renderAllSchedules();
-    }
+    function setRotaFilter(v) { selectedRotaFilter = v; buildFilterPills(); renderAllSchedules(); }
 
     function renderDashboard() {
       renderMySlots();
@@ -446,30 +510,22 @@
       renderAdminNotifications();
     }
 
-    function isMemberAssignedToSlot(profileName, rotaText) {
-      if (!profileName || !rotaText) return false;
-      const cleanProfileName = profileName.toLowerCase().trim();
-      const cleanRotaText = rotaText.toLowerCase().trim();
-      if (cleanRotaText.includes(cleanProfileName) || cleanProfileName.includes(cleanRotaText)) return true;
-      const profileParts = cleanProfileName.split(/\s+/);
-      const rotaParts = cleanRotaText.split(/[\s&,]+/);
-      return profileParts.some(part => part.length > 2 && rotaParts.includes(part));
+    function isMemberAssignedToSlot(pName, rText) {
+      if (!pName || !rText) return false;
+      return rText.toLowerCase().includes(pName.toLowerCase().trim());
     }
 
     function checkDoubleBooking(slot, allSlots) {
       if (!slot.member_name_text || slot.member_name_text.toLowerCase() === 'unassigned') return false;
-      const concurrentSlots = allSlots.filter(s => s.service_date_id === slot.service_date_id && s.id !== slot.id);
-      return concurrentSlots.some(s => isMemberAssignedToSlot(slot.member_name_text, s.member_name_text));
+      return allSlots.some(s => s.service_date_id === slot.service_date_id && s.id !== slot.id && isMemberAssignedToSlot(slot.member_name_text, s.member_name_text));
     }
 
     function renderMySlots() {
       const container = document.getElementById('my-slots-container');
-      if (!appState.profile) { container.innerHTML = `<div class="empty-msg">Complete your registration to link schedules.</div>`; return; }
+      if (!appState.profile) { container.innerHTML = `<div class="empty-msg">Log in to link schedules.</div>`; return; }
       
-      const myName = appState.profile.full_name;
-      const mySlots = appState.slots.filter(s => isMemberAssignedToSlot(myName, s.member_name_text));
-      
-      if (!mySlots.length) { container.innerHTML = `<div class="empty-msg">Welcome, ${appState.profile.full_name}! You don't have any slots assigned to you right now.</div>`; return; }
+      const mySlots = appState.slots.filter(s => isMemberAssignedToSlot(appState.profile.full_name, s.member_name_text));
+      if (!mySlots.length) { container.innerHTML = `<div class="empty-msg">Welcome, ${appState.profile.full_name}! You have no assigned duties right now.</div>`; return; }
       
       let HTML = '';
       appState.dates.forEach(d => {
@@ -478,19 +534,17 @@
           HTML += `<div class="card"><div class="card-date">${new Date(d.date).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' })}</div>`;
           dSlots.forEach(s => {
             const team = appState.rotas.find(r => r.id === s.rota_id);
-            const isSeekingCover = s.status === 'seeking_cover';
-            const isDoubleBooked = checkDoubleBooking(s, appState.slots);
+            const isSeeking = s.status === 'seeking_cover';
+            const isDouble = checkDoubleBooking(s, appState.slots);
 
             HTML += `
-              <div class="card-assignment ${isDoubleBooked ? 'double-booked' : ''}">
+              <div class="card-assignment ${isDouble ? 'double-booked' : ''}">
                 <span class="team-badge ${getTeamBadgeClass(team?.name)}">${team ? team.name : 'Serving Team'}</span>
                 <div class="role-title">${s.role_title}</div>
                 <div class="member-name" style="opacity: 0.6;">You are Assigned (${s.member_name_text})</div>
-                ${isDoubleBooked ? `<span class="double-book-alert">⚠️ Double Booked on this Date!</span>` : ''}
-                ${isSeekingCover ? `<span class="status-banner status-seeking">Cover Requested</span>` : ''}
-                
+                ${isDouble ? `<span class="double-book-alert">⚠️ Double Booked!</span>` : ''}
                 <div class="slot-actions">
-                  ${!isSeekingCover ? `<button class="action-badge-btn btn-cover-req" onclick="requestCover('${s.id}')">Request Cover / Swap</button>` : '<span style="font-size:12px; color:var(--text-muted); font-weight: 500;">Swap Request Listed</span>'}
+                  ${!isSeeking ? `<button class="action-badge-btn btn-cover-req" onclick="requestCover('${s.id}')">Request Swap</button>` : '<span style="font-size:12px; color:var(--text-muted);">Swap Requested</span>'}
                 </div>
               </div>`;
           });
@@ -507,25 +561,25 @@
       
       appState.dates.forEach(d => {
         let dSlots = appState.slots.filter(s => s.service_date_id === d.id);
-        if (selectedRotaFilter !== 'all') { dSlots = dSlots.filter(s => s.rota_id === selectedRotaFilter); }
+        if (selectedRotaFilter !== 'all') dSlots = dSlots.filter(s => s.rota_id === selectedRotaFilter);
 
         if (dSlots.length > 0 || selectedRotaFilter === 'all') {
           HTML += `<div class="card"><div class="card-date">${new Date(d.date).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' })}</div>`;
-          if (!dSlots.length) { 
-            HTML += `<div class="empty-msg" style="padding:16px; border:none;">No roles populated for this view.</div>`; 
+          if (!dSlots.length) {
+            HTML += `<div class="empty-msg" style="padding:16px; border:none;">No entries.</div>`;
           } else {
             dSlots.forEach(s => {
               const team = appState.rotas.find(r => r.id === s.rota_id);
               const isSeeking = s.status === 'seeking_cover';
-              const isDoubleBooked = checkDoubleBooking(s, appState.slots);
+              const isDouble = checkDoubleBooking(s, appState.slots);
 
               HTML += `
-                <div class="card-assignment ${isDoubleBooked ? 'double-booked' : ''}" style="border-left: 4px solid ${isSeeking ? 'var(--warning)' : 'var(--sidebar-bg)'}">
+                <div class="card-assignment ${isDouble ? 'double-booked' : ''}" style="border-left: 4px solid ${isSeeking ? 'var(--warning)' : 'var(--sidebar-bg)'}">
                   <span class="team-badge ${getTeamBadgeClass(team?.name)}">${team ? team.name : 'Team'}</span>
                   <div class="role-title">${s.role_title}</div>
                   <div class="member-name">${s.member_name_text}</div>
-                  ${isDoubleBooked ? `<span class="double-book-alert">⚠️ Double Booked!</span>` : ''}
-                  ${isSeeking ? `<span class="status-banner status-seeking">⚠️ Needs Cover</span>` : ''}
+                  ${isDouble ? `<span class="double-book-alert">⚠️ Double Booked!</span>` : ''}
+                  ${isSeeking ? `<span class="status-banner status-seeking">⚠️ Cover Needed</span>` : ''}
                   ${isAdmin ? `<button class="delete-slot-btn" onclick="deleteAssignment('${s.id}')">×</button>` : ''}
                 </div>`;
             });
@@ -533,96 +587,66 @@
           HTML += `</div>`;
         }
       });
-      container.innerHTML = HTML ? HTML : `<div class="empty-msg">No entries found matching this rota.</div>`;
+      container.innerHTML = HTML || `<div class="empty-msg">No schedules found.</div>`;
     }
 
     function renderSwapBoard() {
       const container = document.getElementById('swap-board-container');
       const swapSlots = appState.slots.filter(s => s.status === 'seeking_cover');
-      
-      if (!swapSlots.length) {
-        container.innerHTML = `<div class="empty-msg">The swap board is clear! No one needs cover right now.</div>`;
-        return;
-      }
+      if (!swapSlots.length) { container.innerHTML = `<div class="empty-msg">The swap board is clear!</div>`; return; }
       
       let HTML = '';
       swapSlots.forEach(s => {
         const d = appState.dates.find(dt => dt.id === s.service_date_id);
         const team = appState.rotas.find(r => r.id === s.rota_id);
-        const dateStr = d ? new Date(d.date).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' }) : '---';
-        
         HTML += `
           <div class="card">
-            <div class="card-date">${dateStr}</div>
+            <div class="card-date">${d ? new Date(d.date).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' }) : '---'}</div>
             <div class="card-assignment" style="border-left: 4px solid var(--warning)">
               <span class="team-badge ${getTeamBadgeClass(team?.name)}">${team ? team.name : 'Team'}</span>
               <div class="role-title">${s.role_title}</div>
-              <div class="member-name" style="color: var(--text-muted); font-size:13px;">Assigned to: ${s.member_name_text}</div>
-              <span class="status-banner status-seeking" style="margin-bottom:10px;">Awaiting Swap</span>
-              
-              <div class="slot-actions" style="margin-top:10px;">
-                <button class="action-badge-btn btn-claim-swap" onclick="claimSwap('${s.id}')">Offer to Take Slot</button>
-              </div>
+              <div class="member-name" style="color: var(--text-muted); font-size:13px;">From: ${s.member_name_text}</div>
+              <div class="slot-actions" style="margin-top:10px;"><button class="action-badge-btn btn-claim-swap" onclick="claimSwap('${s.id}')">Take Slot</button></div>
             </div>
           </div>`;
       });
       container.innerHTML = HTML;
     }
 
-    async function requestCover(slotId) {
-      if (!confirm("Flag this slot as needing cover? This will push it out to the Marketplace Swap board.")) return;
+    async function requestCover(id) {
       showLoading(true);
-      await sb.from('rota_slots').update({ status: 'seeking_cover' }).eq('id', slotId);
-      const { data } = await sb.from('rota_slots').select('*');
-      appState.slots = data || [];
-      renderDashboard();
-      showLoading(false);
+      await sb.from('rota_slots').update({ status: 'seeking_cover' }).eq('id', id);
+      const { data } = await sb.from('rota_slots').select('*'); appState.slots = data || [];
+      renderDashboard(); showLoading(false);
     }
 
-    async function claimSwap(slotId) {
-      if (!appState.profile) { alert("Please login first to trade positions."); return; }
-      const targetSlot = appState.slots.find(s => s.id === slotId);
-      if (!confirm(`Would you like to take over this slot? This will assign your name ("${appState.profile.full_name}") to this role.`)) return;
-      
+    async function claimSwap(id) {
+      if (!appState.profile) { alert("Login first."); return; }
+      if (!confirm("Take over this slot?")) return;
       showLoading(true);
-      await sb.from('rota_slots').update({ member_name_text: appState.profile.full_name, status: 'normal' }).eq('id', slotId);
-      const { data } = await sb.from('rota_slots').select('*');
-      appState.slots = data || [];
-      renderDashboard();
-      showLoading(false);
-      alert("Success! You have taken over this role.");
+      await sb.from('rota_slots').update({ member_name_text: appState.profile.full_name, status: 'normal' }).eq('id', id);
+      const { data } = await sb.from('rota_slots').select('*'); appState.slots = data || [];
+      renderDashboard(); showLoading(false);
     }
 
     function renderAdminNotifications() {
       const notifyBox = document.getElementById('admin-notifications');
       const listEl = document.getElementById('notifications-list');
       if (!checkIsAdmin()) { notifyBox.style.display = 'none'; return; }
-      
-      const flaggedSlots = appState.slots.filter(s => s.status === 'seeking_cover');
-      if (!flaggedSlots.length) { notifyBox.style.display = 'none'; return; }
-      
+      const flagged = appState.slots.filter(s => s.status === 'seeking_cover');
+      if (!flagged.length) { notifyBox.style.display = 'none'; return; }
       notifyBox.style.display = 'block';
-      listEl.innerHTML = flaggedSlots.map(s => {
+      listEl.innerHTML = flagged.map(s => {
         const d = appState.dates.find(dt => dt.id === s.service_date_id);
-        const t = appState.rotas.find(rt => rt.id === s.rota_id);
-        const dateStr = d ? new Date(d.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '---';
-        return `
-          <div class="notification-item">
-            <div style="font-size:14px; color: var(--cbc-navy);">
-              <strong>${s.member_name_text}</strong> requests cover for <strong>${t?.name || 'Rota'} — ${s.role_title}</strong> on <strong>${dateStr}</strong>
-            </div>
-            <button class="action-badge-btn" style="background:var(--success); color:white;" onclick="resolveCover('${s.id}')">Mark Resolved</button>
-          </div>`;
+        return `<div class="notification-item"><div><strong>${s.member_name_text}</strong> needs cover on <strong>${d ? new Date(d.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '---'}</strong></div><button class="action-badge-btn" style="background:var(--success); color:white;" onclick="resolveCover('${s.id}')">Resolve</button></div>`;
       }).join('');
     }
 
-    async function resolveCover(slotId) {
+    async function resolveCover(id) {
       showLoading(true);
-      await sb.from('rota_slots').update({ status: 'normal' }).eq('id', slotId);
-      const { data } = await sb.from('rota_slots').select('*');
-      appState.slots = data || [];
-      renderDashboard();
-      showLoading(false);
+      await sb.from('rota_slots').update({ status: 'normal' }).eq('id', id);
+      const { data } = await sb.from('rota_slots').select('*'); appState.slots = data || [];
+      renderDashboard(); showLoading(false);
     }
 
     function setupAdminForm() {
@@ -631,45 +655,34 @@
         adminBox.style.display = 'block';
         document.getElementById('admin-date-select').innerHTML = appState.dates.map(d => `<option value="${d.id}">${new Date(d.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</option>`).join('');
         document.getElementById('admin-rota-select').innerHTML = appState.rotas.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
-      } else {
-        adminBox.style.display = 'none';
-      }
+      } else { adminBox.style.display = 'none'; }
     }
 
     async function addNewAssignment() {
-      const dateId = document.getElementById('admin-date-select').value;
-      const rotaId = document.getElementById('admin-rota-select').value;
-      const roleInput = document.getElementById('admin-role-input').value.trim();
-      const nameInput = document.getElementById('admin-name-input').value.trim();
-      if (!nameInput || !roleInput) { alert('Please complete form entries.'); return; }
+      const dId = document.getElementById('admin-date-select').value;
+      const rId = document.getElementById('admin-rota-select').value;
+      const role = document.getElementById('admin-role-input').value.trim();
+      const name = document.getElementById('admin-name-input').value.trim();
+      if (!name || !role) return;
       showLoading(true);
-      const { error } = await sb.from('rota_slots').insert({ rota_id: rotaId, service_date_id: dateId, role_title: roleInput, member_name_text: nameInput, status: 'normal' });
-      if (error) { alert(error.message); showLoading(false); } 
-      else {
-        document.getElementById('admin-name-input').value = '';
-        document.getElementById('admin-role-input').value = '';
-        const { data } = await sb.from('rota_slots').select('*');
-        appState.slots = data || [];
-        renderDashboard();
-        showLoading(false);
-      }
+      await sb.from('rota_slots').insert({ rota_id: rId, service_date_id: dId, role_title: role, member_name_text: name, status: 'normal' });
+      const { data } = await sb.from('rota_slots').select('*'); appState.slots = data || [];
+      renderDashboard(); showLoading(false);
     }
 
-    async function deleteAssignment(slotId) {
-      if (!confirm("Delete this role role permanently?")) return;
+    async function deleteAssignment(id) {
+      if (!confirm("Delete?")) return;
       showLoading(true);
-      await sb.from('rota_slots').delete().eq('id', slotId);
-      const { data } = await sb.from('rota_slots').select('*');
-      appState.slots = data || [];
-      renderDashboard();
-      showLoading(false);
+      await sb.from('rota_slots').delete().eq('id', id);
+      const { data } = await sb.from('rota_slots').select('*'); appState.slots = data || [];
+      renderDashboard(); showLoading(false);
     }
 
-    function switchTab(tabId) {
+    function switchTab(id) {
       document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
       document.querySelectorAll('.sidebar-nav-btn').forEach(n => n.classList.remove('active'));
-      document.getElementById(`tab-${tabId}`).classList.add('active');
-      document.getElementById(`nav-${tabId}`).classList.add('active');
+      document.getElementById(`tab-${id}`).classList.add('active');
+      document.getElementById(`nav-${id}`).classList.add('active');
     }
     function signOut() { sb.auth.signOut().then(() => { localStorage.clear(); location.reload(); }); }
     function showLoading(show) { document.getElementById('loading-screen').style.display = show ? 'flex' : 'none'; }
