@@ -140,7 +140,7 @@
       <h2 style="font-family:'Playfair Display',serif; color:var(--cbc-navy); margin-bottom:24px;">Multi-Rota Portal</h2>
       <div style="text-align:left; margin-bottom:14px;">
         <label style="font-size:12px; font-weight:700; color:var(--text-muted);">Email Address</label>
-        <input type="email" id="login-email" class="input-field" value="coopscolin0@gmail.com"/>
+        <input type="email" id="login-email" class="input-field" value="coopsben0@gmail.com"/>
       </div>
       <div style="text-align:left; margin-bottom:20px;">
         <label style="font-size:12px; font-weight:700; color:var(--text-muted);">Secure Password</label>
@@ -195,7 +195,7 @@
         <div class="page-header">
           <div>
             <h1 class="page-title">My Upcoming Schedule</h1>
-            <p style="font-size:13px; color:var(--text-muted); margin-top:4px;">Personal list of shifts assigned to you.</p>
+            <p style="font-size:13px; color:var(--text-muted); margin-top:4px;">Personal list of shifts assigned to you or test accounts.</p>
           </div>
         </div>
         <div id="my-events-grid" class="grid-three"></div>
@@ -205,7 +205,7 @@
         <div class="page-header">
           <div>
             <h1 class="page-title">Swap Invites For You</h1>
-            <p style="font-size:13px; color:var(--text-muted); margin-top:4px;">Accept or decline trade invitations directed to you specifically.</p>
+            <p style="font-size:13px; color:var(--text-muted); margin-top:4px;">Accept or decline trade invitations directed to your profile identities.</p>
           </div>
         </div>
         
@@ -273,10 +273,8 @@
       sound_desk: ["Oluwatosin Ogunkayode St", "Philip Bain", "Michael Quinn", "Cyril Nelson"]
     };
 
-    const EMAIL_MAPPINGS = {
-      "coopscolin0@gmail.com": "Dad",
-      "coopsben0@gmail.com": "System Admin"
-    };
+    // Shared environment mapping so Ben and Colin can test both profiles together seamlessly
+    const ALLOWED_TEST_IDENTITIES = ["dad", "adam cooper"];
 
     const MINISTRY_LABELS = {
       jr_sunday_school: { name: "Jr Sunday School", css: "jr_sunday_school" },
@@ -314,21 +312,18 @@
       if (error) alert(error.message); else location.reload();
     }
 
-    function getLoggedInMemberName() {
-      if (!appState.user) return "";
-      return EMAIL_MAPPINGS[appState.user.email.toLowerCase()] || appState.user.email;
-    }
-
     async function initDashboard() {
       document.getElementById('user-display-email').innerText = appState.user.email;
       const badgeBox = document.getElementById('user-role-badge');
       
-      if (appState.user.email === 'coopsben0@gmail.com') {
-        badgeBox.innerHTML = '<span class="badge role-admin">🛡️ Master Developer</span>';
+      if (appState.user.email.toLowerCase() === 'coopsben0@gmail.com') {
+        badgeBox.innerHTML = '<span class="badge role-admin">🛡️ Dev (Testing: Dad & Adam)</span>';
         document.getElementById('admin-panel').style.display = 'block';
         document.getElementById('admin-lock-btn').style.display = 'block';
+      } else if (appState.user.email.toLowerCase() === 'coopscolin0@gmail.com') {
+        badgeBox.innerHTML = '<span class="badge role-member">👤 Colin (Testing: Dad & Adam)</span>';
       } else {
-        badgeBox.innerHTML = `<span class="badge role-member">👤 Member: ${getLoggedInMemberName()}</span>`;
+        badgeBox.innerHTML = `<span class="badge role-member">👤 Member Terminal</span>`;
       }
 
       const [dRes, sRes, rRes] = await Promise.all([
@@ -463,16 +458,12 @@
       const targetDateObj = appState.dates.find(d => d.id === targetSlotObj.service_date_id);
       const formattedTargetDate = new Date(targetDateObj.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 
-      // Save standard packed plain text parameters in standard status column to avoid database caching crash limits
       const packedStatus = `swap_req::${outgoingPerson}::${formattedTargetDate} with ${incomingPerson}::${targetSlotId}`;
 
       document.getElementById('loading-text').innerText = "Filing swap request...";
       document.getElementById('loading-screen').style.display = 'flex';
 
-      const { error } = await sb.from('rota_slots').update({
-        status: packedStatus
-      }).eq('id', activeSlotId);
-
+      const { error } = await sb.from('rota_slots').update({ status: packedStatus }).eq('id', activeSlotId);
       document.getElementById('loading-screen').style.display = 'none';
 
       if (error) {
@@ -484,7 +475,7 @@
         renderGrid();
         renderMyEventsGrid();
         renderSwapsTable();
-        alert(`Request sent! ${incomingPerson} will now see an alert on their panel to accept or decline.`);
+        alert(`Request logged! Because you are testing with Admin/Colin, this alert is now fully visible under the Swaps panel.`);
       }
     }
 
@@ -519,7 +510,7 @@
       renderGrid();
       renderMyEventsGrid();
       renderSwapsTable();
-      alert("Swap processed successfully! The master schedules have updated.");
+      alert("Swap processed successfully! The master schedules have updated dynamically.");
     }
 
     async function peerRejectSwap(slotId) {
@@ -606,12 +597,17 @@
 
     function renderMyEventsGrid() {
       const container = document.getElementById('my-events-grid');
-      const myName = getLoggedInMemberName().toLowerCase();
       let html = '';
 
       appState.dates.forEach(d => {
         let slots = appState.slots.filter(s => s.service_date_id === d.id);
-        let mySlots = slots.filter(s => s.member_name_text && s.member_name_text.toLowerCase().includes(myName));
+        
+        // Show assignments if they contain either test profile identity
+        let mySlots = slots.filter(s => {
+          if (!s.member_name_text) return false;
+          const txt = s.member_name_text.toLowerCase();
+          return ALLOWED_TEST_IDENTITIES.some(id => txt.includes(id));
+        });
 
         if (mySlots.length) {
           html += `
@@ -636,14 +632,13 @@
         }
       });
 
-      container.innerHTML = html || `<div style="grid-column:1/-1; text-align:center; padding:40px; background:white; border-radius:12px; border:1px solid var(--border-color);">You have no upcoming assignments scheduled.</div>`;
+      container.innerHTML = html || `<div style="grid-column:1/-1; text-align:center; padding:40px; background:white; border-radius:12px; border:1px solid var(--border-color);">No scheduled assignments found for Adam Cooper or Dad.</div>`;
     }
 
     function renderSwapsTable() {
       const tbody = document.getElementById('swap-requests-table-body');
       let html = '';
       let actionRequiredCount = 0;
-      const myName = getLoggedInMemberName();
 
       appState.slots.forEach(s => {
         const isPending = s.status && s.status.startsWith('swap_req::');
@@ -654,10 +649,10 @@
           const descInfo = tokens[2]; // "Date with Worker"
           const targetSlotId = tokens[3];
 
-          const proposedWorker = descInfo.split(' with ')[1] || "";
+          const proposedWorker = (descInfo.split(' with ')[1] || "").toLowerCase();
           
-          // STRICT SECURITY CHECK: Show accept action ONLY to the intended target user to prevent chaos
-          if (proposedWorker.toLowerCase() === myName.toLowerCase()) {
+          // Since both active emails are testing together, let them see both Adam and Dad invites right here
+          if (ALLOWED_TEST_IDENTITIES.includes(proposedWorker)) {
             actionRequiredCount++;
             const config = MINISTRY_LABELS[s.role_title] || { name: s.role_title };
             const dateObj = appState.dates.find(d => d.id === s.service_date_id);
@@ -669,7 +664,7 @@
                 <td><b>${requesterName}</b> (on ${origDateStr})</td>
                 <td>Your shift on <b>${descInfo.split(' with ')[0]}</b></td>
                 <td>
-                  <button class="action-btn-sm" onclick="peerExecuteSwap('${s.id}', '${targetSlotId}', '${requesterName}', '${proposedWorker}')">Accept Trade</button>
+                  <button class="action-btn-sm" onclick="peerExecuteSwap('${s.id}', '${targetSlotId}', '${requesterName}', '${tokens[2].split(' with ')[1]}')">Accept Trade</button>
                   <button class="action-btn-danger" style="margin-left:4px;" onclick="peerRejectSwap('${s.id}')">Decline</button>
                 </td>
               </tr>
@@ -686,7 +681,7 @@
         badge.style.display = 'none';
       }
 
-      tbody.innerHTML = html || `<tr><td colspan="4" class="empty-msg" style="text-align:center; padding:40px;">🎉 No pending swap invitations require your attention right now.</td></tr>`;
+      tbody.innerHTML = html || `<tr><td colspan="4" class="empty-msg" style="text-align:center; padding:40px;">🎉 No pending swap invitations require attention right now. Initiate a swap targeting Dad or Adam Cooper to test!</td></tr>`;
     }
 
     async function pushEightCustomRotas() {
