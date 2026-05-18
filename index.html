@@ -117,6 +117,15 @@
     .modal-header { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--cbc-navy); margin-bottom: 12px; }
     .modal-body { font-size: 14px; color: var(--text-main); margin-bottom: 20px; line-height: 1.5; }
     .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
+    
+    .context-highlight-box {
+      background: #f8fafc;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      font-size: 13px;
+    }
   </style>
 </head>
 <body>
@@ -211,25 +220,27 @@
 
   <div id="member-swap-modal" class="modal-overlay">
     <div class="modal-card">
-      <div class="modal-header">Log Pre-Arranged Shift Swap</div>
+      <div class="modal-header">Log Pre-Arranged Shift Trade</div>
       <div class="modal-body">
-        <p style="margin-bottom:12px; font-size:13px; color:var(--text-muted);">
-          Use this form if you have already contacted another crew member and both parties have agreed to exchange shifts.
-        </p>
         
-        <div style="margin-bottom: 12px;">
-          <label style="font-size:11px; font-weight:700; color:var(--text-muted);">1. WHICH SINGULAR WORKER ARE YOU REPLACING?</label>
-          <select id="member-swap-outgoing-select" class="inline-select" style="margin-top:4px; padding:10px;"></select>
+        <div class="context-highlight-box">
+          📍 <b>Your Current Assigned Shift:</b><br>
+          <span id="context-origin-details" style="color:var(--cbc-teal); font-weight:700;">--</span>
+        </div>
+        
+        <div style="margin-bottom: 16px;">
+          <label style="font-size:11px; font-weight:700; color:var(--text-muted);">1. SELECT YOUR NAME (WHICH WORKER IS OUTGOING?)</label>
+          <select id="member-swap-outgoing-select" class="inline-select" style="margin-top:4px; padding:10px; font-size:14px;"></select>
         </div>
 
-        <div style="margin-bottom: 12px;">
-          <label style="font-size:11px; font-weight:700; color:var(--text-muted);">2. TARGET DATE YOU ARE SWAPPING WITH</label>
-          <select id="member-swap-target-date" class="inline-select" style="margin-top:4px; padding:10px;" onchange="populateTargetWorkersDropdown()"></select>
+        <div style="margin-bottom: 16px;">
+          <label style="font-size:11px; font-weight:700; color:var(--text-muted);">2. SELECT THE FUTURE DATE TO SWAP WITH (SAME MINISTRY ONLY)</label>
+          <select id="member-swap-target-date" class="inline-select" style="margin-top:4px; padding:10px; font-size:14px;" onchange="populateTargetWorkersDropdown()"></select>
         </div>
 
-        <div style="margin-bottom: 12px;">
-          <label style="font-size:11px; font-weight:700; color:var(--text-muted);">3. SPECIFIC PERSON ON THAT DATE TAKING YOUR PLACE</label>
-          <select id="member-swap-incoming-select" class="inline-select" style="margin-top:4px; padding:10px CONTAINER;"></select>
+        <div style="margin-bottom: 16px;">
+          <label style="font-size:11px; font-weight:700; color:var(--text-muted);">3. TARGET REPLACEMENT TEAM MEMBER</label>
+          <select id="member-swap-incoming-select" class="inline-select" style="margin-top:4px; padding:10px; font-size:14px;"></select>
         </div>
       </div>
       <div class="modal-actions">
@@ -379,24 +390,38 @@
     function openMemberSwapModal(originSlotId) {
       activeSlotId = originSlotId;
       const slotObj = appState.slots.find(s => s.id === originSlotId);
-      
+      const dateObj = appState.dates.find(d => d.id === slotObj.service_date_id);
+      const fDateOrig = new Date(dateObj.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+      const labelConfig = MINISTRY_LABELS[slotObj.role_title] || { name: slotObj.role_title };
+
+      // Set the context header info
+      document.getElementById('context-origin-details').innerText = `${fDateOrig} — ${labelConfig.name} (${slotObj.member_name_text || 'Nobody assigned'})`;
+
+      // 1. Outgoing Person select: reads only the people on THIS row
       let currentParts = slotObj.member_name_text ? slotObj.member_name_text.split(' & ') : [];
       let outgoingSelect = document.getElementById('member-swap-outgoing-select');
-      outgoingSelect.innerHTML = currentParts.map(p => `<option value="${p}">${p}</option>`).join('');
+      if(currentParts.length === 0 || (currentParts.length === 1 && currentParts[0] === "")) {
+        outgoingSelect.innerHTML = '<option value="">-- No origin workers assigned --</option>';
+      } else {
+        outgoingSelect.innerHTML = currentParts.map(p => `<option value="${p}">${p}</option>`).join('');
+      }
 
+      // 2. Target Date select: STAGE ONLY matching rows from the same specific role_title
       let targetDateSelect = document.getElementById('member-swap-target-date');
       let alternateSlots = appState.slots.filter(s => s.role_title === slotObj.role_title && s.id !== originSlotId);
       
-      let dateOptions = '<option value="">-- Choose Target Date --</option>';
+      let dateOptions = '<option value="">-- Choose Target Week --</option>';
       alternateSlots.forEach(as => {
         const dObj = appState.dates.find(d => d.id === as.service_date_id);
         if (dObj) {
           const fDate = new Date(dObj.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-          dateOptions += `<option value="${as.id}">${fDate} (Currently: ${as.member_name_text || 'Empty Slot'})</option>`;
+          dateOptions += `<option value="${as.id}">${fDate} (Current: ${as.member_name_text || 'Empty Slot'})</option>`;
         }
       });
       targetDateSelect.innerHTML = dateOptions;
-      document.getElementById('member-swap-incoming-select').innerHTML = '<option value="">-- Select Date First --</option>';
+      
+      // Clear out step 3 selector
+      document.getElementById('member-swap-incoming-select').innerHTML = '<option value="">-- Select Target Week First --</option>';
 
       document.getElementById('member-swap-modal').classList.add('active');
     }
@@ -406,14 +431,14 @@
       const incomingSelect = document.getElementById('member-swap-incoming-select');
       
       if (!selectedTargetSlotId) {
-        incomingSelect.innerHTML = '<option value="">-- Select Date First --</option>';
+        incomingSelect.innerHTML = '<option value="">-- Select Target Week First --</option>';
         return;
       }
 
       const targetSlotObj = appState.slots.find(s => s.id === selectedTargetSlotId);
       let parts = targetSlotObj.member_name_text ? targetSlotObj.member_name_text.split(' & ') : [];
       if(parts.length === 0 || (parts.length === 1 && parts[0] === "")) {
-         incomingSelect.innerHTML = '<option value="">-- No Workers Found on This Row --</option>';
+         incomingSelect.innerHTML = '<option value="">-- No Workers Found on target row --</option>';
       } else {
          incomingSelect.innerHTML = parts.map(p => `<option value="${p}">${p}</option>`).join('');
       }
