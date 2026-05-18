@@ -195,7 +195,7 @@
         <div class="page-header">
           <div>
             <h1 class="page-title">My Upcoming Schedule</h1>
-            <p style="font-size:13px; color:var(--text-muted); margin-top:4px;">Personal list of shifts assigned to you or test accounts.</p>
+            <p style="font-size:13px; color:var(--text-muted); margin-top:4px;">Personal list of shifts assigned to your account.</p>
           </div>
         </div>
         <div id="my-events-grid" class="grid-three"></div>
@@ -237,8 +237,8 @@
         </div>
         
         <div style="margin-bottom: 16px;">
-          <label style="font-size:11px; font-weight:700; color:var(--text-muted);">1. CONFIRM WHO YOU ARE</label>
-          <select id="member-swap-outgoing-select" class="inline-select" style="margin-top:4px; padding:10px; font-size:14px;"></select>
+          <label style="font-size:11px; font-weight:700; color:var(--text-muted);">1. LOGGED-IN IDENTITY VERIFICATION</label>
+          <input type="text" id="member-swap-outgoing-display" class="input-field" style="background:#f1f5f9; font-weight:700; color:var(--cbc-navy);" readonly />
         </div>
 
         <div style="margin-bottom: 16px;">
@@ -248,7 +248,7 @@
 
         <div style="margin-bottom: 16px;">
           <label style="font-size:11px; font-weight:700; color:var(--text-muted);">3. WHO ARE YOU REQUESTING TO TAKE YOUR PLACE?</label>
-          <select id="member-swap-incoming-select" class="inline-select" style="margin-top:4px; padding:10px; font-size:14px;"></select>
+          <select id="member-swap-incoming-select" class="inline-select" style="margin-top:4px; padding:10px; font-size:14px CONTAINER;"></select>
         </div>
       </div>
       <div class="modal-actions">
@@ -273,8 +273,11 @@
       sound_desk: ["Oluwatosin Ogunkayode St", "Philip Bain", "Michael Quinn", "Cyril Nelson"]
     };
 
-    // Shared environment mapping so Ben and Colin can test both profiles together seamlessly
-    const ALLOWED_TEST_IDENTITIES = ["dad", "adam cooper"];
+    // Concrete email mapping so Ben can never accidentally masquerade or trigger choices meant for Dad
+    const EMAIL_TO_NAME_MAP = {
+      "coopsben0@gmail.com": "Adam Cooper",
+      "coopscolin0@gmail.com": "Dad"
+    };
 
     const MINISTRY_LABELS = {
       jr_sunday_school: { name: "Jr Sunday School", css: "jr_sunday_school" },
@@ -312,18 +315,23 @@
       if (error) alert(error.message); else location.reload();
     }
 
+    function getLoggedInMemberName() {
+      if (!appState.user) return "";
+      return EMAIL_TO_NAME_MAP[appState.user.email.toLowerCase()] || "Guest";
+    }
+
     async function initDashboard() {
+      const userEmail = appState.user.email.toLowerCase();
       document.getElementById('user-display-email').innerText = appState.user.email;
       const badgeBox = document.getElementById('user-role-badge');
+      const resolvedName = getLoggedInMemberName();
       
-      if (appState.user.email.toLowerCase() === 'coopsben0@gmail.com') {
-        badgeBox.innerHTML = '<span class="badge role-admin">🛡️ Dev (Testing: Dad & Adam)</span>';
+      if (userEmail === 'coopsben0@gmail.com') {
+        badgeBox.innerHTML = `<span class="badge role-admin">🛡️ Admin Role (${resolvedName})</span>`;
         document.getElementById('admin-panel').style.display = 'block';
         document.getElementById('admin-lock-btn').style.display = 'block';
-      } else if (appState.user.email.toLowerCase() === 'coopscolin0@gmail.com') {
-        badgeBox.innerHTML = '<span class="badge role-member">👤 Colin (Testing: Dad & Adam)</span>';
       } else {
-        badgeBox.innerHTML = `<span class="badge role-member">👤 Member Terminal</span>`;
+        badgeBox.innerHTML = `<span class="badge role-member">👤 Profile: ${resolvedName}</span>`;
       }
 
       const [dRes, sRes, rRes] = await Promise.all([
@@ -393,16 +401,12 @@
       const dateObj = appState.dates.find(d => d.id === slotObj.service_date_id);
       const fDateOrig = new Date(dateObj.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
       const labelConfig = MINISTRY_LABELS[slotObj.role_title] || { name: slotObj.role_title };
+      const resolvedName = getLoggedInMemberName();
 
       document.getElementById('context-origin-details').innerText = `${fDateOrig} — ${labelConfig.name} (${slotObj.member_name_text || 'Nobody assigned'})`;
-
-      let currentParts = slotObj.member_name_text ? slotObj.member_name_text.split(' & ') : [];
-      let outgoingSelect = document.getElementById('member-swap-outgoing-select');
-      if(currentParts.length === 0 || (currentParts.length === 1 && currentParts[0] === "")) {
-        outgoingSelect.innerHTML = '<option value="">-- No origin workers assigned --</option>';
-      } else {
-        outgoingSelect.innerHTML = currentParts.map(p => `<option value="${p}">${p}</option>`).join('');
-      }
+      
+      // Auto lock the requester name to your active profile session
+      document.getElementById('member-swap-outgoing-display').value = resolvedName;
 
       let targetDateSelect = document.getElementById('member-swap-target-date');
       let alternateSlots = appState.slots.filter(s => s.role_title === slotObj.role_title && s.id !== originSlotId);
@@ -446,7 +450,7 @@
 
     async function submitMemberSwapRequest() {
       const targetSlotId = document.getElementById('member-swap-target-date').value;
-      const outgoingPerson = document.getElementById('member-swap-outgoing-select').value;
+      const outgoingPerson = document.getElementById('member-swap-outgoing-display').value;
       const incomingPerson = document.getElementById('member-swap-incoming-select').value;
 
       if (!targetSlotId || !outgoingPerson || !incomingPerson) {
@@ -475,7 +479,7 @@
         renderGrid();
         renderMyEventsGrid();
         renderSwapsTable();
-        alert(`Request logged! Because you are testing with Admin/Colin, this alert is now fully visible under the Swaps panel.`);
+        alert(`Request sent securely! Only ${incomingPerson} will see this pending swap action inside their portal layout.`);
       }
     }
 
@@ -510,7 +514,7 @@
       renderGrid();
       renderMyEventsGrid();
       renderSwapsTable();
-      alert("Swap processed successfully! The master schedules have updated dynamically.");
+      alert("Swap successful! Schedules rearranged dynamically.");
     }
 
     async function peerRejectSwap(slotId) {
@@ -598,15 +602,15 @@
     function renderMyEventsGrid() {
       const container = document.getElementById('my-events-grid');
       let html = '';
+      const resolvedName = getLoggedInMemberName().toLowerCase();
 
       appState.dates.forEach(d => {
         let slots = appState.slots.filter(s => s.service_date_id === d.id);
         
-        // Show assignments if they contain either test profile identity
+        // Strict mapping: displays only entries containing your explicitly mapped profile name
         let mySlots = slots.filter(s => {
           if (!s.member_name_text) return false;
-          const txt = s.member_name_text.toLowerCase();
-          return ALLOWED_TEST_IDENTITIES.some(id => txt.includes(id));
+          return s.member_name_text.toLowerCase().includes(resolvedName);
         });
 
         if (mySlots.length) {
@@ -632,13 +636,14 @@
         }
       });
 
-      container.innerHTML = html || `<div style="grid-column:1/-1; text-align:center; padding:40px; background:white; border-radius:12px; border:1px solid var(--border-color);">No scheduled assignments found for Adam Cooper or Dad.</div>`;
+      container.innerHTML = html || `<div style="grid-column:1/-1; text-align:center; padding:40px; background:white; border-radius:12px; border:1px solid var(--border-color);">You have no upcoming assignments scheduled under your current account profile.</div>`;
     }
 
     function renderSwapsTable() {
       const tbody = document.getElementById('swap-requests-table-body');
       let html = '';
       let actionRequiredCount = 0;
+      const myActiveName = getLoggedInMemberName().toLowerCase();
 
       appState.slots.forEach(s => {
         const isPending = s.status && s.status.startsWith('swap_req::');
@@ -651,8 +656,8 @@
 
           const proposedWorker = (descInfo.split(' with ')[1] || "").toLowerCase();
           
-          // Since both active emails are testing together, let them see both Adam and Dad invites right here
-          if (ALLOWED_TEST_IDENTITIES.includes(proposedWorker)) {
+          // STRICT FILTER: You ONLY see it if you are the one they explicitly asked to swap with
+          if (proposedWorker === myActiveName) {
             actionRequiredCount++;
             const config = MINISTRY_LABELS[s.role_title] || { name: s.role_title };
             const dateObj = appState.dates.find(d => d.id === s.service_date_id);
@@ -664,7 +669,7 @@
                 <td><b>${requesterName}</b> (on ${origDateStr})</td>
                 <td>Your shift on <b>${descInfo.split(' with ')[0]}</b></td>
                 <td>
-                  <button class="action-btn-sm" onclick="peerExecuteSwap('${s.id}', '${targetSlotId}', '${requesterName}', '${tokens[2].split(' with ')[1]}')">Accept Trade</button>
+                  <button class="action-btn-sm" onclick="peerExecuteSwap('${s.id}', '${targetSlotId}', '${requesterName}', '${descInfo.split(' with ')[1]}')">Accept Trade</button>
                   <button class="action-btn-danger" style="margin-left:4px;" onclick="peerRejectSwap('${s.id}')">Decline</button>
                 </td>
               </tr>
@@ -681,7 +686,7 @@
         badge.style.display = 'none';
       }
 
-      tbody.innerHTML = html || `<tr><td colspan="4" class="empty-msg" style="text-align:center; padding:40px;">🎉 No pending swap invitations require attention right now. Initiate a swap targeting Dad or Adam Cooper to test!</td></tr>`;
+      tbody.innerHTML = html || `<tr><td colspan="4" class="empty-msg" style="text-align:center; padding:40px;">🎉 No pending swap invitations require attention right now on this account.</td></tr>`;
     }
 
     async function pushEightCustomRotas() {
