@@ -74,10 +74,9 @@
     .card-assignment.sound_desk { border-left-color: #64748b; }
 
     .role-header-box { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
-    .role-title { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); tracking-spacing: 0.5px; }
+    .role-title { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; }
     .member-name { font-size: 15px; font-weight: 700; color: var(--cbc-navy); line-height: 1.4; }
     
-    /* Interactive Options and States */
     .inline-editor-box { display: none; margin-top: 10px; gap: 6px; grid-template-columns: 1fr 1fr; }
     body.admin-edit-active .inline-editor-box { display: grid; }
     body.admin-edit-active .member-name { display: none; }
@@ -100,9 +99,9 @@
     .badge.role-admin { background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; margin-top: 4px; }
     .badge.role-member { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; margin-top: 4px; }
 
-    .action-btn-sm { padding: 6px 14px; font-size: 12px; font-weight: 600; border-radius: 6px; border: none; cursor: pointer; background: var(--cbc-teal); color: white; transition: background 0.2s; }
+    .action-btn-sm { padding: 8px 14px; font-size: 12px; font-weight: 600; border-radius: 6px; border: none; cursor: pointer; background: var(--cbc-teal); color: white; transition: background 0.2s; }
     .action-btn-sm:hover { background: #287e7c; }
-    .action-btn-danger { background: #ef4444; color: white; padding: 6px 14px; font-size: 12px; font-weight: 600; border-radius: 6px; border: none; cursor: pointer; }
+    .action-btn-danger { background: #ef4444; color: white; padding: 8px 14px; font-size: 12px; font-weight: 600; border-radius: 6px; border: none; cursor: pointer; transition: background 0.2s; }
     .action-btn-danger:hover { background: #dc2626; }
 
     .admin-panel-box { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: var(--radius); padding: 26px; margin-bottom: 32px; box-shadow: var(--shadow-sm); }
@@ -111,6 +110,14 @@
     
     .user-profile-box { border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; margin-top: auto; font-size: 13px; color: #94a3b8; }
     .input-field { width: 100%; padding: 12px; margin-top: 6px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; }
+
+    /* Modal Styling for Approvals */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 10000; align-items: center; justify-content: center; }
+    .modal-overlay.active { display: flex; }
+    .modal-card { background: #fff; padding: 32px; border-radius: var(--radius); width: 100%; max-width: 480px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); }
+    .modal-header { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--cbc-navy); margin-bottom: 12px; }
+    .modal-body { font-size: 14px; color: var(--text-main); margin-bottom: 20px; line-height: 1.5; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
   </style>
 </head>
 <body>
@@ -158,8 +165,8 @@
       <div id="view-master" class="view-view active">
         <div id="admin-panel" class="admin-panel-box" style="display:none;">
           <h3 style="color:#166534; display:flex; align-items:center; gap:8px;">⚡ Global System Overrides</h3>
-          <p style="font-size:13px; color:#166534; margin-top:4px;">Deploys default baseline worker rotations across all dates. Warning: Running this clear action clears manual shifts.</p>
-          <button class="admin-btn" onclick="pushEightCustomRotas()">🚀 Regenerate Automated baseline Schedules</button>
+          <p style="font-size:13px; color:#166534; margin-top:4px;">Deploys default baseline worker rotations across all dates. Warning: Running this action resets manual edits.</p>
+          <button class="admin-btn" onclick="pushEightCustomRotas()">🚀 Regenerate Automated Baseline Schedules</button>
         </div>
 
         <div class="page-header">
@@ -180,7 +187,7 @@
         <div class="page-header">
           <div>
             <h1 class="page-title">Conflict Center & Swap Management</h1>
-            <p style="font-size:13px; color:var(--text-muted); margin-top:4px;">Review pending swap requests flag allocations marked by church staff members.</p>
+            <p style="font-size:13px; color:var(--text-muted); margin-top:4px;">Review pending swap requests flagged by church staff members.</p>
           </div>
         </div>
         
@@ -202,11 +209,35 @@
     </div>
   </div>
 
+  <div id="approval-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">Confirm Assignment Change</div>
+      <div class="modal-body">
+        <p>You are approving a shift change request for <b id="modal-dept-label">Department</b> on <b id="modal-date-label">Date</b>.</p>
+        <p style="margin-top: 10px; margin-bottom: 4px; font-weight:600; color:var(--text-muted);">Choose who will fulfill this schedule assignment:</p>
+        
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px;">
+          <div>
+            <label style="font-size:11px; font-weight:700; color:var(--text-muted);">Worker Position 1</label>
+            <select id="modal-select-1" class="inline-select" style="margin-top:4px; padding:10px;"></select>
+          </div>
+          <div>
+            <label style="font-size:11px; font-weight:700; color:var(--text-muted);">Worker Position 2</label>
+            <select id="modal-select-2" class="inline-select" style="margin-top:4px; padding:10px;"></select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="action-btn-danger" style="background:#e2e8f0; color:var(--cbc-navy);" onclick="closeApprovalModal()">Cancel</button>
+        <button class="action-btn-sm" onclick="submitApprovedSwap()">Confirm and Update Rota</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const SUPABASE_URL = 'https://ojzwujpahfjmaeisnfez.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qend1anBhaGZqbWFlaXNuZmV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTA5NDMsImV4cCI6MjA5NDU4Njk0M30.VvszGR6MbUnBhKsmsXBikkrjok2-F1bnyS4zOwDX5hg';
     
-    // Roster arrays compiled directly from your administration snapshots
     const MINISTRY_POOLS = {
       jr_sunday_school: ["Amelie", "Iris Argue", "Adam Cooper", "Dad"],
       sr_sunday_school: ["Henry", "John", "Kathryn Beggs", "Niall Keys"],
@@ -229,7 +260,7 @@
       sound_desk: { name: "Sound and Desk", css: "sound_desk" }
     };
 
-    let sb, appState = { user: null, dates: [], slots: [], rotas: [] }, currentFilter = 'all', isAdminMode = false;
+    let sb, appState = { user: null, dates: [], slots: [], rotas: [] }, currentFilter = 'all', isAdminMode = false, activeApprovalSlotId = null;
 
     window.addEventListener('load', async () => {
       try {
@@ -338,15 +369,83 @@
       }
     }
 
-    async function resolveSwapFlag(slotId, clearAction = false) {
-      const statusValue = clearAction ? 'normal' : 'normal';
-      const { error } = await sb.from('rota_slots').update({ status: statusValue }).eq('id', slotId);
+    // Opens the targeted modal form to select replacement workers explicitly
+    function openApprovalModal(slotId) {
+      activeApprovalSlotId = slotId;
+      const slotObj = appState.slots.find(s => s.id === slotId);
+      const dateObj = appState.dates.find(d => d.id === slotObj.service_date_id);
+      
+      const config = MINISTRY_LABELS[slotObj.role_title] || { name: slotObj.role_title };
+      const pool = MINISTRY_POOLS[slotObj.role_title] || [];
+      const formattedDate = new Date(dateObj.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+
+      document.getElementById('modal-dept-label').innerText = config.name;
+      document.getElementById('modal-date-label').innerText = formattedDate;
+
+      let currentParts = slotObj.member_name_text ? slotObj.member_name_text.split(' & ') : ["", ""];
+      const p1 = currentParts[0] || "";
+      const p2 = currentParts[1] || "";
+
+      let options1 = `<option value="">-- Vacant Position --</option>`;
+      let options2 = `<option value="">-- Vacant Position --</option>`;
+      
+      pool.forEach(m => {
+        options1 += `<option value="${m}" ${m === p1 ? 'selected' : ''}>${m}</option>`;
+        options2 += `<option value="${m}" ${m === p2 ? 'selected' : ''}>${m}</option>`;
+      });
+
+      document.getElementById('modal-select-1').innerHTML = options1;
+      document.getElementById('modal-select-2').innerHTML = options2;
+
+      document.getElementById('approval-modal').classList.add('active');
+    }
+
+    function closeApprovalModal() {
+      document.getElementById('approval-modal').classList.remove('active');
+      activeApprovalSlotId = null;
+    }
+
+    // Commits the finalized approved swap directly into your database 
+    async function submitApprovedSwap() {
+      if (!activeApprovalSlotId) return;
+      
+      const val1 = document.getElementById('modal-select-1').value;
+      const val2 = document.getElementById('modal-select-2').value;
+      const finalString = [val1, val2].filter(Boolean).join(' & ');
+
+      document.getElementById('loading-text').innerText = "Updating shift assignment...";
+      document.getElementById('loading-screen').style.display = 'flex';
+
+      const { error } = await sb.from('rota_slots').update({
+        member_name_text: finalString,
+        status: 'normal' // Reset state flag to complete the tracking loop
+      }).eq('id', activeApprovalSlotId);
+
+      document.getElementById('loading-screen').style.display = 'none';
+
+      if (error) {
+        alert("Error saving approved change: " + error.message);
+      } else {
+        const slotObj = appState.slots.find(s => s.id === activeApprovalSlotId);
+        if (slotObj) {
+          slotObj.member_name_text = finalString;
+          slotObj.status = 'normal';
+        }
+        closeApprovalModal();
+        renderGrid();
+        renderSwapsTable();
+        alert("Shift updated successfully!");
+      }
+    }
+
+    async function rejectSwapFlag(slotId) {
+      if (!confirm("Reject this swap request and keep the original assignment?")) return;
+      const { error } = await sb.from('rota_slots').update({ status: 'normal' }).eq('id', slotId);
       if (error) {
         alert(error.message);
       } else {
         const target = appState.slots.find(s => s.id === slotId);
-        if (target) target.status = statusValue;
-        alert(clearAction ? "Swap request cancelled cleanly." : "Assignment verified and locked.");
+        if (target) target.status = 'normal';
         renderGrid();
         renderSwapsTable();
       }
@@ -445,8 +544,8 @@
                 </td>
                 <td>
                   ${isPending && appState.user.email === 'coopsben0@gmail.com' ? 
-                    `<button class="action-btn-sm" onclick="resolveSwapFlag('${s.id}', false)">Approve & Close</button>
-                     <button class="action-btn-danger" style="margin-left:4px;" onclick="resolveSwapFlag('${s.id}', true)">Reject</button>` : 
+                    `<button class="action-btn-sm" onclick="openApprovalModal('${s.id}')">Approve & Close</button>
+                     <button class="action-btn-danger" style="margin-left:4px;" onclick="rejectSwapFlag('${s.id}')">Reject</button>` : 
                     `<button class="action-btn-sm" onclick="switchTab('master')">View Grid</button>`
                   }
                 </td>
