@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Craigavon Baptist Church — Multi-Rota Dashboard</title>
+  <title>Craigavon Baptist Church — Multi-Rota Terminal</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet"/>
   <script src="https://unpkg.com/@supabase/supabase-js@2.39.8/dist/umd/supabase.js"></script>
   <style>
@@ -19,6 +19,7 @@
       --text-muted: #64748b;
       --radius: 12px;
       --shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+      --green-accent: #16a34a;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
@@ -42,18 +43,21 @@
     .sidebar-nav-btn.active, .sidebar-nav-btn:hover { background: var(--sidebar-hover); color: #fff; }
 
     .viewport { flex: 1; padding: 40px; max-width: 1400px; margin: 0 auto; width: 100%; overflow-y: auto; }
-    .page-header { margin-bottom: 32px; }
+    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
     .page-title { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 700; color: var(--cbc-navy); }
     
+    .view-view { display: none; }
+    .view-view.active { display: block; }
+
     .filter-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
     .filter-btn { padding: 8px 16px; border-radius: 20px; background: #fff; border: 1.5px solid var(--border-color); font-size: 13px; font-weight: 600; cursor: pointer; }
     .filter-btn.active { background: var(--cbc-blue); color: #fff; border-color: var(--cbc-blue); }
 
     .grid-three { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 24px; }
-    .card { background: #fff; border: 1px solid var(--border-color); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); }
+    .card { background: #fff; border: 1px solid var(--border-color); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); position: relative; }
     .card-date { font-size: 18px; font-weight: 700; color: var(--cbc-navy); margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid var(--bg-main); }
     
-    .card-assignment { background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; padding: 12px 16px; margin-bottom: 10px; border-left: 4px solid var(--cbc-blue); }
+    .card-assignment { background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; padding: 12px 16px; margin-bottom: 10px; border-left: 4px solid var(--cbc-blue); transition: all 0.2s ease; }
     .card-assignment.jr_sunday_school { border-left-color: #ec4899; }
     .card-assignment.sr_sunday_school { border-left-color: #a855f7; }
     .card-assignment.worship { border-left-color: #0ea5e9; }
@@ -64,12 +68,29 @@
     .card-assignment.sound_desk { border-left-color: #64748b; }
 
     .role-title { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); }
-    .member-name { font-size: 15px; font-weight: 700; color: var(--cbc-navy); margin-top: 2px; }
+    .member-name { font-size: 15px; font-weight: 700; color: var(--cbc-navy); margin-top: 2px; display: block; }
+    
+    /* Interactive Editor Controls */
+    .inline-editor-box { display: none; margin-top: 8px; gap: 4px; grid-template-columns: 1fr 1fr; }
+    body.admin-edit-active .inline-editor-box { display: grid; }
+    body.admin-edit-active .member-name { display: none; }
+    .inline-select { width: 100%; padding: 6px; font-size: 12px; border-radius: 4px; border: 1px solid var(--border-color); background: #fff; font-weight: 600; color: var(--cbc-navy); }
 
+    .toggle-admin-mode-btn { padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; font-size: 14px; background: #e2e8f0; color: var(--cbc-navy); display: flex; align-items: center; gap: 8px; }
+    .toggle-admin-mode-btn.active { background: #ef4444; color: white; }
+
+    .table-container { width: 100%; border-collapse: collapse; background: #fff; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border-color); margin-top: 16px; }
+    .table-container th, .table-container td { padding: 14px 20px; text-align: left; border-bottom: 1px solid var(--border-color); }
+    .table-container th { background: #f8fafc; font-weight: 600; font-size: 13px; color: var(--text-muted); }
+    
+    .badge { padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; display: inline-block; }
+    .badge.pending { background: #fef3c7; color: #d97706; }
+    .badge.resolved { background: #dcfce7; color: #15803d; }
+    
+    .action-btn-sm { padding: 6px 12px; font-size: 12px; font-weight: 600; border-radius: 4px; border: none; cursor: pointer; background: var(--cbc-blue); color: white; }
     .admin-panel-box { background: #fff; border: 1px solid #bbf7d0; background: #f0fdf4; border-radius: var(--radius); padding: 24px; margin-bottom: 32px; }
-    .admin-btn { padding: 12px 24px; background: #16a34a; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 12px; }
+    .admin-btn { padding: 12px 24px; background: var(--green-accent); color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 12px; }
     .user-profile-box { border-top: 1px solid #1e293b; padding-top: 16px; margin-top: auto; font-size: 13px; color: #94a3b8; }
-    .empty-msg { font-size: 14px; color: var(--text-muted); font-style: italic; }
   </style>
 </head>
 <body>
@@ -92,7 +113,8 @@
     <sidebar>
       <div class="sidebar-brand">Craigavon Baptist<span>All-Ministry Terminal</span></div>
       <div class="nav-group">
-        <button class="sidebar-nav-btn active">🗓️ Master Rota Grid</button>
+        <button id="nav-master" class="sidebar-nav-btn active" onclick="switchTab('master')">🗓️ Master Rota Grid</button>
+        <button id="nav-swaps" class="sidebar-nav-btn" onclick="switchTab('swaps')">🔄 Swaps & Requests</button>
       </div>
       <div class="user-profile-box">
         <div id="user-display-email">---</div>
@@ -101,18 +123,46 @@
     </sidebar>
 
     <div class="viewport">
-      <div id="admin-panel" class="admin-panel-box" style="display:none;">
-        <h3 style="color:#166534;">⚡ Master Church Initialization Engine</h3>
-        <p style="font-size:13px; color:#166534; margin-top:4px;">This setup creates automated tracking rosters across all 8 custom structural request departments.</p>
-        <button class="admin-btn" onclick="pushEightCustomRotas()">🚀 Deploy 8 Separate Ministry Schedules</button>
+      
+      <div id="view-master" class="view-view active">
+        <div id="admin-panel" class="admin-panel-box" style="display:none;">
+          <h3 style="color:#166534;">⚡ Master Church Initialization Engine</h3>
+          <p style="font-size:13px; color:#166534; margin-top:4px;">Wipes the slate clean and deploys automated rotations based on structural team parameters.</p>
+          <button class="admin-btn" onclick="pushEightCustomRotas()">🚀 Deploy 8 Separate Ministry Schedules</button>
+        </div>
+
+        <div class="page-header">
+          <h1 class="page-title">Craigavon Baptist Church Master Schedules</h1>
+          <button id="admin-lock-btn" class="toggle-admin-mode-btn" onclick="toggleAdminEditMode()" style="display:none;">
+            🔓 Enable Live Editing
+          </button>
+        </div>
+
+        <div class="filter-container" id="category-filters"></div>
+        <div id="master-grid" class="grid-three"></div>
       </div>
 
-      <div class="page-header">
-        <h1 class="page-title">Craigavon Baptist Church Master Schedules</h1>
+      <div id="view-swaps" class="view-view">
+        <div class="page-header">
+          <h1 class="page-title">Swap Logs & Custom Overrides</h1>
+        </div>
+        <p style="color:var(--text-muted); margin-bottom:16px;">Track member availability notes or coordinate dates here. Toggle Live Editing on the Master Grid tab to make adjustments directly.</p>
+        
+        <table class="table-container">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Ministry Department</th>
+              <th>Current Assigned Staff</th>
+              <th>Status Track</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="swap-requests-table-body">
+            </tbody>
+        </table>
       </div>
 
-      <div class="filter-container" id="category-filters"></div>
-      <div id="master-grid" class="grid-three"></div>
     </div>
   </div>
 
@@ -143,7 +193,7 @@
       sound_desk: { name: "Sound and Desk", css: "sound_desk" }
     };
 
-    let sb, appState = { user: null, dates: [], slots: [], rotas: [] }, currentFilter = 'all';
+    let sb, appState = { user: null, dates: [], slots: [], rotas: [] }, currentFilter = 'all', isAdminMode = false;
 
     window.addEventListener('load', async () => {
       try {
@@ -170,7 +220,11 @@
 
     async function initDashboard() {
       document.getElementById('user-display-email').innerText = appState.user.email;
-      if (appState.user.email === 'coopsben0@gmail.com') document.getElementById('admin-panel').style.display = 'block';
+      
+      if (appState.user.email === 'coopsben0@gmail.com') {
+        document.getElementById('admin-panel').style.display = 'block';
+        document.getElementById('admin-lock-btn').style.display = 'block';
+      }
 
       const [dRes, sRes, rRes] = await Promise.all([
         sb.from('service_dates').select('*'),
@@ -185,57 +239,52 @@
 
       buildFilters();
       renderGrid();
+      renderSwapsTable();
       document.getElementById('loading-screen').style.display = 'none';
       document.getElementById('app').style.display = 'flex';
     }
 
-    async function pushEightCustomRotas() {
-      if (!confirm("Wipe existing data and generate fresh 8-team ministry rosters?")) return;
+    function switchTab(tabId) {
+      document.querySelectorAll('.view-view').forEach(v => v.classList.remove('active'));
+      document.querySelectorAll('.sidebar-nav-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('view-' + tabId).classList.add('active');
+      document.getElementById('nav-' + tabId).classList.add('active');
+    }
+
+    function toggleAdminEditMode() {
+      isAdminMode = !isAdminMode;
+      const btn = document.getElementById('admin-lock-btn');
+      if (isAdminMode) {
+        document.body.classList.add('admin-edit-active');
+        btn.innerText = "🔒 Save & Lock Changes";
+        btn.classList.add('active');
+      } else {
+        document.body.classList.remove('admin-edit-active');
+        btn.innerText = "🔓 Enable Live Editing";
+        btn.classList.remove('active');
+      }
+    }
+
+    async function handleInlineChange(slotId, partIndex, selectedName) {
+      const slotObj = appState.slots.find(s => s.id === slotId);
+      if (!slotObj) return;
+
+      let currentParts = slotObj.member_name_text ? slotObj.member_name_text.split(' & ') : ["", ""];
+      if (currentParts.length < 2) currentParts = [currentParts[0] || "", ""];
+
+      currentParts[partIndex] = selectedName;
+      const finalString = currentParts.filter(Boolean).join(' & ');
+
+      // Realtime update right back into your Supabase database table structure
+      const { error } = await sb.from('rota_slots').update({ member_name_text: finalString }).eq('id', slotId);
       
-      document.getElementById('loading-text').innerText = "Deploying ministry tables...";
-      document.getElementById('loading-screen').style.display = 'flex';
-
-      try {
-        // Clear old items cleanly
-        await sb.from('rota_slots').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-
-        // Dynamically find a valid rota entry from your database to satisfy the foreign key constraint
-        let sharedRotaId = appState.rotas[0]?.id;
-
-        // If your rotas table is entirely empty, we'll create a generic parent container row first
-        if (!sharedRotaId) {
-          const { data: newRota, error: rotaErr } = await sb.from('rotas').insert({ name: 'Master Church Schedule' }).select();
-          if (rotaErr) throw rotaErr;
-          sharedRotaId = newRota[0].id;
-        }
-
-        let payload = [];
-        
-        appState.dates.forEach((dateObj, dateIndex) => {
-          Object.keys(MINISTRY_POOLS).forEach(key => {
-            const pool = MINISTRY_POOLS[key];
-            const server1 = pool[(dateIndex * 2) % pool.length];
-            const server2 = pool[(dateIndex * 2 + 1) % pool.length];
-
-            payload.push({
-              rota_id: sharedRotaId, // Now perfectly satisfied!
-              service_date_id: dateObj.id,
-              role_title: key, 
-              member_name_text: `${server1} & ${server2}`,
-              status: 'normal'
-            });
-          });
-        });
-
-        const { error: insError } = await sb.from('rota_slots').insert(payload);
-        if (insError) throw insError;
-
-        alert("Successfully generated and deployed all 8 clean ministry lists!");
-        location.reload();
-
-      } catch (err) {
-        document.getElementById('loading-screen').style.display = 'none';
-        alert("Deployment Error: " + err.message);
+      if (error) {
+        alert("Database Error: " + error.message);
+      } else {
+        slotObj.member_name_text = finalString;
+        // Refresh local display elements cleanly
+        renderGrid();
+        renderSwapsTable();
       }
     }
 
@@ -269,17 +318,103 @@
           `;
           slots.forEach(s => {
             const config = MINISTRY_LABELS[s.role_title] || { name: s.role_title, css: 'default' };
+            const pool = MINISTRY_POOLS[s.role_title] || [];
+            
+            let parts = s.member_name_text ? s.member_name_text.split(' & ') : ["", ""];
+            const p1 = parts[0] || "";
+            const p2 = parts[1] || "";
+
+            // Dynamic safe option block generator matching congregation names cleanly
+            let selectOpt1 = `<option value="">-- Worker 1 --</option>`;
+            let selectOpt2 = `<option value="">-- Worker 2 --</option>`;
+            pool.forEach(member => {
+              selectOpt1 += `<option value="${member}" ${member === p1 ? 'selected' : ''}>${member}</option>`;
+              selectOpt2 += `<option value="${member}" ${member === p2 ? 'selected' : ''}>${member}</option>`;
+            });
+
             html += `
               <div class="card-assignment ${config.css}">
                 <div class="role-title">${config.name}</div>
-                <div class="member-name">${s.member_name_text || 'Unassigned Slot'}</div>
+                <span class="member-name">${s.member_name_text || 'Unassigned Slot'}</span>
+                
+                <div class="inline-editor-box">
+                  <select class="inline-select" onchange="handleInlineChange('${s.id}', 0, this.value)">${selectOpt1}</select>
+                  <select class="inline-select" onchange="handleInlineChange('${s.id}', 1, this.value)">${selectOpt2}</select>
+                </div>
               </div>
             `;
           });
           html += `</div>`;
         }
       });
-      container.innerHTML = html || `<div class="empty-msg">No team entries matching selection found.</div>`;
+      container.innerHTML = html || `<div class="empty-msg">No entries match your filter.</div>`;
+    }
+
+    function renderSwapsTable() {
+      const tbody = document.getElementById('swap-requests-table-body');
+      let html = '';
+
+      appState.dates.forEach(d => {
+        const slots = appState.slots.filter(s => s.service_date_id === d.id);
+        slots.forEach(s => {
+          const config = MINISTRY_LABELS[s.role_title] || { name: s.role_title };
+          const formattedDate = new Date(d.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+          
+          html += `
+            <tr>
+              <td><b>${formattedDate}</b></td>
+              <td>${config.name}</td>
+              <td><code>${s.member_name_text || 'Vacant'}</code></td>
+              <td><span class="badge resolved">Active</span></td>
+              <td><button class="action-btn-sm" onclick="switchTab('master')">Manage</button></td>
+            </tr>
+          `;
+        });
+      });
+
+      tbody.innerHTML = html || `<tr><td colspan="5">No active rows mapped.</td></tr>`;
+    }
+
+    async function pushEightCustomRotas() {
+      if (!confirm("Wipe data and generate fresh baseline 8-team rosters?")) return;
+      document.getElementById('loading-text').innerText = "Deploying initial schedules...";
+      document.getElementById('loading-screen').style.display = 'flex';
+
+      try {
+        await sb.from('rota_slots').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+        let sharedRotaId = appState.rotas[0]?.id;
+
+        if (!sharedRotaId) {
+          const { data: newRota, error: rotaErr } = await sb.from('rotas').insert({ name: 'Master Church Schedule' }).select();
+          if (rotaErr) throw rotaErr;
+          sharedRotaId = newRota[0].id;
+        }
+
+        let payload = [];
+        appState.dates.forEach((dateObj, dateIndex) => {
+          Object.keys(MINISTRY_POOLS).forEach(key => {
+            const pool = MINISTRY_POOLS[key];
+            const server1 = pool[(dateIndex * 2) % pool.length];
+            const server2 = pool[(dateIndex * 2 + 1) % pool.length];
+
+            payload.push({
+              rota_id: sharedRotaId,
+              service_date_id: dateObj.id,
+              role_title: key, 
+              member_name_text: `${server1} & ${server2}`,
+              status: 'normal'
+            });
+          });
+        });
+
+        const { error: insError } = await sb.from('rota_slots').insert(payload);
+        if (insError) throw insError;
+
+        location.reload();
+      } catch (err) {
+        document.getElementById('loading-screen').style.display = 'none';
+        alert("Deployment Error: " + err.message);
+      }
     }
 
     function showGlobalError(msg) {
