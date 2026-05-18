@@ -24,17 +24,14 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
     body { background: var(--bg-main); color: var(--text-main); min-height: 100vh; display: flex; }
 
-    /* Loading Spinner */
     #loading-screen { position: fixed; inset: 0; background: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; }
     .spinner { border: 3px solid var(--border-color); border-top: 3px solid var(--cbc-blue); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 16px; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-    /* Gateway */
     #auth-screen { min-height: 100vh; width: 100vw; background: var(--sidebar-bg); display: flex; align-items: center; justify-content: center; }
     .auth-card { background: #fff; border-radius: var(--radius); padding: 40px; width: 100%; max-width: 420px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
     .auth-btn { width: 100%; padding: 12px; background: var(--cbc-blue); color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 12px; }
 
-    /* Layout */
     #app { display: none; width: 100%; min-height: 100vh; }
     sidebar { width: 280px; background: var(--sidebar-bg); color: #fff; display: flex; flex-direction: column; padding: 24px; flex-shrink: 0; }
     .sidebar-brand { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; margin-bottom: 32px; color: #fff; border-bottom: 1px solid #1e293b; padding-bottom: 16px; }
@@ -48,12 +45,10 @@
     .page-header { margin-bottom: 32px; }
     .page-title { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 700; color: var(--cbc-navy); }
     
-    /* Filters */
     .filter-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
     .filter-btn { padding: 8px 16px; border-radius: 20px; background: #fff; border: 1.5px solid var(--border-color); font-size: 13px; font-weight: 600; cursor: pointer; }
     .filter-btn.active { background: var(--cbc-blue); color: #fff; border-color: var(--cbc-blue); }
 
-    /* Grid layout */
     .grid-three { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 24px; }
     .card { background: #fff; border: 1px solid var(--border-color); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); }
     .card-date { font-size: 18px; font-weight: 700; color: var(--cbc-navy); margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid var(--bg-main); }
@@ -74,13 +69,14 @@
     .admin-panel-box { background: #fff; border: 1px solid #bbf7d0; background: #f0fdf4; border-radius: var(--radius); padding: 24px; margin-bottom: 32px; }
     .admin-btn { padding: 12px 24px; background: #16a34a; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 12px; }
     .user-profile-box { border-top: 1px solid #1e293b; padding-top: 16px; margin-top: auto; font-size: 13px; color: #94a3b8; }
+    .empty-msg { font-size: 14px; color: var(--text-muted); font-style: italic; }
   </style>
 </head>
 <body>
 
   <div id="loading-screen">
     <div class="spinner"></div>
-    <div style="font-size: 14px; color: var(--text-muted);">Syncing Church Rotas...</div>
+    <div id="loading-text" style="font-size: 14px; color: var(--text-muted);">Syncing Church Rotas...</div>
   </div>
 
   <div id="auth-screen" style="display:none;">
@@ -147,17 +143,21 @@
       sound_desk: { name: "Sound & Desk Tech", css: "sound-desk" }
     };
 
-    let sb, appState = { user: null, dates: [], slots: [] }, currentFilter = 'all';
+    let sb, appState = { user: null, dates: [], slots: [], rotas: [] }, currentFilter = 'all';
 
     window.addEventListener('load', async () => {
-      sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-      const sessionCheck = await sb.auth.getSession();
-      if (sessionCheck?.data?.session?.user) {
-        appState.user = sessionCheck.data.session.user;
-        await initDashboard();
-      } else {
-        document.getElementById('loading-screen').style.display = 'none';
-        document.getElementById('auth-screen').style.display = 'flex';
+      try {
+        sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const sessionCheck = await sb.auth.getSession();
+        if (sessionCheck?.data?.session?.user) {
+          appState.user = sessionCheck.data.session.user;
+          await initDashboard();
+        } else {
+          document.getElementById('loading-screen').style.display = 'none';
+          document.getElementById('auth-screen').style.display = 'flex';
+        }
+      } catch (err) {
+        showGlobalError("Initialization failed: " + err.message);
       }
     });
 
@@ -172,13 +172,18 @@
       document.getElementById('user-display-email').innerText = appState.user.email;
       if (appState.user.email === 'coopsben0@gmail.com') document.getElementById('admin-panel').style.display = 'block';
 
-      const [dRes, sRes] = await Promise.all([
+      const [dRes, sRes, rRes] = await Promise.all([
         sb.from('service_dates').select('*'),
-        sb.from('rota_slots').select('*')
+        sb.from('rota_slots').select('*'),
+        sb.from('rotas').select('*')
       ]);
+
+      if (dRes.error) console.error("Dates error:", dRes.error);
+      if (sRes.error) console.error("Slots error:", sRes.error);
 
       appState.dates = dRes.data || [];
       appState.slots = sRes.data || [];
+      appState.rotas = rRes.data || [];
       appState.dates.sort((a,b) => new Date(a.date) - new Date(b.date));
 
       buildFilters();
@@ -187,36 +192,51 @@
       document.getElementById('app').style.display = 'flex';
     }
 
-    // Dynamic rotation deployment engine logic matching individuals to roles cleanly
     async function pushEightCustomRotas() {
-      if (!confirm("This will overwrite existing test data and establish clean timelines for all 8 separate ministries. Proceed?")) return;
+      if (!confirm("This will overwrite existing data and establish clean timelines for all 8 separate ministries. Proceed?")) return;
+      
+      document.getElementById('loading-text').innerText = "Clearing old rosters and deploying tables...";
       document.getElementById('loading-screen').style.display = 'flex';
 
-      // Clear any conflicting rows
-      await sb.from('rota_slots').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      try {
+        // Clear any old slots to clean the slate
+        const { error: delError } = await sb.from('rota_slots').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+        if (delError) throw delError;
 
-      let payload = [];
-      
-      // Look at every Sunday currently saved in your database
-      appState.dates.forEach((dateObj, dateIndex) => {
-        Object.keys(MINISTRY_POOLS).forEach(key => {
-          const pool = MINISTRY_POOLS[key];
-          // Select two people from this department pool to serve together on this specific Sunday
-          const server1 = pool[(dateIndex * 2) % pool.length];
-          const server2 = pool[(dateIndex * 2 + 1) % pool.length];
+        // Grab a fallback real valid UUID from your database tables
+        const validFallbackRotaId = appState.rotas[0]?.id;
+        if (!validFallbackRotaId) {
+          throw new Error("No existing records found in your 'rotas' table. Please ensure at least one base rota exists in Supabase first.");
+        }
 
-          payload.push({
-            rota_id: 'df03f23c-9746-4289-9534-b1e4e3e3b7b2', // Fixed root table ID link
-            service_date_id: dateObj.id,
-            role_title: key, // Storing the department key directly so we can filter perfectly
-            member_name_text: `${server1} & ${server2}`,
-            status: 'normal'
+        let payload = [];
+        
+        appState.dates.forEach((dateObj, dateIndex) => {
+          Object.keys(MINISTRY_POOLS).forEach(key => {
+            const pool = MINISTRY_POOLS[key];
+            const server1 = pool[(dateIndex * 2) % pool.length];
+            const server2 = pool[(dateIndex * 2 + 1) % pool.length];
+
+            payload.push({
+              rota_id: validFallbackRotaId, 
+              service_date_id: dateObj.id,
+              role_title: key, 
+              member_name_text: `${server1} & ${server2}`,
+              status: 'normal'
+            });
           });
         });
-      });
 
-      const { error } = await sb.from('rota_slots').insert(payload);
-      if (error) alert(error.message); else location.reload();
+        const { error: insError } = await sb.from('rota_slots').insert(payload);
+        if (insError) throw insError;
+
+        alert("Successfully generated and deployed all 8 clean ministry lists!");
+        location.reload();
+
+      } catch (err) {
+        document.getElementById('loading-screen').style.display = 'none';
+        alert("Deployment Error: " + err.message);
+      }
     }
 
     function buildFilters() {
@@ -252,14 +272,19 @@
             html += `
               <div class="card-assignment ${config.css}">
                 <div class="role-title">${config.name}</div>
-                <div class="member-name">${s.member_name_text}</div>
+                <div class="member-name">${s.member_name_text || 'Unassigned Slot'}</div>
               </div>
             `;
           });
           html += `</div>`;
         }
       });
-      container.innerHTML = html || `<div class="empty-msg">No team metrics generated for selection criteria.</div>`;
+      container.innerHTML = html || `<div class="empty-msg">No team entries matching selection found.</div>`;
+    }
+
+    function showGlobalError(msg) {
+      document.getElementById('loading-screen').style.display = 'flex';
+      document.getElementById('loading-text').innerHTML = `<b style="color:#ef4444;">System Error:</b><br>${msg}`;
     }
 
     function signOut() { sb.auth.signOut().then(() => location.reload()); }
