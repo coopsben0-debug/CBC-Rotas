@@ -82,8 +82,14 @@
     .page-title { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 700; color: var(--cbc-navy); }
     .page-sub { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
 
+    /* Rota Selector Filtering Pills */
+    .filter-container { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 30px; }
+    .filter-btn { padding: 10px 18px; border-radius: 20px; background: #fff; border: 1.5px solid var(--border-color); font-size: 13px; font-weight: 600; color: var(--text-main); cursor: pointer; transition: all 0.2s; }
+    .filter-btn:hover { border-color: var(--cbc-blue); color: var(--cbc-blue); }
+    .filter-btn.active { background: var(--cbc-blue); color: #fff; border-color: var(--cbc-blue); }
+
     /* Dynamic Badges based on Church Teams */
-    .team-badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; uppercase; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.03em; }
+    .team-badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.03em; }
     .badge-music { background: var(--cbc-blue-light); color: var(--cbc-blue); }
     .badge-kids { background: #dcfce7; color: #15803d; }
     .badge-default { background: var(--border-color); color: var(--text-main); }
@@ -110,11 +116,17 @@
     .role-title { font-size: 13px; font-weight: 600; color: var(--text-main); margin-top: 2px; }
     .member-name { font-size: 15px; font-weight: 700; color: var(--cbc-navy); margin-top: 2px; }
     
+    /* Double Booking Styles */
+    .card-assignment.double-booked { border-left: 4px solid var(--danger) !important; background: #fff5f5; }
+    .double-book-alert { color: var(--danger); font-size: 11px; font-weight: 700; display: block; margin-top: 4px; }
+
     /* Action Controls inside cards */
     .slot-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border-color); }
     .action-badge-btn { font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; transition: all 0.2s; }
     .btn-cover-req { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
     .btn-cover-req:hover { background: #ffeeba; }
+    .btn-claim-swap { background: var(--cbc-blue-light); color: var(--cbc-blue); border: 1px solid #bae6fd; }
+    .btn-claim-swap:hover { background: #bae6fd; }
     
     .status-banner { font-size: 11px; font-weight: 700; text-transform: uppercase; display: inline-block; padding: 2px 6px; border-radius: 4px; margin-top: 6px; }
     .status-seeking { background: var(--warning-light); color: #b45309; border: 1px solid #fde68a; }
@@ -168,6 +180,7 @@
       <div class="nav-group">
         <button id="nav-my-slots" class="sidebar-nav-btn active" onclick="switchTab('my-slots')"> My Assignments</button>
         <button id="nav-all-rotas" class="sidebar-nav-btn" onclick="switchTab('all-rotas')"> Master Schedules</button>
+        <button id="nav-swap-board" class="sidebar-nav-btn" onclick="switchTab('swap-board')"> Marketplace Swap Board</button>
       </div>
       
       <div class="user-profile-box">
@@ -189,7 +202,7 @@
         <div class="admin-title">⚡ Admin Management Panel</div>
         <div class="admin-form-row">
           <div class="field" style="margin:0;"><label>Date</label><select id="admin-date-select"></select></div>
-          <div class="field" style="margin:0;"><label>Team</label><select id="admin-rota-select"></select></div>
+          <div class="field" style="margin:0;"><label>Team / Rota Category</label><select id="admin-rota-select"></select></div>
           <div class="field" style="margin:0;"><label>Role / Position</label><input type="text" id="admin-role-input" placeholder="e.g. Pianist"/></div>
           <div class="field" style="margin:0;"><label>Member Name(s)</label><input type="text" id="admin-name-input" placeholder="e.g. John Smith"/></div>
           <button class="admin-btn" onclick="addNewAssignment()">Add to Rota</button>
@@ -209,7 +222,19 @@
           <div class="page-title">Master Rota Schedule</div>
           <div class="page-sub">Comprehensive view of all upcoming church team operations.</div>
         </div>
+        
+        <div class="filter-container" id="rota-filter-pills">
+          </div>
+
         <div id="all-rotas-container" class="grid-three"></div>
+      </div>
+
+      <div id="tab-swap-board" class="page-section">
+        <div class="page-header">
+          <div class="page-title">Marketplace Swap Board</div>
+          <div class="page-sub">See who needs cover and offer to swap into their slot.</div>
+        </div>
+        <div id="swap-board-container" class="grid-three"></div>
       </div>
 
     </div>
@@ -223,6 +248,7 @@
 
     let sb;
     let isSignUpMode = false;
+    let selectedRotaFilter = 'all';
     let appState = { user: null, profile: null, rotas: [], dates: [], slots: [] };
 
     window.addEventListener('load', async () => {
@@ -320,6 +346,7 @@
 
         if (appState.dates.length) appState.dates.sort((a,b) => new Date(a.date) - new Date(b.date));
         
+        buildFilterPills();
         renderDashboard();
         setupAdminForm();
         
@@ -349,29 +376,48 @@
       return 'badge-default';
     }
 
+    function buildFilterPills() {
+      const container = document.getElementById('rota-filter-pills');
+      let html = `<button class="filter-btn ${selectedRotaFilter === 'all' ? 'active' : ''}" onclick="setRotaFilter('all')">All Rotas</button>`;
+      
+      appState.rotas.forEach(r => {
+        html += `<button class="filter-btn ${selectedRotaFilter === r.id ? 'active' : ''}" onclick="setRotaFilter('${r.id}')">${r.name}</button>`;
+      });
+      container.innerHTML = html;
+    }
+
+    function setRotaFilter(filterValue) {
+      selectedRotaFilter = filterValue;
+      buildFilterPills();
+      renderAllSchedules();
+    }
+
     function renderDashboard() {
       renderMySlots();
       renderAllSchedules();
+      renderSwapBoard();
       renderAdminNotifications();
     }
 
-    // Advanced, forgiving matching engine
     function isMemberAssignedToSlot(profileName, rotaText) {
       if (!profileName || !rotaText) return false;
-      
       const cleanProfileName = profileName.toLowerCase().trim();
       const cleanRotaText = rotaText.toLowerCase().trim();
-      
-      // 1. Direct contains check (e.g., profile "Neil Keys" matches rota "Neil Keys")
-      if (cleanRotaText.includes(cleanProfileName) || cleanProfileName.includes(cleanRotaText)) {
-        return true;
-      }
-      
-      // 2. Break down words (handles "Neil Keys" matching a rota that just says "Neil")
+      if (cleanRotaText.includes(cleanProfileName) || cleanProfileName.includes(cleanRotaText)) return true;
       const profileParts = cleanProfileName.split(/\s+/);
-      const rotaParts = cleanRotaText.split(/[\s&,]+/); // Split by spaces, ampersands, commas
-      
+      const rotaParts = cleanRotaText.split(/[\s&,]+/);
       return profileParts.some(part => part.length > 2 && rotaParts.includes(part));
+    }
+
+    // Double Booking Analysis Engine
+    function checkDoubleBooking(slot, allSlots) {
+      if (!slot.member_name_text || slot.member_name_text.toLowerCase() === 'unassigned') return false;
+      
+      // Look for slots on the exact same date, with a different ID
+      const concurrentSlots = allSlots.filter(s => s.service_date_id === slot.service_date_id && s.id !== slot.id);
+      
+      // Check if the names overlap
+      return concurrentSlots.some(s => isMemberAssignedToSlot(slot.member_name_text, s.member_name_text));
     }
 
     function renderMySlots() {
@@ -391,15 +437,18 @@
           dSlots.forEach(s => {
             const team = appState.rotas.find(r => r.id === s.rota_id);
             const isSeekingCover = s.status === 'seeking_cover';
+            const isDoubleBooked = checkDoubleBooking(s, appState.slots);
+
             HTML += `
-              <div class="card-assignment">
+              <div class="card-assignment ${isDoubleBooked ? 'double-booked' : ''}">
                 <span class="team-badge ${getTeamBadgeClass(team?.name)}">${team ? team.name : 'Serving Team'}</span>
                 <div class="role-title">${s.role_title}</div>
                 <div class="member-name" style="opacity: 0.6;">You are Assigned (${s.member_name_text})</div>
+                ${isDoubleBooked ? `<span class="double-book-alert">⚠️ Double Booked on this Date!</span>` : ''}
                 ${isSeekingCover ? `<span class="status-banner status-seeking">Cover Requested</span>` : ''}
                 
                 <div class="slot-actions">
-                  ${!isSeekingCover ? `<button class="action-badge-btn btn-cover-req" onclick="requestCover('${s.id}')">Request Cover / Swap</button>` : '<span style="font-size:12px; color:var(--text-muted); font-weight: 500;">Swap Request Pending Admin Help</span>'}
+                  ${!isSeekingCover ? `<button class="action-badge-btn btn-cover-req" onclick="requestCover('${s.id}')">Request Cover / Swap</button>` : '<span style="font-size:12px; color:var(--text-muted); font-weight: 500;">Swap Request Listed</span>'}
                 </div>
               </div>`;
           });
@@ -415,37 +464,101 @@
       let HTML = '';
       
       appState.dates.forEach(d => {
-        HTML += `<div class="card"><div class="card-date">${new Date(d.date).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' })}</div>`;
-        const dSlots = appState.slots.filter(s => s.service_date_id === d.id);
+        let dSlots = appState.slots.filter(s => s.service_date_id === d.id);
         
-        if (!dSlots.length) { HTML += `<div class="empty-msg" style="padding:16px; border:none;">No roles populated.</div>`; } 
-        else {
-          dSlots.forEach(s => {
-            const team = appState.rotas.find(r => r.id === s.rota_id);
-            const isSeeking = s.status === 'seeking_cover';
-            HTML += `
-              <div class="card-assignment" style="border-left: 4px solid ${isSeeking ? 'var(--warning)' : 'var(--sidebar-bg)'}">
-                <span class="team-badge ${getTeamBadgeClass(team?.name)}">${team ? team.name : 'Team'}</span>
-                <div class="role-title">${s.role_title}</div>
-                <div class="member-name">${s.member_name_text}</div>
-                ${isSeeking ? `<span class="status-banner status-seeking">⚠️ Needs Cover</span>` : ''}
-                ${isAdmin ? `<button class="delete-slot-btn" onclick="deleteAssignment('${s.id}')">×</button>` : ''}
-              </div>`;
-          });
+        // Apply individual rota selection filtering pill rules
+        if (selectedRotaFilter !== 'all') {
+          dSlots = dSlots.filter(s => s.rota_id === selectedRotaFilter);
         }
-        HTML += `</div>`;
+
+        if (dSlots.length > 0 || selectedRotaFilter === 'all') {
+          HTML += `<div class="card"><div class="card-date">${new Date(d.date).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' })}</div>`;
+          
+          if (!dSlots.length) { 
+            HTML += `<div class="empty-msg" style="padding:16px; border:none;">No roles populated for this view.</div>`; 
+          } else {
+            dSlots.forEach(s => {
+              const team = appState.rotas.find(r => r.id === s.rota_id);
+              const isSeeking = s.status === 'seeking_cover';
+              const isDoubleBooked = checkDoubleBooking(s, appState.slots);
+
+              HTML += `
+                <div class="card-assignment ${isDoubleBooked ? 'double-booked' : ''}" style="border-left: 4px solid ${isSeeking ? 'var(--warning)' : 'var(--sidebar-bg)'}">
+                  <span class="team-badge ${getTeamBadgeClass(team?.name)}">${team ? team.name : 'Team'}</span>
+                  <div class="role-title">${s.role_title}</div>
+                  <div class="member-name">${s.member_name_text}</div>
+                  ${isDoubleBooked ? `<span class="double-book-alert">⚠️ Double Booked!</span>` : ''}
+                  ${isSeeking ? `<span class="status-banner status-seeking">⚠️ Needs Cover</span>` : ''}
+                  ${isAdmin ? `<button class="delete-slot-btn" onclick="deleteAssignment('${s.id}')">×</button>` : ''}
+                </div>`;
+            });
+          }
+          HTML += `</div>`;
+        }
+      });
+      container.innerHTML = HTML ? HTML : `<div class="empty-msg">No entries found matching this rota.</div>`;
+    }
+
+    function renderSwapBoard() {
+      const container = document.getElementById('swap-board-container');
+      const swapSlots = appState.slots.filter(s => s.status === 'seeking_cover');
+      
+      if (!swapSlots.length) {
+        container.innerHTML = `<div class="empty-msg">The swap board is clear! No one needs cover right now.</div>`;
+        return;
+      }
+      
+      let HTML = '';
+      swapSlots.forEach(s => {
+        const d = appState.dates.find(dt => dt.id === s.service_date_id);
+        const team = appState.rotas.find(r => r.id === s.rota_id);
+        const dateStr = d ? new Date(d.date).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' }) : '---';
+        
+        HTML += `
+          <div class="card">
+            <div class="card-date">${dateStr}</div>
+            <div class="card-assignment" style="border-left: 4px solid var(--warning)">
+              <span class="team-badge ${getTeamBadgeClass(team?.name)}">${team ? team.name : 'Team'}</span>
+              <div class="role-title">${s.role_title}</div>
+              <div class="member-name" style="color: var(--text-muted); font-size:13px;">Assigned to: ${s.member_name_text}</div>
+              <span class="status-banner status-seeking" style="margin-bottom:10px;">Awaiting Swap</span>
+              
+              <div class="slot-actions" style="margin-top:10px;">
+                <button class="action-badge-btn btn-claim-swap" onclick="claimSwap('${s.id}')">Offer to Take Slot</button>
+              </div>
+            </div>
+          </div>`;
       });
       container.innerHTML = HTML;
     }
 
     async function requestCover(slotId) {
-      if (!confirm("Flag this slot as needing cover? This will notify the admin group panel.")) return;
+      if (!confirm("Flag this slot as needing cover? This will push it out to the Marketplace Swap board.")) return;
       showLoading(true);
       await sb.from('rota_slots').update({ status: 'seeking_cover' }).eq('id', slotId);
       const { data } = await sb.from('rota_slots').select('*');
       appState.slots = data || [];
       renderDashboard();
       showLoading(false);
+    }
+
+    async function claimSwap(slotId) {
+      if (!appState.profile) { alert("Please login first to trade positions."); return; }
+      
+      const targetSlot = appState.slots.find(s => s.id === slotId);
+      if (!confirm(`Would you like to take over this slot? This will assign your name ("${appState.profile.full_name}") to this role.`)) return;
+      
+      showLoading(true);
+      await sb.from('rota_slots').update({ 
+        member_name_text: appState.profile.full_name,
+        status: 'normal'
+      }).eq('id', slotId);
+      
+      const { data } = await sb.from('rota_slots').select('*');
+      appState.slots = data || [];
+      renderDashboard();
+      showLoading(false);
+      alert("Success! You have taken over this role.");
     }
 
     function renderAdminNotifications() {
