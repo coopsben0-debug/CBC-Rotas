@@ -636,16 +636,32 @@
             let targetDateText = '—';
             let actionMarkup = `<button class="action-btn-sm" onclick="switchTab('master')">View Grid</button>`;
 
-            try {
-              const parsed = JSON.parse(s.notes);
-              outgoingWorker = `<code>${parsed.outgoing_worker}</code>`;
-              incomingWorker = `<code>${parsed.incoming_worker}</code>`;
+            // Check if there is valid swap notes data to parse
+            if (s.notes) {
+              try {
+                const parsed = JSON.parse(s.notes);
+                if (parsed.outgoing_worker && parsed.incoming_worker && parsed.target_slot_id) {
+                  outgoingWorker = `<strong style="color: #0f172a;">${parsed.outgoing_worker}</strong>`;
+                  incomingWorker = `<strong style="color: #319795;">${parsed.incoming_worker}</strong>`;
 
-              const linkedSlot = appState.slots.find(item => item.id === parsed.target_slot_id);
-              const linkedDateObj = appState.dates.find(day => day.id === linkedSlot.service_date_id);
-              targetDateText = `<b>${new Date(linkedDateObj.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</b>`;
-            } catch(err) {
-              outgoingWorker = '<span style="color:var(--text-muted);">Unparsed</span>';
+                  const linkedSlot = appState.slots.find(item => item.id === parsed.target_slot_id);
+                  if (linkedSlot) {
+                    const linkedDateObj = appState.dates.find(day => day.id === linkedSlot.service_date_id);
+                    if (linkedDateObj) {
+                      targetDateText = `<b>${new Date(linkedDateObj.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</b>`;
+                    }
+                  }
+                }
+              } catch(err) {
+                outgoingWorker = '<span style="color:var(--text-muted);">Parsing Error</span>';
+              }
+            }
+
+            // Fallback display if notes are blank or generic admin modifications are running
+            if (outgoingWorker === '—') {
+              outgoingWorker = `<span style="color:var(--text-muted); font-size:13px;">${s.member_name_text || 'Form Unfinished'}</span>`;
+              targetDateText = `<span style="color:var(--text-muted);">Admin Override</span>`;
+              incomingWorker = `<span style="color:var(--text-muted);">Pending Input</span>`;
             }
 
             if (isCurrentUserAdmin) {
@@ -658,7 +674,7 @@
             html += `
               <tr>
                 <td><b>${formattedDate}</b></td>
-                <td><span class="role-title">${config.name}</span></td>
+                <td><span class="badge role-member" style="margin:0;">${config.name}</span></td>
                 <td>${outgoingWorker}</td>
                 <td>${targetDateText}</td>
                 <td>${incomingWorker}</td>
@@ -677,7 +693,7 @@
         indicator.style.display = 'none';
       }
 
-      tbody.innerHTML = html || `<tr><td colspan="6" class="empty-msg" style="text-align:center; padding:30px;">🎉 No pending team shifts require attention right now.</td></tr>`;
+      tbody.innerHTML = html || `<tr><td colspan="6" class="empty-msg" style="text-align:center; padding:40px;">🎉 No pending team shifts require attention right now.</td></tr>`;
     }
 
     async function pushEightCustomRotas() {
