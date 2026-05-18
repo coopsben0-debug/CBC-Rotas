@@ -129,10 +129,10 @@
   <div id="auth-screen" style="display:none;">
     <div class="auth-card">
       <img src="https://ojzwujpahfjmaeisnfez.supabase.co/storage/v1/object/public/branding/cbc%20logo.jpg" class="auth-logo" alt="Craigavon Baptist Logo"/>
-      <h2 style="font-family:'Playfair Display',serif; color:var(--cbc-navy); margin-bottom:24px;">Multi-Rota Login</h2>
+      <h2 style="font-family:'Playfair Display',serif; color:var(--cbc-navy); margin-bottom:24px;">Multi-Rota Portal</h2>
       <div style="text-align:left; margin-bottom:14px;">
         <label style="font-size:12px; font-weight:700; color:var(--text-muted);">Email Address</label>
-        <input type="email" id="login-email" class="input-field" value="coopsben0@gmail.com"/>
+        <input type="email" id="login-email" class="input-field" value="coopscolin0@gmail.com"/>
       </div>
       <div style="text-align:left; margin-bottom:20px;">
         <label style="font-size:12px; font-weight:700; color:var(--text-muted);">Secure Password</label>
@@ -229,7 +229,7 @@
 
         <div style="margin-bottom: 12px;">
           <label style="font-size:11px; font-weight:700; color:var(--text-muted);">3. SPECIFIC PERSON ON THAT DATE TAKING YOUR PLACE</label>
-          <select id="member-swap-incoming-select" class="inline-select" style="margin-top:4px; padding:10px;"></select>
+          <select id="member-swap-incoming-select" class="inline-select" style="margin-top:4px; padding:10px CONTAINER;"></select>
         </div>
       </div>
       <div class="modal-actions">
@@ -392,7 +392,7 @@
         const dObj = appState.dates.find(d => d.id === as.service_date_id);
         if (dObj) {
           const fDate = new Date(dObj.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-          dateOptions += `<option value="${as.id}">${fDate} (Currently: ${as.member_name_text})</option>`;
+          dateOptions += `<option value="${as.id}">${fDate} (Currently: ${as.member_name_text || 'Empty Slot'})</option>`;
         }
       });
       targetDateSelect.innerHTML = dateOptions;
@@ -412,7 +412,11 @@
 
       const targetSlotObj = appState.slots.find(s => s.id === selectedTargetSlotId);
       let parts = targetSlotObj.member_name_text ? targetSlotObj.member_name_text.split(' & ') : [];
-      incomingSelect.innerHTML = parts.map(p => `<option value="${p}">${p}</option>`).join('');
+      if(parts.length === 0 || (parts.length === 1 && parts[0] === "")) {
+         incomingSelect.innerHTML = '<option value="">-- No Workers Found on This Row --</option>';
+      } else {
+         incomingSelect.innerHTML = parts.map(p => `<option value="${p}">${p}</option>`).join('');
+      }
     }
 
     function closeMemberSwapModal() {
@@ -447,7 +451,7 @@
       document.getElementById('loading-screen').style.display = 'none';
 
       if (error) {
-        alert(error.message);
+        alert("Submission failed: " + error.message);
       } else {
         const origin = appState.slots.find(s => s.id === activeSlotId);
         if (origin) {
@@ -636,7 +640,6 @@
             let targetDateText = '—';
             let actionMarkup = `<button class="action-btn-sm" onclick="switchTab('master')">View Grid</button>`;
 
-            // Check if there is valid swap notes data to parse
             if (s.notes) {
               try {
                 const parsed = JSON.parse(s.notes);
@@ -657,7 +660,6 @@
               }
             }
 
-            // Fallback display if notes are blank or generic admin modifications are running
             if (outgoingWorker === '—') {
               outgoingWorker = `<span style="color:var(--text-muted); font-size:13px;">${s.member_name_text || 'Form Unfinished'}</span>`;
               targetDateText = `<span style="color:var(--text-muted);">Admin Override</span>`;
