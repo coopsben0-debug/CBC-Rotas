@@ -166,8 +166,8 @@
       
       <div id="gatekeeper-field" style="display: none;">
         <div class="field" style="border: 1px solid #fde68a; padding: 14px; background: #fffdf5; border-radius: 8px;">
-          <label style="color:#b45309;">Church Join Key</label>
-          <input type="text" id="reg-key" placeholder="Enter secret church access key"/>
+          <label id="key-label" style="color:#b45309;">Church Access Key</label>
+          <input type="text" id="reg-key" placeholder="Enter security verification key"/>
         </div>
       </div>
 
@@ -250,8 +250,12 @@
   <script>
     const SUPABASE_URL = 'https://ojzwujpahfjmaeisnfez.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qend1anBhaGZqbWFlaXNuZmV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTA5NDMsImV4cCI6MjA5NDU4Njk0M30.VvszGR6MbUnBhKsmsXBikkrjok2-F1bnyS4zOwDX5hg';
-    const SECRET_JOIN_KEY = 'CraigavonBaptist2026';
-    const ADMIN_EMAIL = 'coopsben0@gmail.com';
+    
+    // The Dual Gateway Key Security Setup
+    const SECRET_MEMBER_KEY = 'CraigavonBaptist2026';
+    const SECRET_ADMIN_KEY = 'CBCAdmin2026!';
+    
+    const BACKUP_ADMIN_EMAIL = 'coopsben0@gmail.com';
 
     let sb;
     let isSignUpMode = false;
@@ -288,9 +292,10 @@
 
     function checkIsAdmin() {
       if (!appState.user) return false;
-      const emailMatch = appState.user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
-      const profileMatch = appState.profile && appState.profile.full_name?.toLowerCase() === 'ben';
-      return emailMatch || profileMatch;
+      // Checks database flag OR falls back to your hardcoded email safeguard
+      const databaseAdminFlag = appState.profile && appState.profile.is_admin === true;
+      const emailSafeguard = appState.user.email.toLowerCase() === BACKUP_ADMIN_EMAIL.toLowerCase();
+      return databaseAdminFlag || emailSafeguard;
     }
 
     function toggleAuthMode() {
@@ -315,14 +320,27 @@
         const accessKey = document.getElementById('reg-key').value.trim();
         
         if (!fullName) { alert("Please enter your full name."); showLoading(false); return; }
-        if (accessKey !== SECRET_JOIN_KEY) { alert("Invalid Church Join Key. Registration blocked."); showLoading(false); return; }
+        
+        // Evaluate Key Clearances
+        let grantAdminClearance = false;
+        if (accessKey === SECRET_ADMIN_KEY) {
+          grantAdminClearance = true;
+        } else if (accessKey !== SECRET_MEMBER_KEY) {
+          alert("Invalid Church Key. Registration blocked.");
+          showLoading(false);
+          return;
+        }
 
         const { data: authData, error: signUpErr } = await sb.auth.signUp({ email, password: pass });
         if (signUpErr) { alert("Registration issue: " + signUpErr.message); showLoading(false); return; }
 
         if (authData?.user) {
-          await sb.from('profiles').insert({ id: authData.user.id, full_name: fullName });
-          alert("Account successfully created and registered! Logging in...");
+          await sb.from('profiles').insert({ 
+            id: authData.user.id, 
+            full_name: fullName,
+            is_admin: grantAdminClearance 
+          });
+          alert(grantAdminClearance ? "Admin Account successfully registered! Logging in..." : "Member Account successfully registered! Logging in...");
         }
       } else {
         const { error } = await sb.auth.signInWithPassword({ email, password: pass });
@@ -347,7 +365,6 @@
           document.getElementById('user-display-name').innerText = "Church Member"; 
         }
 
-        // Apply visual badge adjustment rules based on authorization checks
         const badgeEl = document.getElementById('user-clearance-badge');
         if (checkIsAdmin()) {
           badgeEl.innerText = "System Admin";
