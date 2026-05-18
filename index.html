@@ -193,10 +193,11 @@
         <table class="table-container">
           <thead>
             <tr>
-              <th>Original Shift Details</th>
+              <th>Original Date</th>
               <th>Ministry Segment</th>
-              <th>Agreed Swap Details</th>
-              <th>Status</th>
+              <th>Outgoing Person</th>
+              <th>Target Date</th>
+              <th>Incoming Replacement</th>
               <th>Control Operations</th>
             </tr>
           </thead>
@@ -375,17 +376,14 @@
       }
     }
 
-    // Opens custom member window to capture pre-arranged swap choices
     function openMemberSwapModal(originSlotId) {
       activeSlotId = originSlotId;
       const slotObj = appState.slots.find(s => s.id === originSlotId);
       
-      // Isolate current workers on this shift so they can pinpoint which exact person is swapping out
       let currentParts = slotObj.member_name_text ? slotObj.member_name_text.split(' & ') : [];
       let outgoingSelect = document.getElementById('member-swap-outgoing-select');
       outgoingSelect.innerHTML = currentParts.map(p => `<option value="${p}">${p}</option>`).join('');
 
-      // List alternate dates running the same ministry segment
       let targetDateSelect = document.getElementById('member-swap-target-date');
       let alternateSlots = appState.slots.filter(s => s.role_title === slotObj.role_title && s.id !== originSlotId);
       
@@ -422,7 +420,6 @@
       activeSlotId = null;
     }
 
-    // Saves the structured tracking object inside our Supabase notes field for clear review
     async function submitMemberSwapRequest() {
       const targetSlotId = document.getElementById('member-swap-target-date').value;
       const outgoingPerson = document.getElementById('member-swap-outgoing-select').value;
@@ -444,7 +441,7 @@
 
       const { error } = await sb.from('rota_slots').update({
         status: 'pending_swap',
-        notes: JSON.stringify(packingDetails) // Safely save the explicit breakdown configuration
+        notes: JSON.stringify(packingDetails)
       }).eq('id', activeSlotId);
 
       document.getElementById('loading-screen').style.display = 'none';
@@ -464,7 +461,6 @@
       }
     }
 
-    // Admin Interface: Open the verification modal
     function openApprovalModal(slotId) {
       adminTargetSlotId = slotId;
       const slotObj = appState.slots.find(s => s.id === slotId);
@@ -499,7 +495,6 @@
       adminTargetSlotId = null;
     }
 
-    // Admin Execution Engine: Processes the 2-way data switch precisely
     async function executeTwoWaySwap() {
       if (!adminTargetSlotId) return;
 
@@ -510,28 +505,24 @@
       const destinationSlot = appState.slots.find(s => s.id === details.target_slot_id);
       if (!destinationSlot) return;
 
-      // Unpack string arrays for the origin date slot
       let originWorkers = originSlot.member_name_text ? originSlot.member_name_text.split(' & ') : [];
       let idx1 = originWorkers.indexOf(details.outgoing_worker);
-      if (idx1 !== -1) originWorkers[idx1] = details.incoming_worker; // Swap singular person out
+      if (idx1 !== -1) originWorkers[idx1] = details.incoming_worker;
       const newOriginString = originWorkers.filter(Boolean).join(' & ');
 
-      // Unpack string arrays for the destination target date slot
       let destWorkers = destinationSlot.member_name_text ? destinationSlot.member_name_text.split(' & ') : [];
       let idx2 = destWorkers.indexOf(details.incoming_worker);
-      if (idx2 !== -1) destWorkers[idx2] = details.outgoing_worker; // Swap singular person in
+      if (idx2 !== -1) destWorkers[idx2] = details.outgoing_worker;
       const newDestString = destWorkers.filter(Boolean).join(' & ');
 
       document.getElementById('loading-text').innerText = "Executing cross-date switch...";
       document.getElementById('loading-screen').style.display = 'flex';
 
-      // Push both row updates straight to Supabase
       const update1 = sb.from('rota_slots').update({ member_name_text: newOriginString, status: 'normal', notes: null }).eq('id', originSlot.id);
       const update2 = sb.from('rota_slots').update({ member_name_text: newDestString, status: 'normal', notes: null }).eq('id', destinationSlot.id);
 
       await Promise.all([update1, update2]);
 
-      // Refresh app local state representation
       originSlot.member_name_text = newOriginString; originSlot.status = 'normal'; originSlot.notes = null;
       destinationSlot.member_name_text = newDestString; destinationSlot.status = 'normal'; destinationSlot.notes = null;
 
@@ -637,40 +628,40 @@
           const formattedDate = new Date(d.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
           const isPending = s.status === 'pending_swap';
 
-          if (isPending) pendingCounter++;
+          if (isPending) {
+            pendingCounter++;
 
-          if (isPending || isCurrentUserAdmin) {
-            let detailsText = '📂 Baseline Assignment Operational';
+            let outgoingWorker = '—';
+            let incomingWorker = '—';
+            let targetDateText = '—';
             let actionMarkup = `<button class="action-btn-sm" onclick="switchTab('master')">View Grid</button>`;
 
-            if (isPending) {
-              try {
-                const parsed = JSON.parse(s.notes);
-                const linkedSlot = appState.slots.find(item => item.id === parsed.target_slot_id);
-                const linkedDateObj = appState.dates.find(day => day.id === linkedSlot.service_date_id);
-                const fLinkedDate = new Date(linkedDateObj.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-                
-                detailsText = `👉 Swap <b>${parsed.outgoing_worker}</b> with <b>${parsed.incoming_worker}</b> (${fLinkedDate})`;
-              } catch(err) {
-                detailsText = '⚠️ Custom Swap Form Data Pending Review';
-              }
+            try {
+              const parsed = JSON.parse(s.notes);
+              outgoingWorker = `<code>${parsed.outgoing_worker}</code>`;
+              incomingWorker = `<code>${parsed.incoming_worker}</code>`;
 
-              if (isCurrentUserAdmin) {
-                actionMarkup = `
-                  <button class="action-btn-sm" onclick="openApprovalModal('${s.id}')">Approve & Close</button>
-                  <button class="action-btn-danger" style="margin-left:4px;" onclick="rejectSwapFlag('${s.id}')">Reject</button>
-                `;
-              }
+              const linkedSlot = appState.slots.find(item => item.id === parsed.target_slot_id);
+              const linkedDateObj = appState.dates.find(day => day.id === linkedSlot.service_date_id);
+              targetDateText = `<b>${new Date(linkedDateObj.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</b>`;
+            } catch(err) {
+              outgoingWorker = '<span style="color:var(--text-muted);">Unparsed</span>';
+            }
+
+            if (isCurrentUserAdmin) {
+              actionMarkup = `
+                <button class="action-btn-sm" onclick="openApprovalModal('${s.id}')">Approve & Close</button>
+                <button class="action-btn-danger" style="margin-left:4px;" onclick="rejectSwapFlag('${s.id}')">Reject</button>
+              `;
             }
 
             html += `
               <tr>
                 <td><b>${formattedDate}</b></td>
                 <td><span class="role-title">${config.name}</span></td>
-                <td>${detailsText}</td>
-                <td>
-                  ${isPending ? '<span class="badge pending">🔄 Under Review</span>' : '<span class="badge resolved">✓ Active</span>'}
-                </td>
+                <td>${outgoingWorker}</td>
+                <td>${targetDateText}</td>
+                <td>${incomingWorker}</td>
                 <td>${actionMarkup}</td>
               </tr>
             `;
@@ -686,7 +677,7 @@
         indicator.style.display = 'none';
       }
 
-      tbody.innerHTML = html || `<tr><td colspan="5" class="empty-msg" style="text-align:center; padding:30px;">No pending team shifts require attention right now.</td></tr>`;
+      tbody.innerHTML = html || `<tr><td colspan="6" class="empty-msg" style="text-align:center; padding:30px;">🎉 No pending team shifts require attention right now.</td></tr>`;
     }
 
     async function pushEightCustomRotas() {
