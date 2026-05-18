@@ -109,12 +109,11 @@
     .admin-btn:hover { background: #15803d; }
     
     .user-profile-box { border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; margin-top: auto; font-size: 13px; color: #94a3b8; }
-    .input-field { width: 100%; padding: 12px; margin-top: 6px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; }
+    .input-field { width: 100%; padding: 12px; margin-top: 6px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; background: #fff; }
 
-    /* Modal Styling for Approvals */
     .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 10000; align-items: center; justify-content: center; }
     .modal-overlay.active { display: flex; }
-    .modal-card { background: #fff; padding: 32px; border-radius: var(--radius); width: 100%; max-width: 480px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); }
+    .modal-card { background: #fff; padding: 32px; border-radius: var(--radius); width: 100%; max-width: 500px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); }
     .modal-header { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--cbc-navy); margin-bottom: 12px; }
     .modal-body { font-size: 14px; color: var(--text-main); margin-bottom: 20px; line-height: 1.5; }
     .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
@@ -129,7 +128,7 @@
 
   <div id="auth-screen" style="display:none;">
     <div class="auth-card">
-      <img src="https://ojzwujpahfjmaeisnfez.supabase.co/storage/v1/object/public/branding/cbc%20logo.jpg" class="auth-logo" alt="Craigavon Baptist Logo" onerror="this.src='https://placehold.co/100x100?text=CBC'"/>
+      <img src="https://ojzwujpahfjmaeisnfez.supabase.co/storage/v1/object/public/branding/cbc%20logo.jpg" class="auth-logo" alt="Craigavon Baptist Logo"/>
       <h2 style="font-family:'Playfair Display',serif; color:var(--cbc-navy); margin-bottom:24px;">Multi-Rota Login</h2>
       <div style="text-align:left; margin-bottom:14px;">
         <label style="font-size:12px; font-weight:700; color:var(--text-muted);">Email Address</label>
@@ -146,7 +145,7 @@
   <div id="app">
     <sidebar>
       <div class="brand-container">
-        <img src="https://ojzwujpahfjmaeisnfez.supabase.co/storage/v1/object/public/branding/cbc%20logo.jpg" class="brand-logo" alt="CBC Branding" onerror="this.src='https://placehold.co/50x50?text=CBC'"/>
+        <img src="https://ojzwujpahfjmaeisnfez.supabase.co/storage/v1/object/public/branding/cbc%20logo.jpg" class="brand-logo" alt="CBC Branding"/>
         <div class="sidebar-brand">Craigavon Baptist<span>All-Ministry Terminal</span></div>
       </div>
       <div class="nav-group">
@@ -187,17 +186,17 @@
         <div class="page-header">
           <div>
             <h1 class="page-title">Conflict Center & Swap Management</h1>
-            <p style="font-size:13px; color:var(--text-muted); margin-top:4px;">Review pending swap requests flagged by church staff members.</p>
+            <p style="font-size:13px; color:var(--text-muted); margin-top:4px;">Review pre-arranged trade agreements uploaded by church team members.</p>
           </div>
         </div>
         
         <table class="table-container">
           <thead>
             <tr>
-              <th>Date</th>
+              <th>Original Shift Details</th>
               <th>Ministry Segment</th>
-              <th>Assigned Crew Members</th>
-              <th>Operational Status</th>
+              <th>Agreed Swap Details</th>
+              <th>Status</th>
               <th>Control Operations</th>
             </tr>
           </thead>
@@ -209,27 +208,47 @@
     </div>
   </div>
 
-  <div id="approval-modal" class="modal-overlay">
+  <div id="member-swap-modal" class="modal-overlay">
     <div class="modal-card">
-      <div class="modal-header">Confirm Assignment Change</div>
+      <div class="modal-header">Log Pre-Arranged Shift Swap</div>
       <div class="modal-body">
-        <p>You are approving a shift change request for <b id="modal-dept-label">Department</b> on <b id="modal-date-label">Date</b>.</p>
-        <p style="margin-top: 10px; margin-bottom: 4px; font-weight:600; color:var(--text-muted);">Choose who will fulfill this schedule assignment:</p>
+        <p style="margin-bottom:12px; font-size:13px; color:var(--text-muted);">
+          Use this form if you have already contacted another crew member and both parties have agreed to exchange shifts.
+        </p>
         
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px;">
-          <div>
-            <label style="font-size:11px; font-weight:700; color:var(--text-muted);">Worker Position 1</label>
-            <select id="modal-select-1" class="inline-select" style="margin-top:4px; padding:10px;"></select>
-          </div>
-          <div>
-            <label style="font-size:11px; font-weight:700; color:var(--text-muted);">Worker Position 2</label>
-            <select id="modal-select-2" class="inline-select" style="margin-top:4px; padding:10px;"></select>
-          </div>
+        <div style="margin-bottom: 12px;">
+          <label style="font-size:11px; font-weight:700; color:var(--text-muted);">1. WHICH SINGULAR WORKER ARE YOU REPLACING?</label>
+          <select id="member-swap-outgoing-select" class="inline-select" style="margin-top:4px; padding:10px;"></select>
+        </div>
+
+        <div style="margin-bottom: 12px;">
+          <label style="font-size:11px; font-weight:700; color:var(--text-muted);">2. TARGET DATE YOU ARE SWAPPING WITH</label>
+          <select id="member-swap-target-date" class="inline-select" style="margin-top:4px; padding:10px;" onchange="populateTargetWorkersDropdown()"></select>
+        </div>
+
+        <div style="margin-bottom: 12px;">
+          <label style="font-size:11px; font-weight:700; color:var(--text-muted);">3. SPECIFIC PERSON ON THAT DATE TAKING YOUR PLACE</label>
+          <select id="member-swap-incoming-select" class="inline-select" style="margin-top:4px; padding:10px;"></select>
         </div>
       </div>
       <div class="modal-actions">
+        <button class="action-btn-danger" style="background:#e2e8f0; color:var(--cbc-navy);" onclick="closeMemberSwapModal()">Cancel</button>
+        <button class="action-btn-sm" onclick="submitMemberSwapRequest()">Log Swap for Admin Approval</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="approval-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">Approve Trade Agreement</div>
+      <div class="modal-body">
+        <p>You are about to execute an agreed shift trade for <b id="modal-dept-label">Department</b>.</p>
+        <div id="modal-swap-summary-box" style="background:#f8fafc; border:1px solid var(--border-color); padding:16px; border-radius:8px; margin-top:14px; font-size:13px;">
+          </div>
+      </div>
+      <div class="modal-actions">
         <button class="action-btn-danger" style="background:#e2e8f0; color:var(--cbc-navy);" onclick="closeApprovalModal()">Cancel</button>
-        <button class="action-btn-sm" onclick="submitApprovedSwap()">Confirm and Update Rota</button>
+        <button class="action-btn-sm" onclick="executeTwoWaySwap()">Approve & Swap Rota Rows</button>
       </div>
     </div>
   </div>
@@ -260,7 +279,7 @@
       sound_desk: { name: "Sound and Desk", css: "sound_desk" }
     };
 
-    let sb, appState = { user: null, dates: [], slots: [], rotas: [] }, currentFilter = 'all', isAdminMode = false, activeApprovalSlotId = null;
+    let sb, appState = { user: null, dates: [], slots: [], rotas: [] }, currentFilter = 'all', isAdminMode = false, activeSlotId = null, adminTargetSlotId = null;
 
     window.addEventListener('load', async () => {
       try {
@@ -348,7 +367,7 @@
 
       const { error } = await sb.from('rota_slots').update({ member_name_text: finalString }).eq('id', slotId);
       if (error) {
-        alert("Database error updating row: " + error.message);
+        alert("Database error: " + error.message);
       } else {
         slotObj.member_name_text = finalString;
         renderGrid();
@@ -356,96 +375,181 @@
       }
     }
 
-    async function requestSwapFlag(slotId) {
-      if (!confirm("Flag this ministry assignment as requesting a change/swap?")) return;
-      const { error } = await sb.from('rota_slots').update({ status: 'pending_swap' }).eq('id', slotId);
+    // Opens custom member window to capture pre-arranged swap choices
+    function openMemberSwapModal(originSlotId) {
+      activeSlotId = originSlotId;
+      const slotObj = appState.slots.find(s => s.id === originSlotId);
+      
+      // Isolate current workers on this shift so they can pinpoint which exact person is swapping out
+      let currentParts = slotObj.member_name_text ? slotObj.member_name_text.split(' & ') : [];
+      let outgoingSelect = document.getElementById('member-swap-outgoing-select');
+      outgoingSelect.innerHTML = currentParts.map(p => `<option value="${p}">${p}</option>`).join('');
+
+      // List alternate dates running the same ministry segment
+      let targetDateSelect = document.getElementById('member-swap-target-date');
+      let alternateSlots = appState.slots.filter(s => s.role_title === slotObj.role_title && s.id !== originSlotId);
+      
+      let dateOptions = '<option value="">-- Choose Target Date --</option>';
+      alternateSlots.forEach(as => {
+        const dObj = appState.dates.find(d => d.id === as.service_date_id);
+        if (dObj) {
+          const fDate = new Date(dObj.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+          dateOptions += `<option value="${as.id}">${fDate} (Currently: ${as.member_name_text})</option>`;
+        }
+      });
+      targetDateSelect.innerHTML = dateOptions;
+      document.getElementById('member-swap-incoming-select').innerHTML = '<option value="">-- Select Date First --</option>';
+
+      document.getElementById('member-swap-modal').classList.add('active');
+    }
+
+    function populateTargetWorkersDropdown() {
+      const selectedTargetSlotId = document.getElementById('member-swap-target-date').value;
+      const incomingSelect = document.getElementById('member-swap-incoming-select');
+      
+      if (!selectedTargetSlotId) {
+        incomingSelect.innerHTML = '<option value="">-- Select Date First --</option>';
+        return;
+      }
+
+      const targetSlotObj = appState.slots.find(s => s.id === selectedTargetSlotId);
+      let parts = targetSlotObj.member_name_text ? targetSlotObj.member_name_text.split(' & ') : [];
+      incomingSelect.innerHTML = parts.map(p => `<option value="${p}">${p}</option>`).join('');
+    }
+
+    function closeMemberSwapModal() {
+      document.getElementById('member-swap-modal').classList.remove('active');
+      activeSlotId = null;
+    }
+
+    // Saves the structured tracking object inside our Supabase notes field for clear review
+    async function submitMemberSwapRequest() {
+      const targetSlotId = document.getElementById('member-swap-target-date').value;
+      const outgoingPerson = document.getElementById('member-swap-outgoing-select').value;
+      const incomingPerson = document.getElementById('member-swap-incoming-select').value;
+
+      if (!targetSlotId || !outgoingPerson || !incomingPerson) {
+        alert("Please specify all details of your swap arrangement.");
+        return;
+      }
+
+      const packingDetails = {
+        outgoing_worker: outgoingPerson,
+        target_slot_id: targetSlotId,
+        incoming_worker: incomingPerson
+      };
+
+      document.getElementById('loading-text').innerText = "Filing swap request...";
+      document.getElementById('loading-screen').style.display = 'flex';
+
+      const { error } = await sb.from('rota_slots').update({
+        status: 'pending_swap',
+        notes: JSON.stringify(packingDetails) // Safely save the explicit breakdown configuration
+      }).eq('id', activeSlotId);
+
+      document.getElementById('loading-screen').style.display = 'none';
+
       if (error) {
         alert(error.message);
       } else {
-        const target = appState.slots.find(s => s.id === slotId);
-        if (target) target.status = 'pending_swap';
+        const origin = appState.slots.find(s => s.id === activeSlotId);
+        if (origin) {
+          origin.status = 'pending_swap';
+          origin.notes = JSON.stringify(packingDetails);
+        }
+        closeMemberSwapModal();
         renderGrid();
         renderSwapsTable();
+        alert("Agreement logged. Shift will update across the schedule as soon as the Admin approves it.");
       }
     }
 
-    // Opens the targeted modal form to select replacement workers explicitly
+    // Admin Interface: Open the verification modal
     function openApprovalModal(slotId) {
-      activeApprovalSlotId = slotId;
+      adminTargetSlotId = slotId;
       const slotObj = appState.slots.find(s => s.id === slotId);
-      const dateObj = appState.dates.find(d => d.id === slotObj.service_date_id);
+      const labelConfig = MINISTRY_LABELS[slotObj.role_title] || { name: slotObj.role_title };
       
-      const config = MINISTRY_LABELS[slotObj.role_title] || { name: slotObj.role_title };
-      const pool = MINISTRY_POOLS[slotObj.role_title] || [];
-      const formattedDate = new Date(dateObj.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+      document.getElementById('modal-dept-label').innerText = labelConfig.name;
 
-      document.getElementById('modal-dept-label').innerText = config.name;
-      document.getElementById('modal-date-label').innerText = formattedDate;
+      try {
+        const details = JSON.parse(slotObj.notes);
+        const pairedSlot = appState.slots.find(s => s.id === details.target_slot_id);
+        
+        const dateOrig = appState.dates.find(d => d.id === slotObj.service_date_id);
+        const dateDest = appState.dates.find(d => d.id === pairedSlot.service_date_id);
 
-      let currentParts = slotObj.member_name_text ? slotObj.member_name_text.split(' & ') : ["", ""];
-      const p1 = currentParts[0] || "";
-      const p2 = currentParts[1] || "";
+        const fOrig = new Date(dateOrig.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+        const fDest = new Date(dateDest.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 
-      let options1 = `<option value="">-- Vacant Position --</option>`;
-      let options2 = `<option value="">-- Vacant Position --</option>`;
-      
-      pool.forEach(m => {
-        options1 += `<option value="${m}" ${m === p1 ? 'selected' : ''}>${m}</option>`;
-        options2 += `<option value="${m}" ${m === p2 ? 'selected' : ''}>${m}</option>`;
-      });
-
-      document.getElementById('modal-select-1').innerHTML = options1;
-      document.getElementById('modal-select-2').innerHTML = options2;
+        document.getElementById('modal-swap-summary-box').innerHTML = `
+          • <b>${details.outgoing_worker}</b> will leave the shift on <b>${fOrig}</b>.<br>
+          • <b>${details.incoming_worker}</b> will leave the shift on <b>${fDest}</b>.<br><br>
+          <span style="color:var(--cbc-teal); font-weight:700;">✓ They will trade places. All other assigned team partners remain unaffected.</span>
+        `;
+      } catch(e) {
+        document.getElementById('modal-swap-summary-box').innerText = "Manual modification override required.";
+      }
 
       document.getElementById('approval-modal').classList.add('active');
     }
 
     function closeApprovalModal() {
       document.getElementById('approval-modal').classList.remove('active');
-      activeApprovalSlotId = null;
+      adminTargetSlotId = null;
     }
 
-    // Commits the finalized approved swap directly into your database 
-    async function submitApprovedSwap() {
-      if (!activeApprovalSlotId) return;
-      
-      const val1 = document.getElementById('modal-select-1').value;
-      const val2 = document.getElementById('modal-select-2').value;
-      const finalString = [val1, val2].filter(Boolean).join(' & ');
+    // Admin Execution Engine: Processes the 2-way data switch precisely
+    async function executeTwoWaySwap() {
+      if (!adminTargetSlotId) return;
 
-      document.getElementById('loading-text').innerText = "Updating shift assignment...";
+      const originSlot = appState.slots.find(s => s.id === adminTargetSlotId);
+      let details;
+      try { details = JSON.parse(originSlot.notes); } catch(e) { alert("Invalid structure format."); return; }
+
+      const destinationSlot = appState.slots.find(s => s.id === details.target_slot_id);
+      if (!destinationSlot) return;
+
+      // Unpack string arrays for the origin date slot
+      let originWorkers = originSlot.member_name_text ? originSlot.member_name_text.split(' & ') : [];
+      let idx1 = originWorkers.indexOf(details.outgoing_worker);
+      if (idx1 !== -1) originWorkers[idx1] = details.incoming_worker; // Swap singular person out
+      const newOriginString = originWorkers.filter(Boolean).join(' & ');
+
+      // Unpack string arrays for the destination target date slot
+      let destWorkers = destinationSlot.member_name_text ? destinationSlot.member_name_text.split(' & ') : [];
+      let idx2 = destWorkers.indexOf(details.incoming_worker);
+      if (idx2 !== -1) destWorkers[idx2] = details.outgoing_worker; // Swap singular person in
+      const newDestString = destWorkers.filter(Boolean).join(' & ');
+
+      document.getElementById('loading-text').innerText = "Executing cross-date switch...";
       document.getElementById('loading-screen').style.display = 'flex';
 
-      const { error } = await sb.from('rota_slots').update({
-        member_name_text: finalString,
-        status: 'normal' // Reset state flag to complete the tracking loop
-      }).eq('id', activeApprovalSlotId);
+      // Push both row updates straight to Supabase
+      const update1 = sb.from('rota_slots').update({ member_name_text: newOriginString, status: 'normal', notes: null }).eq('id', originSlot.id);
+      const update2 = sb.from('rota_slots').update({ member_name_text: newDestString, status: 'normal', notes: null }).eq('id', destinationSlot.id);
+
+      await Promise.all([update1, update2]);
+
+      // Refresh app local state representation
+      originSlot.member_name_text = newOriginString; originSlot.status = 'normal'; originSlot.notes = null;
+      destinationSlot.member_name_text = newDestString; destinationSlot.status = 'normal'; destinationSlot.notes = null;
 
       document.getElementById('loading-screen').style.display = 'none';
-
-      if (error) {
-        alert("Error saving approved change: " + error.message);
-      } else {
-        const slotObj = appState.slots.find(s => s.id === activeApprovalSlotId);
-        if (slotObj) {
-          slotObj.member_name_text = finalString;
-          slotObj.status = 'normal';
-        }
-        closeApprovalModal();
-        renderGrid();
-        renderSwapsTable();
-        alert("Shift updated successfully!");
-      }
+      closeApprovalModal();
+      renderGrid();
+      renderSwapsTable();
+      alert("Database rows updated! The swap is complete.");
     }
 
     async function rejectSwapFlag(slotId) {
-      if (!confirm("Reject this swap request and keep the original assignment?")) return;
-      const { error } = await sb.from('rota_slots').update({ status: 'normal' }).eq('id', slotId);
+      if (!confirm("Reject this swap request and restore previous state settings?")) return;
+      const { error } = await sb.from('rota_slots').update({ status: 'normal', notes: null }).eq('id', slotId);
       if (error) {
         alert(error.message);
       } else {
         const target = appState.slots.find(s => s.id === slotId);
-        if (target) target.status = 'normal';
+        if (target) { target.status = 'normal'; target.notes = null; }
         renderGrid();
         renderSwapsTable();
       }
@@ -500,7 +604,7 @@
               <div class="card-assignment ${config.css}" style="${isPending ? 'background:#fffbeb; border-right:4px solid #f59e0b;' : ''}">
                 <div class="role-header-box">
                   <div class="role-title">${config.name}</div>
-                  ${isPending ? '<span class="badge pending">🔄 Swap Requested</span>' : ''}
+                  ${isPending ? '<span class="badge pending" style="font-size:9px;">🔄 Swap Logged</span>' : ''}
                 </div>
                 <span class="member-name">${s.member_name_text || 'Unassigned Slot'}</span>
                 
@@ -509,7 +613,7 @@
                   <select class="inline-select" onchange="handleInlineChange('${s.id}', 1, this.value)">${selectOpt2}</select>
                 </div>
 
-                ${!isPending ? `<button class="swap-member-trigger-btn" onclick="requestSwapFlag('${s.id}')">🔄 Ask to Swap</button>` : ''}
+                ${!isPending ? `<button class="swap-member-trigger-btn" onclick="openMemberSwapModal('${s.id}')">🔄 Ask to Swap</button>` : ''}
               </div>
             `;
           });
@@ -524,6 +628,8 @@
       let html = '';
       let pendingCounter = 0;
 
+      const isCurrentUserAdmin = (appState.user && appState.user.email === 'coopsben0@gmail.com');
+
       appState.dates.forEach(d => {
         const slots = appState.slots.filter(s => s.service_date_id === d.id);
         slots.forEach(s => {
@@ -533,22 +639,39 @@
 
           if (isPending) pendingCounter++;
 
-          if (isPending || appState.user.email === 'coopsben0@gmail.com') {
+          if (isPending || isCurrentUserAdmin) {
+            let detailsText = '📂 Baseline Assignment Operational';
+            let actionMarkup = `<button class="action-btn-sm" onclick="switchTab('master')">View Grid</button>`;
+
+            if (isPending) {
+              try {
+                const parsed = JSON.parse(s.notes);
+                const linkedSlot = appState.slots.find(item => item.id === parsed.target_slot_id);
+                const linkedDateObj = appState.dates.find(day => day.id === linkedSlot.service_date_id);
+                const fLinkedDate = new Date(linkedDateObj.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+                
+                detailsText = `👉 Swap <b>${parsed.outgoing_worker}</b> with <b>${parsed.incoming_worker}</b> (${fLinkedDate})`;
+              } catch(err) {
+                detailsText = '⚠️ Custom Swap Form Data Pending Review';
+              }
+
+              if (isCurrentUserAdmin) {
+                actionMarkup = `
+                  <button class="action-btn-sm" onclick="openApprovalModal('${s.id}')">Approve & Close</button>
+                  <button class="action-btn-danger" style="margin-left:4px;" onclick="rejectSwapFlag('${s.id}')">Reject</button>
+                `;
+              }
+            }
+
             html += `
               <tr>
                 <td><b>${formattedDate}</b></td>
                 <td><span class="role-title">${config.name}</span></td>
-                <td><code>${s.member_name_text || 'Vacant Slot'}</code></td>
+                <td>${detailsText}</td>
                 <td>
-                  ${isPending ? '<span class="badge pending">🔄 Swap Pending</span>' : '<span class="badge resolved">✓ Active</span>'}
+                  ${isPending ? '<span class="badge pending">🔄 Under Review</span>' : '<span class="badge resolved">✓ Active</span>'}
                 </td>
-                <td>
-                  ${isPending && appState.user.email === 'coopsben0@gmail.com' ? 
-                    `<button class="action-btn-sm" onclick="openApprovalModal('${s.id}')">Approve & Close</button>
-                     <button class="action-btn-danger" style="margin-left:4px;" onclick="rejectSwapFlag('${s.id}')">Reject</button>` : 
-                    `<button class="action-btn-sm" onclick="switchTab('master')">View Grid</button>`
-                  }
-                </td>
+                <td>${actionMarkup}</td>
               </tr>
             `;
           }
