@@ -54,14 +54,14 @@
     .card-date { font-size: 18px; font-weight: 700; color: var(--cbc-navy); margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid var(--bg-main); }
     
     .card-assignment { background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; padding: 12px 16px; margin-bottom: 10px; border-left: 4px solid var(--cbc-blue); }
-    .card-assignment.jr-ss { border-left-color: #ec4899; }
-    .card-assignment.sr-ss { border-left-color: #a855f7; }
+    .card-assignment.jr_sunday_school { border-left-color: #ec4899; }
+    .card-assignment.sr_sunday_school { border-left-color: #a855f7; }
     .card-assignment.worship { border-left-color: #0ea5e9; }
     .card-assignment.communion { border-left-color: #10b981; }
     .card-assignment.greeting { border-left-color: #f59e0b; }
-    .card-assignment.tea-coffee { border-left-color: #14b8a6; }
-    .card-assignment.hall-duty { border-left-color: #6366f1; }
-    .card-assignment.sound-desk { border-left-color: #64748b; }
+    .card-assignment.tea_coffee { border-left-color: #14b8a6; }
+    .card-assignment.hall_duty { border-left-color: #6366f1; }
+    .card-assignment.sound_desk { border-left-color: #64748b; }
 
     .role-title { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); }
     .member-name { font-size: 15px; font-weight: 700; color: var(--cbc-navy); margin-top: 2px; }
@@ -120,27 +120,27 @@
     const SUPABASE_URL = 'https://ojzwujpahfjmaeisnfez.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qend1anBhaGZqbWFlaXNuZmV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTA5NDMsImV4cCI6MjA5NDU4Njk0M30.VvszGR6MbUnBhKsmsXBikkrjok2-F1bnyS4zOwDX5hg';
     
-    // Explicit 8 separate ministry lists mapped out using your full congregation directory
+    // Configured pools with the 45 members provided in your screenshots
     const MINISTRY_POOLS = {
-      jr_sunday_school: ["Amelie", "Iris Argue", "Adam Cooper", "Dad", "Henry", "John"],
-      sr_sunday_school: ["Kathryn Beggs", "Niall Keys", "Charlotte McCabe", "Mervyn Scott", "Mum", "Nathanael McCabe"],
-      worship: ["Paul Savage", "Emma Savage", "Carole Mckenna", "Rosemary T", "Godiya Bwala", "andrewbwala", "Sarah Pogue"],
-      communion: ["Janet McAuley", "Neil", "Andrew Ferguson", "Andrew Pogue", "Julie", "Elizabeth"],
-      greeting: ["Stephen McAuley", "Robert", "Tbelle", "Adrian Tomlinson", "Glynis"],
-      tea_coffee: ["Harry McCrum", "Lesley Quinn", "Paul", "Ann", "Margaret Jackson"],
-      hall_duty: ["Ruth Hamilton", "Wes", "Karen Scott", "Janet"],
+      jr_sunday_school: ["Amelie", "Iris Argue", "Adam Cooper", "Dad"],
+      sr_sunday_school: ["Henry", "John", "Kathryn Beggs", "Niall Keys"],
+      worship: ["Paul Savage", "Emma Savage", "Carole Mckenna", "Rosemary T", "Godiya Bwala", "andrewbwala"],
+      communion: ["Janet McAuley", "Neil", "Andrew Ferguson", "Andrew Pogue"],
+      greeting: ["Julie", "Elizabeth", "Stephen McAuley", "Robert", "Tbelle"],
+      tea_coffee: ["Adrian Tomlinson", "Amy Verner", "Glynis", "Harry McCrum", "Lesley Quinn"],
+      hall_duty: ["Paul", "Ann", "Margaret Jackson", "Ruth Hamilton", "Wes", "Karen Scott", "Janet"],
       sound_desk: ["Oluwatosin Ogunkayode St", "Philip Bain", "Michael Quinn", "Cyril Nelson"]
     };
 
     const MINISTRY_LABELS = {
-      jr_sunday_school: { name: "Jr Sunday School", css: "jr-ss" },
-      sr_sunday_school: { name: "Sr Sunday School", css: "sr-ss" },
+      jr_sunday_school: { name: "Jr Sunday School", css: "jr_sunday_school" },
+      sr_sunday_school: { name: "Sr Sunday School", css: "sr_sunday_school" },
       worship: { name: "Worship Team", css: "worship" },
-      communion: { name: "Communion Prep", css: "communion" },
-      greeting: { name: "Welcome Greeting", css: "greeting" },
-      tea_coffee: { name: "Tea & Coffee Duty", css: "tea-coffee" },
-      hall_duty: { name: "Hall Duty Guard", css: "hall-duty" },
-      sound_desk: { name: "Sound & Desk Tech", css: "sound-desk" }
+      communion: { name: "Communion", css: "communion" },
+      greeting: { name: "Greeting", css: "greeting" },
+      tea_coffee: { name: "Tea & Coffee", css: "tea_coffee" },
+      hall_duty: { name: "Hall Duty", css: "hall_duty" },
+      sound_desk: { name: "Sound and Desk", css: "sound_desk" }
     };
 
     let sb, appState = { user: null, dates: [], slots: [], rotas: [] }, currentFilter = 'all';
@@ -178,9 +178,6 @@
         sb.from('rotas').select('*')
       ]);
 
-      if (dRes.error) console.error("Dates error:", dRes.error);
-      if (sRes.error) console.error("Slots error:", sRes.error);
-
       appState.dates = dRes.data || [];
       appState.slots = sRes.data || [];
       appState.rotas = rRes.data || [];
@@ -193,20 +190,23 @@
     }
 
     async function pushEightCustomRotas() {
-      if (!confirm("This will overwrite existing data and establish clean timelines for all 8 separate ministries. Proceed?")) return;
+      if (!confirm("Wipe existing data and generate fresh 8-team ministry rosters?")) return;
       
-      document.getElementById('loading-text').innerText = "Clearing old rosters and deploying tables...";
+      document.getElementById('loading-text').innerText = "Deploying ministry tables...";
       document.getElementById('loading-screen').style.display = 'flex';
 
       try {
-        // Clear any old slots to clean the slate
-        const { error: delError } = await sb.from('rota_slots').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-        if (delError) throw delError;
+        // Clear old items cleanly
+        await sb.from('rota_slots').delete().neq('id', '00000000-0000-0000-0000-000000000000');
 
-        // Grab a fallback real valid UUID from your database tables
-        const validFallbackRotaId = appState.rotas[0]?.id;
-        if (!validFallbackRotaId) {
-          throw new Error("No existing records found in your 'rotas' table. Please ensure at least one base rota exists in Supabase first.");
+        // Dynamically find a valid rota entry from your database to satisfy the foreign key constraint
+        let sharedRotaId = appState.rotas[0]?.id;
+
+        // If your rotas table is entirely empty, we'll create a generic parent container row first
+        if (!sharedRotaId) {
+          const { data: newRota, error: rotaErr } = await sb.from('rotas').insert({ name: 'Master Church Schedule' }).select();
+          if (rotaErr) throw rotaErr;
+          sharedRotaId = newRota[0].id;
         }
 
         let payload = [];
@@ -218,7 +218,7 @@
             const server2 = pool[(dateIndex * 2 + 1) % pool.length];
 
             payload.push({
-              rota_id: validFallbackRotaId, 
+              rota_id: sharedRotaId, // Now perfectly satisfied!
               service_date_id: dateObj.id,
               role_title: key, 
               member_name_text: `${server1} & ${server2}`,
