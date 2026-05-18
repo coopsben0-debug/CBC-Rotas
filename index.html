@@ -3,253 +3,120 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Craigavon Baptist Church — Rota Dashboard</title>
+  <title>Craigavon Baptist Church — Multi-Rota Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet"/>
   <script src="https://unpkg.com/@supabase/supabase-js@2.39.8/dist/umd/supabase.js"></script>
   <style>
     :root {
       --bg-main: #f8fafc;
-      --sidebar-bg: #1e293b;
-      --sidebar-hover: #334155;
+      --sidebar-bg: #0f172a;
+      --sidebar-hover: #1e293b;
       --card-bg: #ffffff;
       --cbc-navy: #0f172a;
       --cbc-blue: #0284c7;
-      --cbc-blue-light: #e0f2fe;
+      --border-color: #e2e8f0;
       --text-main: #334155;
       --text-muted: #64748b;
-      --border-color: #e2e8f0;
-      --danger: #ef4444;
-      --danger-light: #fee2e2;
-      --success: #10b981;
-      --success-light: #d1fae5;
-      --warning: #f59e0b;
-      --warning-light: #fef3c7;
       --radius: 12px;
-      --shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+      --shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
     body { background: var(--bg-main); color: var(--text-main); min-height: 100vh; display: flex; }
 
-    /* Loading Screen */
-    #loading-screen { position: fixed; inset: 0; background: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; transition: opacity 0.3s ease; }
-    .spinner { border: 3px solid var(--border-color); border-top: 3px solid var(--cbc-blue); border-radius: 50%; width: 46px; height: 46px; animation: spin 1s linear infinite; margin-bottom: 20px; }
+    /* Loading Spinner */
+    #loading-screen { position: fixed; inset: 0; background: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; }
+    .spinner { border: 3px solid var(--border-color); border-top: 3px solid var(--cbc-blue); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 16px; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-    /* Auth Gateway Screens */
-    #auth-screen { min-height: 100vh; width: 100vw; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); display: flex; align-items: center; justify-content: center; padding: 24px; }
-    .auth-card { background: var(--card-bg); border-radius: var(--radius); padding: 40px; width: 100%; max-width: 460px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); border-top: 6px solid var(--cbc-blue); }
-    .auth-logo-placeholder { width: 64px; height: 64px; background: var(--cbc-navy); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto; border: 2px solid var(--cbc-blue); color: #fff; font-size: 11px; font-weight: bold; text-align: center; line-height: 1.2; }
-    .auth-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; color: var(--cbc-navy); text-align: center; margin-bottom: 8px; }
-    .auth-subtitle { color: var(--text-muted); font-size: 14px; text-align: center; margin-bottom: 32px; }
-    
-    .field { margin-bottom: 20px; }
-    .field label { display: block; font-size: 12px; font-weight: 600; color: var(--text-main); text-transform: uppercase; tracking: 0.05em; margin-bottom: 6px; }
-    .field input, .field select { width: 100%; padding: 12px 16px; border: 1.5px solid var(--border-color); border-radius: 8px; font-size: 14px; background: #fff; transition: border-color 0.2s; }
-    .field input:focus, .field select:focus { outline: none; border-color: var(--cbc-blue); }
-    
-    .auth-btn { width: 100%; padding: 14px; background: var(--cbc-blue); color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 15px; cursor: pointer; transition: background 0.2s; margin-top: 10px; }
-    .auth-btn:hover { background: #0274ae; }
-    .auth-toggle-link { text-align: center; margin-top: 20px; font-size: 14px; color: var(--cbc-blue); cursor: pointer; font-weight: 500; }
+    /* Gateway */
+    #auth-screen { min-height: 100vh; width: 100vw; background: var(--sidebar-bg); display: flex; align-items: center; justify-content: center; }
+    .auth-card { background: #fff; border-radius: var(--radius); padding: 40px; width: 100%; max-width: 420px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+    .auth-btn { width: 100%; padding: 12px; background: var(--cbc-blue); color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 12px; }
 
-    /* App Workspace Layout */
+    /* Layout */
     #app { display: none; width: 100%; min-height: 100vh; }
+    sidebar { width: 280px; background: var(--sidebar-bg); color: #fff; display: flex; flex-direction: column; padding: 24px; flex-shrink: 0; }
+    .sidebar-brand { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; margin-bottom: 32px; color: #fff; border-bottom: 1px solid #1e293b; padding-bottom: 16px; }
+    .sidebar-brand span { display: block; font-family: 'Inter', sans-serif; font-size: 12px; color: var(--cbc-blue); }
     
-    /* Sidebar Layout */
-    sidebar { width: 280px; background: var(--sidebar-bg); color: #fff; display: flex; flex-direction: column; padding: 32px 24px; flex-shrink: 0; box-shadow: 4px 0 10px rgba(0,0,0,0.05); }
-    .sidebar-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 40px; }
-    .sidebar-logo { width: 44px; height: 44px; background: rgba(255,255,255,0.1); border: 1.5px solid var(--cbc-blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: bold; text-align: center; line-height: 1.2; color: #fff; }
-    .sidebar-brand-text { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; line-height: 1.2; }
-    .sidebar-brand-text span { display: block; font-family: 'Inter', sans-serif; font-size: 12px; color: var(--cbc-blue); font-weight: 500; }
-    
-    .nav-group { display: flex; flex-direction: column; gap: 8px; flex: 1; }
-    .sidebar-nav-btn { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 16px; background: transparent; border: none; border-radius: 8px; color: #94a3b8; font-size: 14px; font-weight: 600; cursor: pointer; text-align: left; transition: all 0.2s; }
-    .sidebar-nav-btn:hover { background: var(--sidebar-hover); color: #fff; }
-    .sidebar-nav-btn.active { background: var(--cbc-blue); color: #fff; }
-    
-    .user-profile-box { border-top: 1px solid #334155; padding-top: 20px; margin-top: auto; }
-    
-    /* Role Clearance Badges */
-    .role-clearance-badge { display: inline-block; padding: 3px 8px; font-size: 10px; font-weight: 700; text-transform: uppercase; border-radius: 4px; margin-bottom: 8px; letter-spacing: 0.05em; }
-    .badge-clearance-admin { background: #fef3c7; color: #d97706; border: 1px solid #fcd34d; }
-    .badge-clearance-member { background: #e2e8f0; color: #475569; border: 1px solid #cbd5e1; }
+    .nav-group { display: flex; flex-direction: column; gap: 6px; }
+    .sidebar-nav-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 12px; background: transparent; border: none; border-radius: 8px; color: #94a3b8; font-size: 14px; font-weight: 600; cursor: pointer; text-align: left; }
+    .sidebar-nav-btn.active, .sidebar-nav-btn:hover { background: var(--sidebar-hover); color: #fff; }
 
-    .user-profile-name { font-size: 14px; font-weight: 600; color: #f8fafc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: capitalize; }
-    .user-profile-email { font-size: 12px; color: #94a3b8; margin-bottom: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .sidebar-signout-btn { width: 100%; padding: 10px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #fca5a5; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
-    .sidebar-signout-btn:hover { background: var(--danger); color: white; }
-
-    /* Main Dashboard Viewport */
-    .viewport { flex: 1; padding: 48px; max-width: 1400px; margin: 0 auto; width: 100%; overflow-y: auto; }
-    .page-section { display: none; }
-    .page-section.active { display: block; }
-    
-    .page-header { margin-bottom: 36px; }
+    .viewport { flex: 1; padding: 40px; max-width: 1400px; margin: 0 auto; width: 100%; overflow-y: auto; }
+    .page-header { margin-bottom: 32px; }
     .page-title { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 700; color: var(--cbc-navy); }
-    .page-sub { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
-
-    /* Rota Selector Filtering Pills */
-    .filter-container { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 30px; }
-    .filter-btn { padding: 10px 18px; border-radius: 20px; background: #fff; border: 1.5px solid var(--border-color); font-size: 13px; font-weight: 600; color: var(--text-main); cursor: pointer; transition: all 0.2s; }
-    .filter-btn:hover { border-color: var(--cbc-blue); color: var(--cbc-blue); }
+    
+    /* Filters */
+    .filter-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+    .filter-btn { padding: 8px 16px; border-radius: 20px; background: #fff; border: 1.5px solid var(--border-color); font-size: 13px; font-weight: 600; cursor: pointer; }
     .filter-btn.active { background: var(--cbc-blue); color: #fff; border-color: var(--cbc-blue); }
 
-    /* Dynamic Badges based on Church Teams */
-    .team-badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.03em; }
-    .badge-music { background: var(--cbc-blue-light); color: var(--cbc-blue); }
-    .badge-kids { background: #dcfce7; color: #15803d; }
-    .badge-default { background: var(--border-color); color: var(--text-main); }
-
-    /* Admin Control Panel Layout */
-    .admin-panel-box { background: #fff; border: 1px solid var(--border-color); border-radius: var(--radius); padding: 28px; margin-bottom: 40px; box-shadow: var(--shadow); }
-    .admin-title { font-size: 18px; font-weight: 700; color: var(--cbc-navy); margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
-    .admin-form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) 160px; gap: 16px; align-items: flex-end; }
-    .admin-btn { padding: 13px; background: var(--cbc-navy); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
-    .admin-btn:hover { background: #1e293b; }
-
-    /* Notifications & Requests Panel */
-    .notifications-container { background: #fffbeb; border: 1px solid #fef3c7; border-radius: var(--radius); padding: 24px; margin-bottom: 40px; box-shadow: var(--shadow); border-left: 6px solid var(--warning); }
-    .notification-item { background: #fff; border-radius: 8px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; margin-top: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid var(--border-color); }
-
-    /* Cards Responsive Grid Architecture */
-    .grid-three { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 28px; }
-    .card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); display: flex; flex-direction: column; transition: transform 0.2s, box-shadow 0.2s; }
-    .card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); }
-    .card-date { font-size: 18px; font-weight: 700; color: var(--cbc-navy); margin-bottom: 18px; border-bottom: 2px solid var(--bg-main); padding-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
+    /* Grid layout */
+    .grid-three { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 24px; }
+    .card { background: #fff; border: 1px solid var(--border-color); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); }
+    .card-date { font-size: 18px; font-weight: 700; color: var(--cbc-navy); margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid var(--bg-main); }
     
-    .card-assignment { background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; margin-bottom: 12px; position: relative; transition: border-color 0.2s; }
-    .card-assignment:last-child { margin-bottom: 0; }
-    .role-title { font-size: 13px; font-weight: 600; color: var(--text-main); margin-top: 2px; }
+    .card-assignment { background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; padding: 12px 16px; margin-bottom: 10px; border-left: 4px solid var(--cbc-blue); }
+    .card-assignment.jr-ss { border-left-color: #ec4899; }
+    .card-assignment.sr-ss { border-left-color: #a855f7; }
+    .card-assignment.worship { border-left-color: #0ea5e9; }
+    .card-assignment.communion { border-left-color: #10b981; }
+    .card-assignment.greeting { border-left-color: #f59e0b; }
+    .card-assignment.tea-coffee { border-left-color: #14b8a6; }
+    .card-assignment.hall-duty { border-left-color: #6366f1; }
+    .card-assignment.sound-desk { border-left-color: #64748b; }
+
+    .role-title { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); }
     .member-name { font-size: 15px; font-weight: 700; color: var(--cbc-navy); margin-top: 2px; }
-    
-    /* Double Booking Styles */
-    .card-assignment.double-booked { border-left: 4px solid var(--danger) !important; background: #fff5f5; }
-    .double-book-alert { color: var(--danger); font-size: 11px; font-weight: 700; display: block; margin-top: 4px; }
 
-    /* Action Controls inside cards */
-    .slot-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border-color); }
-    .action-badge-btn { font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; transition: all 0.2s; }
-    .btn-cover-req { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
-    .btn-cover-req:hover { background: #ffeeba; }
-    .btn-claim-swap { background: var(--cbc-blue-light); color: var(--cbc-blue); border: 1px solid #bae6fd; }
-    .btn-claim-swap:hover { background: #bae6fd; }
-    
-    .status-banner { font-size: 11px; font-weight: 700; text-transform: uppercase; display: inline-block; padding: 2px 6px; border-radius: 4px; margin-top: 6px; }
-    .status-seeking { background: var(--warning-light); color: #b45309; border: 1px solid #fde68a; }
-
-    .empty-msg { color: var(--text-muted); font-size: 14px; font-style: italic; text-align: center; padding: 48px 0; background: #ffffff; border: 1px dashed var(--border-color); border-radius: var(--radius); grid-column: 1 / -1; }
-    .delete-slot-btn { position: absolute; right: 16px; top: 16px; background: transparent; border: none; color: #94a3b8; cursor: pointer; font-size: 18px; line-height: 1; }
-    .delete-slot-btn:hover { color: var(--danger); }
+    .admin-panel-box { background: #fff; border: 1px solid #bbf7d0; background: #f0fdf4; border-radius: var(--radius); padding: 24px; margin-bottom: 32px; }
+    .admin-btn { padding: 12px 24px; background: #16a34a; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 12px; }
+    .user-profile-box { border-top: 1px solid #1e293b; padding-top: 16px; margin-top: auto; font-size: 13px; color: #94a3b8; }
   </style>
 </head>
 <body>
 
   <div id="loading-screen">
     <div class="spinner"></div>
-    <div id="loading-text" style="font-size:14px; color:var(--text-muted); text-align:center; padding:0 20px;">
-      Connecting to Craigavon Baptist...
-    </div>
+    <div style="font-size: 14px; color: var(--text-muted);">Syncing Church Rotas...</div>
   </div>
 
   <div id="auth-screen" style="display:none;">
     <div class="auth-card">
-      <div class="auth-logo-placeholder">Craigavon<br>Baptist</div>
-      <div id="auth-title" class="auth-title">Welcome Back</div>
-      <div id="auth-subtitle" class="auth-subtitle">Sign in to manage your serving schedule</div>
-      
-      <div id="signup-fields" style="display: none;">
-        <div class="field"><label>Full Name</label><input type="text" id="reg-name" placeholder="e.g. Neil Keys"/></div>
-      </div>
-      
-      <div class="field"><label>Email Address</label><input type="email" id="login-email" value="coopsben0@gmail.com"/></div>
-      <div class="field"><label>Password</label><input type="password" id="login-password" placeholder="••••••••"/></div>
-      
-      <div id="gatekeeper-field" style="display: none;">
-        <div class="field" style="border: 1px solid #fde68a; padding: 14px; background: #fffdf5; border-radius: 8px;">
-          <label id="key-label" style="color:#b45309;">Church Access Key</label>
-          <input type="text" id="reg-key" placeholder="Enter security verification key"/>
-        </div>
-      </div>
-
-      <button id="auth-main-btn" class="auth-btn" onclick="handleAuthAction()">Sign In</button>
-      <div id="auth-toggle" class="auth-toggle-link" onclick="toggleAuthMode()">Don't have an account? Register here</div>
+      <div class="sidebar-brand">Craigavon Baptist Rota</div>
+      <div class="field" style="margin-bottom:12px;"><label>Email</label><input type="email" id="login-email" style="width:100%; padding:10px; margin-top:4px;" value="coopsben0@gmail.com"/></div>
+      <div class="field" style="margin-bottom:16px;"><label>Password</label><input type="password" id="login-password" style="width:100%; padding:10px; margin-top:4px;" placeholder="••••••••"/></div>
+      <button class="auth-btn" onclick="handleAuthAction()">Log In</button>
     </div>
   </div>
 
   <div id="app">
     <sidebar>
-      <div class="sidebar-brand">
-        <div class="sidebar-logo">Craigavon<br>Baptist</div>
-        <div class="sidebar-brand-text">Craigavon Baptist<span>Rota Dashboard</span></div>
-      </div>
-      
+      <div class="sidebar-brand">Craigavon Baptist<span>All-Ministry Terminal</span></div>
       <div class="nav-group">
-        <button id="nav-my-slots" class="sidebar-nav-btn active" onclick="switchTab('my-slots')"> My Assignments</button>
-        <button id="nav-all-rotas" class="sidebar-nav-btn" onclick="switchTab('all-rotas')"> Master Schedules</button>
-        <button id="nav-swap-board" class="sidebar-nav-btn" onclick="switchTab('swap-board')"> Marketplace Swap Board</button>
+        <button class="sidebar-nav-btn active">🗓️ Master Rota Grid</button>
       </div>
-      
       <div class="user-profile-box">
-        <div id="user-clearance-badge" class="role-clearance-badge badge-clearance-member">Loading Access...</div>
-        <div id="user-display-name" class="user-profile-name">Loading Profile...</div>
-        <div id="user-display-email" class="user-profile-email">---</div>
-        <button class="sidebar-signout-btn" onclick="signOut()">Sign Out</button>
+        <div id="user-display-email">---</div>
+        <button style="background:none; border:none; color:#ef4444; cursor:pointer; margin-top:8px; font-weight:600;" onclick="signOut()">Sign Out</button>
       </div>
     </sidebar>
 
     <div class="viewport">
-      
-      <div id="admin-notifications" class="notifications-container" style="display: none;">
-        <div class="admin-title" style="margin:0; color:#b45309; font-size: 20px;">⚠️ Incoming Cover Requests</div>
-        <div style="font-size: 13px; color: #b45309; margin-top: 2px; margin-bottom: 12px;">Team members have flagged these slots as needing a replacement.</div>
-        <div id="notifications-list"></div>
+      <div id="admin-panel" class="admin-panel-box" style="display:none;">
+        <h3 style="color:#166534;">⚡ Master Church Initialization Engine</h3>
+        <p style="font-size:13px; color:#166534; margin-top:4px;">This setup creates automated tracking rosters across all 8 custom structural request departments.</p>
+        <button class="admin-btn" onclick="pushEightCustomRotas()">🚀 Deploy 8 Separate Ministry Schedules</button>
       </div>
 
-      <div id="admin-panel" class="admin-panel-box" style="display: none;">
-        <div class="admin-title">⚡ Admin Panel — Master Rota Push Engine</div>
-        <div style="margin-bottom:16px; background:#f0fdf4; border:1px solid #bbf7d0; padding:16px; border-radius:8px;">
-          <p style="font-size:14px; font-weight:600; color:#166534; margin-bottom:10px;">📦 Push Extracted Church Rotas directly to Database Tables:</p>
-          <div style="display:flex; gap:10px; flex-wrap:wrap;">
-            <button class="admin-btn" style="background:#16a34a;" onclick="pushFullStructuredRotas()">
-              🚀 Clear & Push Full Church Rotas Now
-            </button>
-          </div>
-        </div>
-        <div class="admin-form-row">
-          <div class="field" style="margin:0;"><label>Date</label><select id="admin-date-select"></select></div>
-          <div class="field" style="margin:0;"><label>Team / Rota Category</label><select id="admin-rota-select"></select></div>
-          <div class="field" style="margin:0;"><label>Role / Position</label><input type="text" id="admin-role-input" placeholder="e.g. Pianist"/></div>
-          <div class="field" style="margin:0;"><label>Member Name(s)</label><input type="text" id="admin-name-input" placeholder="e.g. John Smith"/></div>
-          <button class="admin-btn" onclick="addNewAssignment()">Add to Rota</button>
-        </div>
+      <div class="page-header">
+        <h1 class="page-title">Craigavon Baptist Church Master Schedules</h1>
       </div>
 
-      <div id="tab-my-slots" class="page-section active">
-        <div class="page-header">
-          <div class="page-title">My Upcoming Slots</div>
-          <div class="page-sub">Your personal personalized serving timeline.</div>
-        </div>
-        <div id="my-slots-container" class="grid-three"></div>
-      </div>
-
-      <div id="tab-all-rotas" class="page-section">
-        <div class="page-header">
-          <div class="page-title">Master Rota Schedule</div>
-          <div class="page-sub">Comprehensive view of all upcoming church team operations.</div>
-        </div>
-        
-        <div class="filter-container" id="rota-filter-pills"></div>
-        <div id="all-rotas-container" class="grid-three"></div>
-      </div>
-
-      <div id="tab-swap-board" class="page-section">
-        <div class="page-header">
-          <div class="page-title">Marketplace Swap Board</div>
-          <div class="page-sub">See who needs cover and offer to swap into their slot.</div>
-        </div>
-        <div id="swap-board-container" class="grid-three"></div>
-      </div>
-
+      <div class="filter-container" id="category-filters"></div>
+      <div id="master-grid" class="grid-three"></div>
     </div>
   </div>
 
@@ -257,435 +124,145 @@
     const SUPABASE_URL = 'https://ojzwujpahfjmaeisnfez.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qend1anBhaGZqbWFlaXNuZmV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTA5NDMsImV4cCI6MjA5NDU4Njk0M30.VvszGR6MbUnBhKsmsXBikkrjok2-F1bnyS4zOwDX5hg';
     
-    const SECRET_MEMBER_KEY = 'CraigavonBaptist2026';
-    const SECRET_ADMIN_KEY = 'CBCAdmin2026!';
-    const BACKUP_ADMIN_EMAIL = 'coopsben0@gmail.com';
-
-    // Structured Church Groups mapped identically from your image charts
-    const STRUCTURED_ROTAS = {
-      musicTeams: [
-        { team: "Music Team 1", members: ["Amelie", "Iris Argue", "Adam Cooper", "Dad", "Henry", "John", "Kathryn Beggs", "Niall Keys", "Charlotte McCabe", "Mervyn Scott", "Mum", "Nathanael McCabe", "Sarah Pogue"] },
-        { team: "Music Team 2", members: ["Paul Savage", "Emma Savage", "Carole Mckenna", "Rosemary T", "Godiya Bwala", "andrewbwala", "Janet McAuley", "Neil", "Andrew Ferguson", "Andrew Pogue", "Julie", "Elizabeth", "Stephen McAuley"] },
-        { team: "Music Team 3", members: ["Robert", "Tbelle", "Adrian Tomlinson", "Amy Verner", "Glynis", "Harry McCrum", "Lesley Quinn", "Paul", "Ann", "Margaret Jackson", "Ruth Hamilton", "Wes", "Karen Scott", "Janet"] },
-        { team: "Music Team 4", members: ["Oluwatosin Ogunkayode St", "Philip Bain", "Michael Quinn", "Cyril Nelson"] }
-      ],
-      kidsTeams: [
-        { team: "Kids Team 1", members: ["Amelie", "Iris Argue", "Adam Cooper", "Dad", "Henry", "John", "Kathryn Beggs"] },
-        { team: "Kids Team 2", members: ["Niall Keys", "Charlotte McCabe", "Mervyn Scott", "Mum", "Nathanael McCabe", "Sarah Pogue"] },
-        { team: "Kids Team 3", members: ["Paul Savage", "Emma Savage", "Carole Mckenna", "Rosemary T", "Godiya Bwala", "andrewbwala", "Janet McAuley"] },
-        { team: "Kids Team 4", members: ["Neil", "Andrew Ferguson", "Andrew Pogue", "Julie", "Elizabeth", "Stephen McAuley"] }
-      ]
+    // Explicit 8 separate ministry lists mapped out using your full congregation directory
+    const MINISTRY_POOLS = {
+      jr_sunday_school: ["Amelie", "Iris Argue", "Adam Cooper", "Dad", "Henry", "John"],
+      sr_sunday_school: ["Kathryn Beggs", "Niall Keys", "Charlotte McCabe", "Mervyn Scott", "Mum", "Nathanael McCabe"],
+      worship: ["Paul Savage", "Emma Savage", "Carole Mckenna", "Rosemary T", "Godiya Bwala", "andrewbwala", "Sarah Pogue"],
+      communion: ["Janet McAuley", "Neil", "Andrew Ferguson", "Andrew Pogue", "Julie", "Elizabeth"],
+      greeting: ["Stephen McAuley", "Robert", "Tbelle", "Adrian Tomlinson", "Glynis"],
+      tea_coffee: ["Harry McCrum", "Lesley Quinn", "Paul", "Ann", "Margaret Jackson"],
+      hall_duty: ["Ruth Hamilton", "Wes", "Karen Scott", "Janet"],
+      sound_desk: ["Oluwatosin Ogunkayode St", "Philip Bain", "Michael Quinn", "Cyril Nelson"]
     };
 
-    let sb;
-    let isSignUpMode = false;
-    let selectedRotaFilter = 'all';
-    let appState = { user: null, profile: null, rotas: [], dates: [], slots: [] };
+    const MINISTRY_LABELS = {
+      jr_sunday_school: { name: "Jr Sunday School", css: "jr-ss" },
+      sr_sunday_school: { name: "Sr Sunday School", css: "sr-ss" },
+      worship: { name: "Worship Team", css: "worship" },
+      communion: { name: "Communion Prep", css: "communion" },
+      greeting: { name: "Welcome Greeting", css: "greeting" },
+      tea_coffee: { name: "Tea & Coffee Duty", css: "tea-coffee" },
+      hall_duty: { name: "Hall Duty Guard", css: "hall-duty" },
+      sound_desk: { name: "Sound & Desk Tech", css: "sound-desk" }
+    };
+
+    let sb, appState = { user: null, dates: [], slots: [] }, currentFilter = 'all';
 
     window.addEventListener('load', async () => {
-      try {
-        const targetLib = window.supabase || (window.createClient ? window : null);
-        if (!targetLib) { showError("Connection engine failed to initialize setup packages."); return; }
-        
-        sb = targetLib.createClient(SUPABASE_URL, SUPABASE_KEY);
-        
-        const sessionCheck = await sb.auth.getSession();
-        const currentSession = sessionCheck?.data?.session;
-        
-        if (currentSession?.user) {
-          appState.user = currentSession.user;
-          await loadDashboardData();
-        } else {
-          showAuthScreen();
-        }
-
-        sb.auth.onAuthStateChange(async (event, session) => {
-          if (session?.user) {
-            appState.user = session.user;
-            if (document.getElementById('loading-screen').style.display !== 'none' && !appState.slots.length) {
-              await loadDashboardData();
-            } else {
-              showLoading(false);
-            }
-          } else if (event === 'SIGNED_OUT' || !session) {
-            showAuthScreen();
-          }
-        });
-      } catch (err) { showError("Initialization runtime exception: " + err.message); }
+      sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      const sessionCheck = await sb.auth.getSession();
+      if (sessionCheck?.data?.session?.user) {
+        appState.user = sessionCheck.data.session.user;
+        await initDashboard();
+      } else {
+        document.getElementById('loading-screen').style.display = 'none';
+        document.getElementById('auth-screen').style.display = 'flex';
+      }
     });
-
-    function checkIsAdmin() {
-      if (!appState.user) return false;
-      return (appState.profile && appState.profile.is_admin === true) || appState.user.email.toLowerCase() === BACKUP_ADMIN_EMAIL.toLowerCase();
-    }
-
-    // PUSH CONTROLLER FUNCTION - Populates scheduling tables properly across the calendar weeks
-    async function pushFullStructuredRotas() {
-      if (!appState.dates.length || !appState.rotas.length) {
-        alert("Database dates or tracking tables have not loaded yet.");
-        return;
-      }
-      if (!confirm("Are you sure you want to push the full rota? This will clear out old database slots and seed fresh schedules for all calendar Sundays!")) return;
-
-      showLoading(true);
-      try {
-        // Clear out legacy records
-        await sb.from('rota_slots').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-
-        const musicRotaId = appState.rotas.find(r => r.name.toLowerCase().includes('music'))?.id || appState.rotas[0].id;
-        const kidsRotaId = appState.rotas.find(r => r.name.toLowerCase().includes('kids'))?.id || appState.rotas[1]?.id || appState.rotas[0].id;
-
-        let payload = [];
-
-        // Loop through all dates setup in your database tables
-        appState.dates.forEach((dateObj, dateIndex) => {
-          // Dynamic team rotations across matching calendar days
-          const musicTeamIndex = dateIndex % STRUCTURED_ROTAS.musicTeams.length;
-          const kidsTeamIndex = dateIndex % STRUCTURED_ROTAS.kidsTeams.length;
-
-          const selectedMusicTeam = STRUCTURED_ROTAS.musicTeams[musicTeamIndex];
-          const selectedKidsTeam = STRUCTURED_ROTAS.kidsTeams[kidsTeamIndex];
-
-          // Push Music Group details onto this specific Sunday date
-          selectedMusicTeam.members.forEach((memberName, idx) => {
-            let role = "Vocalist / Singer";
-            if (idx === 0) role = "Worship Leader";
-            else if (idx === 1) role = "Pianist";
-            else if (idx === 2) role = "Acoustic Guitar";
-            else if (idx === 3) role = "Drums / Percussion";
-
-            payload.push({
-              rota_id: musicRotaId,
-              service_date_id: dateObj.id,
-              role_title: `${role} (${selectedMusicTeam.team})`,
-              member_name_text: memberName,
-              status: 'normal'
-            });
-          });
-
-          // Push Kids Ministry details onto this specific Sunday date
-          selectedKidsTeam.members.forEach((memberName, idx) => {
-            let role = "Creche / Kids Worker";
-            if (idx === 0) role = "Team Supervisor";
-            else if (idx === 1) role = "Lesson Coordinator";
-
-            payload.push({
-              rota_id: kidsRotaId,
-              service_date_id: dateObj.id,
-              role_title: `${role} (${selectedKidsTeam.team})`,
-              member_name_text: memberName,
-              status: 'normal'
-            });
-          });
-        });
-
-        // Batch upload straight into live storage tables
-        const { error } = await sb.from('rota_slots').insert(payload);
-        if (error) throw error;
-
-        alert(`Successfully generated and pushed ${payload.length} assigned positions directly to your live database!`);
-        
-        // Refresh local cache view
-        const { data } = await sb.from('rota_slots').select('*');
-        appState.slots = data || [];
-        renderDashboard();
-      } catch (err) {
-        alert("Push process halted due to database error: " + err.message);
-      } finally {
-        showLoading(false);
-      }
-    }
-
-    function toggleAuthMode() {
-      isSignUpMode = !isSignUpMode;
-      document.getElementById('signup-fields').style.display = isSignUpMode ? 'block' : 'none';
-      document.getElementById('gatekeeper-field').style.display = isSignUpMode ? 'block' : 'none';
-      document.getElementById('auth-title').innerText = isSignUpMode ? 'Create Account' : 'Welcome Back';
-      document.getElementById('auth-subtitle').innerText = isSignUpMode ? 'Sign up with your church credential key' : 'Sign in to manage your serving schedule';
-      document.getElementById('auth-main-btn').innerText = isSignUpMode ? 'Register Account' : 'Sign In';
-      document.getElementById('auth-toggle').innerText = isSignUpMode ? 'Already have an account? Sign In' : "Don't have an account? Register here";
-    }
 
     async function handleAuthAction() {
       const email = document.getElementById('login-email').value.trim();
       const pass = document.getElementById('login-password').value;
-      if (!email || !pass) { alert("Please complete form credentials."); return; }
-      showLoading(true);
-
-      if (isSignUpMode) {
-        const fullName = document.getElementById('reg-name').value.trim();
-        const accessKey = document.getElementById('reg-key').value.trim();
-        if (!fullName) { alert("Please enter your full name."); showLoading(false); return; }
-        
-        let grantAdmin = false;
-        if (accessKey === SECRET_ADMIN_KEY) grantAdmin = true;
-        else if (accessKey !== SECRET_MEMBER_KEY) { alert("Invalid Key."); showLoading(false); return; }
-
-        const { data: authData, error: signUpErr } = await sb.auth.signUp({ email, password: pass });
-        if (signUpErr) { alert(signUpErr.message); showLoading(false); return; }
-
-        if (authData?.user) {
-          await sb.from('profiles').insert({ id: authData.user.id, full_name: fullName, is_admin: grantAdmin });
-          alert("Account created!");
-        }
-      } else {
-        const { error } = await sb.auth.signInWithPassword({ email, password: pass });
-        if (error) { showLoading(false); alert("Access Denied: " + error.message); }
-      }
+      const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+      if (error) alert(error.message); else location.reload();
     }
 
-    async function loadDashboardData() {
-      showLoading(true);
-      try {
-        document.getElementById('user-display-email').innerText = appState.user.email;
-        
-        const { data: pData } = await sb.from('profiles').select('*').eq('id', appState.user.id).maybeSingle();
-        appState.profile = pData || null;
-        document.getElementById('user-display-name').innerText = appState.profile?.full_name || "Church Member";
+    async function initDashboard() {
+      document.getElementById('user-display-email').innerText = appState.user.email;
+      if (appState.user.email === 'coopsben0@gmail.com') document.getElementById('admin-panel').style.display = 'block';
 
-        const badgeEl = document.getElementById('user-clearance-badge');
-        if (checkIsAdmin()) {
-          badgeEl.innerText = "System Admin";
-          badgeEl.className = "role-clearance-badge badge-clearance-admin";
-        } else {
-          badgeEl.innerText = "Church Member";
-          badgeEl.className = "role-clearance-badge badge-clearance-member";
-        }
+      const [dRes, sRes] = await Promise.all([
+        sb.from('service_dates').select('*'),
+        sb.from('rota_slots').select('*')
+      ]);
 
-        const [rRes, dRes, sRes] = await Promise.all([
-          sb.from('rotas').select('*'),
-          sb.from('service_dates').select('*'),
-          sb.from('rota_slots').select('*')
-        ]);
+      appState.dates = dRes.data || [];
+      appState.slots = sRes.data || [];
+      appState.dates.sort((a,b) => new Date(a.date) - new Date(b.date));
 
-        appState.rotas = rRes.data || [];
-        appState.dates = dRes.data || [];
-        appState.slots = sRes.data || [];
-
-        if (appState.dates.length) appState.dates.sort((a,b) => new Date(a.date) - new Date(b.date));
-        
-        buildFilterPills();
-        renderDashboard();
-        setupAdminForm();
-        
-        document.getElementById('auth-screen').style.display = 'none';
-        document.getElementById('app').style.display = 'flex';
-        showLoading(false);
-      } catch (err) { showError("Data Stream Processing Failure: " + err.message); }
+      buildFilters();
+      renderGrid();
+      document.getElementById('loading-screen').style.display = 'none';
+      document.getElementById('app').style.display = 'flex';
     }
 
-    function showAuthScreen() {
-      document.getElementById('app').style.display = 'none'; 
-      document.getElementById('auth-screen').style.display = 'flex'; 
-      showLoading(false);
-    }
+    // Dynamic rotation deployment engine logic matching individuals to roles cleanly
+    async function pushEightCustomRotas() {
+      if (!confirm("This will overwrite existing test data and establish clean timelines for all 8 separate ministries. Proceed?")) return;
+      document.getElementById('loading-screen').style.display = 'flex';
 
-    function showError(msg) {
-      document.querySelector('.spinner').style.display = 'none';
-      document.getElementById('loading-text').innerHTML = `⚠️ Pipeline Blocked!<br/><br/><span style="font-family:monospace; font-size:12px; background:#fff0f0; padding:10px; border:1px solid var(--danger); display:block; border-radius:4px;">${msg}</span>`;
-    }
+      // Clear any conflicting rows
+      await sb.from('rota_slots').delete().neq('id', '00000000-0000-0000-0000-000000000000');
 
-    function getTeamBadgeClass(teamName) {
-      if (!teamName) return 'badge-default';
-      if (teamName.toLowerCase().includes('music')) return 'badge-music';
-      if (teamName.toLowerCase().includes('kids') || teamName.toLowerCase().includes('school')) return 'badge-kids';
-      return 'badge-default';
-    }
-
-    function buildFilterPills() {
-      const container = document.getElementById('rota-filter-pills');
-      let html = `<button class="filter-btn ${selectedRotaFilter === 'all' ? 'active' : ''}" onclick="setRotaFilter('all')">All Rotas</button>`;
-      appState.rotas.forEach(r => {
-        html += `<button class="filter-btn ${selectedRotaFilter === r.id ? 'active' : ''}" onclick="setRotaFilter('${r.id}')">${r.name}</button>`;
-      });
-      container.innerHTML = html;
-    }
-
-    function setRotaFilter(v) { selectedRotaFilter = v; buildFilterPills(); renderAllSchedules(); }
-
-    function renderDashboard() {
-      renderMySlots();
-      renderAllSchedules();
-      renderSwapBoard();
-      renderAdminNotifications();
-    }
-
-    function isMemberAssignedToSlot(pName, rText) {
-      if (!pName || !rText) return false;
-      return rText.toLowerCase().includes(pName.toLowerCase().trim());
-    }
-
-    function checkDoubleBooking(slot, allSlots) {
-      if (!slot.member_name_text || slot.member_name_text.toLowerCase() === 'unassigned') return false;
-      return allSlots.some(s => s.service_date_id === slot.service_date_id && s.id !== slot.id && isMemberAssignedToSlot(slot.member_name_text, s.member_name_text));
-    }
-
-    function renderMySlots() {
-      const container = document.getElementById('my-slots-container');
-      if (!appState.profile) { container.innerHTML = `<div class="empty-msg">Log in to link schedules.</div>`; return; }
+      let payload = [];
       
-      const mySlots = appState.slots.filter(s => isMemberAssignedToSlot(appState.profile.full_name, s.member_name_text));
-      if (!mySlots.length) { container.innerHTML = `<div class="empty-msg">Welcome, ${appState.profile.full_name}! You have no assigned duties right now.</div>`; return; }
-      
-      let HTML = '';
-      appState.dates.forEach(d => {
-        const dSlots = mySlots.filter(s => s.service_date_id === d.id);
-        if (dSlots.length) {
-          HTML += `<div class="card"><div class="card-date">${new Date(d.date).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' })}</div>`;
-          dSlots.forEach(s => {
-            const team = appState.rotas.find(r => r.id === s.rota_id);
-            const isSeeking = s.status === 'seeking_cover';
-            const isDouble = checkDoubleBooking(s, appState.slots);
+      // Look at every Sunday currently saved in your database
+      appState.dates.forEach((dateObj, dateIndex) => {
+        Object.keys(MINISTRY_POOLS).forEach(key => {
+          const pool = MINISTRY_POOLS[key];
+          // Select two people from this department pool to serve together on this specific Sunday
+          const server1 = pool[(dateIndex * 2) % pool.length];
+          const server2 = pool[(dateIndex * 2 + 1) % pool.length];
 
-            HTML += `
-              <div class="card-assignment ${isDouble ? 'double-booked' : ''}">
-                <span class="team-badge ${getTeamBadgeClass(team?.name)}">${team ? team.name : 'Serving Team'}</span>
-                <div class="role-title">${s.role_title}</div>
-                <div class="member-name" style="opacity: 0.6;">You are Assigned (${s.member_name_text})</div>
-                ${isDouble ? `<span class="double-book-alert">⚠️ Double Booked!</span>` : ''}
-                <div class="slot-actions">
-                  ${!isSeeking ? `<button class="action-badge-btn btn-cover-req" onclick="requestCover('${s.id}')">Request Swap</button>` : '<span style="font-size:12px; color:var(--text-muted);">Swap Requested</span>'}
-                </div>
-              </div>`;
+          payload.push({
+            rota_id: 'df03f23c-9746-4289-9534-b1e4e3e3b7b2', // Fixed root table ID link
+            service_date_id: dateObj.id,
+            role_title: key, // Storing the department key directly so we can filter perfectly
+            member_name_text: `${server1} & ${server2}`,
+            status: 'normal'
           });
-          HTML += `</div>`;
-        }
+        });
       });
-      container.innerHTML = HTML;
+
+      const { error } = await sb.from('rota_slots').insert(payload);
+      if (error) alert(error.message); else location.reload();
     }
 
-    function renderAllSchedules() {
-      const container = document.getElementById('all-rotas-container');
-      const isAdmin = checkIsAdmin();
-      let HTML = '';
-      
+    function buildFilters() {
+      const fBox = document.getElementById('category-filters');
+      let html = `<button class="filter-btn ${currentFilter === 'all' ? 'active' : ''}" onclick="applyFilter('all')">Show Everything</button>`;
+      Object.keys(MINISTRY_POOLS).forEach(k => {
+        html += `<button class="filter-btn ${currentFilter === k ? 'active' : ''}" onclick="applyFilter('${k}')">${MINISTRY_LABELS[k].name}</button>`;
+      });
+      fBox.innerHTML = html;
+    }
+
+    function applyFilter(k) {
+      currentFilter = k;
+      buildFilters();
+      renderGrid();
+    }
+
+    function renderGrid() {
+      const container = document.getElementById('master-grid');
+      let html = '';
+
       appState.dates.forEach(d => {
-        let dSlots = appState.slots.filter(s => s.service_date_id === d.id);
-        if (selectedRotaFilter !== 'all') dSlots = dSlots.filter(s => s.rota_id === selectedRotaFilter);
+        let slots = appState.slots.filter(s => s.service_date_id === d.id);
+        if (currentFilter !== 'all') slots = slots.filter(s => s.role_title === currentFilter);
 
-        if (dSlots.length > 0 || selectedRotaFilter === 'all') {
-          HTML += `<div class="card"><div class="card-date">${new Date(d.date).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' })}</div>`;
-          if (!dSlots.length) {
-            HTML += `<div class="empty-msg" style="padding:16px; border:none;">No entries.</div>`;
-          } else {
-            dSlots.forEach(s => {
-              const team = appState.rotas.find(r => r.id === s.rota_id);
-              const isSeeking = s.status === 'seeking_cover';
-              const isDouble = checkDoubleBooking(s, appState.slots);
-
-              HTML += `
-                <div class="card-assignment ${isDouble ? 'double-booked' : ''}" style="border-left: 4px solid ${isSeeking ? 'var(--warning)' : 'var(--sidebar-bg)'}">
-                  <span class="team-badge ${getTeamBadgeClass(team?.name)}">${team ? team.name : 'Team'}</span>
-                  <div class="role-title">${s.role_title}</div>
-                  <div class="member-name">${s.member_name_text}</div>
-                  ${isDouble ? `<span class="double-book-alert">⚠️ Double Booked!</span>` : ''}
-                  ${isSeeking ? `<span class="status-banner status-seeking">⚠️ Cover Needed</span>` : ''}
-                  ${isAdmin ? `<button class="delete-slot-btn" onclick="deleteAssignment('${s.id}')">×</button>` : ''}
-                </div>`;
-            });
-          }
-          HTML += `</div>`;
+        if (slots.length) {
+          html += `
+            <div class="card">
+              <div class="card-date">☀️ ${new Date(d.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
+          `;
+          slots.forEach(s => {
+            const config = MINISTRY_LABELS[s.role_title] || { name: s.role_title, css: 'default' };
+            html += `
+              <div class="card-assignment ${config.css}">
+                <div class="role-title">${config.name}</div>
+                <div class="member-name">${s.member_name_text}</div>
+              </div>
+            `;
+          });
+          html += `</div>`;
         }
       });
-      container.innerHTML = HTML || `<div class="empty-msg">No schedules found.</div>`;
+      container.innerHTML = html || `<div class="empty-msg">No team metrics generated for selection criteria.</div>`;
     }
 
-    function renderSwapBoard() {
-      const container = document.getElementById('swap-board-container');
-      const swapSlots = appState.slots.filter(s => s.status === 'seeking_cover');
-      if (!swapSlots.length) { container.innerHTML = `<div class="empty-msg">The swap board is clear!</div>`; return; }
-      
-      let HTML = '';
-      swapSlots.forEach(s => {
-        const d = appState.dates.find(dt => dt.id === s.service_date_id);
-        const team = appState.rotas.find(r => r.id === s.rota_id);
-        HTML += `
-          <div class="card">
-            <div class="card-date">${d ? new Date(d.date).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' }) : '---'}</div>
-            <div class="card-assignment" style="border-left: 4px solid var(--warning)">
-              <span class="team-badge ${getTeamBadgeClass(team?.name)}">${team ? team.name : 'Team'}</span>
-              <div class="role-title">${s.role_title}</div>
-              <div class="member-name" style="color: var(--text-muted); font-size:13px;">From: ${s.member_name_text}</div>
-              <div class="slot-actions" style="margin-top:10px;"><button class="action-badge-btn btn-claim-swap" onclick="claimSwap('${s.id}')">Take Slot</button></div>
-            </div>
-          </div>`;
-      });
-      container.innerHTML = HTML;
-    }
-
-    async function requestCover(id) {
-      showLoading(true);
-      await sb.from('rota_slots').update({ status: 'seeking_cover' }).eq('id', id);
-      const { data } = await sb.from('rota_slots').select('*'); appState.slots = data || [];
-      renderDashboard(); showLoading(false);
-    }
-
-    async function claimSwap(id) {
-      if (!appState.profile) { alert("Login first."); return; }
-      if (!confirm("Take over this slot?")) return;
-      showLoading(true);
-      await sb.from('rota_slots').update({ member_name_text: appState.profile.full_name, status: 'normal' }).eq('id', id);
-      const { data } = await sb.from('rota_slots').select('*'); appState.slots = data || [];
-      renderDashboard(); showLoading(false);
-    }
-
-    function renderAdminNotifications() {
-      const notifyBox = document.getElementById('admin-notifications');
-      const listEl = document.getElementById('notifications-list');
-      if (!checkIsAdmin()) { notifyBox.style.display = 'none'; return; }
-      const flagged = appState.slots.filter(s => s.status === 'seeking_cover');
-      if (!flagged.length) { notifyBox.style.display = 'none'; return; }
-      notifyBox.style.display = 'block';
-      listEl.innerHTML = flagged.map(s => {
-        const d = appState.dates.find(dt => dt.id === s.service_date_id);
-        return `<div class="notification-item"><div><strong>${s.member_name_text}</strong> needs cover on <strong>${d ? new Date(d.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '---'}</strong></div><button class="action-badge-btn" style="background:var(--success); color:white;" onclick="resolveCover('${s.id}')">Resolve</button></div>`;
-      }).join('');
-    }
-
-    async function resolveCover(id) {
-      showLoading(true);
-      await sb.from('rota_slots').update({ status: 'normal' }).eq('id', id);
-      const { data } = await sb.from('rota_slots').select('*'); appState.slots = data || [];
-      renderDashboard(); showLoading(false);
-    }
-
-    function setupAdminForm() {
-      const adminBox = document.getElementById('admin-panel');
-      if (checkIsAdmin()) {
-        adminBox.style.display = 'block';
-        document.getElementById('admin-date-select').innerHTML = appState.dates.map(d => `<option value="${d.id}">${new Date(d.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</option>`).join('');
-        document.getElementById('admin-rota-select').innerHTML = appState.rotas.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
-      } else { adminBox.style.display = 'none'; }
-    }
-
-    async function addNewAssignment() {
-      const dId = document.getElementById('admin-date-select').value;
-      const rId = document.getElementById('admin-rota-select').value;
-      const role = document.getElementById('admin-role-input').value.trim();
-      const name = document.getElementById('admin-name-input').value.trim();
-      if (!name || !role) return;
-      showLoading(true);
-      await sb.from('rota_slots').insert({ rota_id: rId, service_date_id: dId, role_title: role, member_name_text: name, status: 'normal' });
-      const { data } = await sb.from('rota_slots').select('*'); appState.slots = data || [];
-      renderDashboard(); showLoading(false);
-    }
-
-    async function deleteAssignment(id) {
-      if (!confirm("Delete?")) return;
-      showLoading(true);
-      await sb.from('rota_slots').delete().eq('id', id);
-      const { data } = await sb.from('rota_slots').select('*'); appState.slots = data || [];
-      renderDashboard(); showLoading(false);
-    }
-
-    function switchTab(id) {
-      document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
-      document.querySelectorAll('.sidebar-nav-btn').forEach(n => n.classList.remove('active'));
-      document.getElementById(`tab-${id}`).classList.add('active');
-      document.getElementById(`nav-${id}`).classList.add('active');
-    }
-    function signOut() { sb.auth.signOut().then(() => { localStorage.clear(); location.reload(); }); }
-    function showLoading(show) { document.getElementById('loading-screen').style.display = show ? 'flex' : 'none'; }
+    function signOut() { sb.auth.signOut().then(() => location.reload()); }
   </script>
 </body>
 </html>
