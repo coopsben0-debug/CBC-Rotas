@@ -68,6 +68,12 @@
     .sidebar-nav-btn.active { background: var(--cbc-blue); color: #fff; }
     
     .user-profile-box { border-top: 1px solid #334155; padding-top: 20px; margin-top: auto; }
+    
+    /* Role Clearance Badges */
+    .role-clearance-badge { display: inline-block; padding: 3px 8px; font-size: 10px; font-weight: 700; text-transform: uppercase; border-radius: 4px; margin-bottom: 8px; letter-spacing: 0.05em; }
+    .badge-clearance-admin { background: #fef3c7; color: #d97706; border: 1px solid #fcd34d; }
+    .badge-clearance-member { background: #e2e8f0; color: #475569; border: 1px solid #cbd5e1; }
+
     .user-profile-name { font-size: 14px; font-weight: 600; color: #f8fafc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: capitalize; }
     .user-profile-email { font-size: 12px; color: #94a3b8; margin-bottom: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .sidebar-signout-btn { width: 100%; padding: 10px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #fca5a5; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
@@ -184,6 +190,7 @@
       </div>
       
       <div class="user-profile-box">
+        <div id="user-clearance-badge" class="role-clearance-badge badge-clearance-member">Loading Access...</div>
         <div id="user-display-name" class="user-profile-name">Loading Profile...</div>
         <div id="user-display-email" class="user-profile-email">---</div>
         <button class="sidebar-signout-btn" onclick="signOut()">Sign Out</button>
@@ -329,10 +336,26 @@
         document.getElementById('user-display-email').innerText = appState.user.email;
         
         try {
-          const profileRes = await sb.from('profiles').select('*').eq('id', appState.user.id).maybeSingle();
-          appState.profile = profileRes?.data || null;
+          const { data: profileData, error: profileErr } = await sb.from('profiles')
+            .select('*')
+            .eq('id', appState.user.id)
+            .maybeSingle();
+            
+          appState.profile = profileData || null;
           document.getElementById('user-display-name').innerText = appState.profile?.full_name || "Church Member";
-        } catch (e) { document.getElementById('user-display-name').innerText = "Church Member"; }
+        } catch (e) { 
+          document.getElementById('user-display-name').innerText = "Church Member"; 
+        }
+
+        // Apply visual badge adjustment rules based on authorization checks
+        const badgeEl = document.getElementById('user-clearance-badge');
+        if (checkIsAdmin()) {
+          badgeEl.innerText = "System Admin";
+          badgeEl.className = "role-clearance-badge badge-clearance-admin";
+        } else {
+          badgeEl.innerText = "Church Member";
+          badgeEl.className = "role-clearance-badge badge-clearance-member";
+        }
 
         const [rRes, dRes, sRes] = await Promise.all([
           sb.from('rotas').select('*'),
@@ -409,14 +432,9 @@
       return profileParts.some(part => part.length > 2 && rotaParts.includes(part));
     }
 
-    // Double Booking Analysis Engine
     function checkDoubleBooking(slot, allSlots) {
       if (!slot.member_name_text || slot.member_name_text.toLowerCase() === 'unassigned') return false;
-      
-      // Look for slots on the exact same date, with a different ID
       const concurrentSlots = allSlots.filter(s => s.service_date_id === slot.service_date_id && s.id !== slot.id);
-      
-      // Check if the names overlap
       return concurrentSlots.some(s => isMemberAssignedToSlot(slot.member_name_text, s.member_name_text));
     }
 
@@ -465,15 +483,10 @@
       
       appState.dates.forEach(d => {
         let dSlots = appState.slots.filter(s => s.service_date_id === d.id);
-        
-        // Apply individual rota selection filtering pill rules
-        if (selectedRotaFilter !== 'all') {
-          dSlots = dSlots.filter(s => s.rota_id === selectedRotaFilter);
-        }
+        if (selectedRotaFilter !== 'all') { dSlots = dSlots.filter(s => s.rota_id === selectedRotaFilter); }
 
         if (dSlots.length > 0 || selectedRotaFilter === 'all') {
           HTML += `<div class="card"><div class="card-date">${new Date(d.date).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' })}</div>`;
-          
           if (!dSlots.length) { 
             HTML += `<div class="empty-msg" style="padding:16px; border:none;">No roles populated for this view.</div>`; 
           } else {
@@ -544,16 +557,11 @@
 
     async function claimSwap(slotId) {
       if (!appState.profile) { alert("Please login first to trade positions."); return; }
-      
       const targetSlot = appState.slots.find(s => s.id === slotId);
       if (!confirm(`Would you like to take over this slot? This will assign your name ("${appState.profile.full_name}") to this role.`)) return;
       
       showLoading(true);
-      await sb.from('rota_slots').update({ 
-        member_name_text: appState.profile.full_name,
-        status: 'normal'
-      }).eq('id', slotId);
-      
+      await sb.from('rota_slots').update({ member_name_text: appState.profile.full_name, status: 'normal' }).eq('id', slotId);
       const { data } = await sb.from('rota_slots').select('*');
       appState.slots = data || [];
       renderDashboard();
@@ -564,9 +572,7 @@
     function renderAdminNotifications() {
       const notifyBox = document.getElementById('admin-notifications');
       const listEl = document.getElementById('notifications-list');
-      const isAdmin = checkIsAdmin();
-      
-      if (!isAdmin) { notifyBox.style.display = 'none'; return; }
+      if (!checkIsAdmin()) { notifyBox.style.display = 'none'; return; }
       
       const flaggedSlots = appState.slots.filter(s => s.status === 'seeking_cover');
       if (!flaggedSlots.length) { notifyBox.style.display = 'none'; return; }
