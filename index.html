@@ -269,6 +269,7 @@
         
         sb = targetLib.createClient(SUPABASE_URL, SUPABASE_KEY);
         
+        // 1. Initial manual session validation on window load
         const sessionCheck = await sb.auth.getSession();
         const currentSession = sessionCheck?.data?.session;
         
@@ -279,11 +280,18 @@
           showAuthScreen();
         }
 
+        // 2. Upgraded active listener context to circumvent tab-focus loading freeze 
         sb.auth.onAuthStateChange(async (event, session) => {
-          if (event === 'SIGNED_IN' && session?.user) {
+          if (session?.user) {
             appState.user = session.user;
-            await loadDashboardData();
-          } else if (event === 'SIGNED_OUT') {
+            
+            // Only fire load mapping if view parameters are empty or screen is actively locked
+            if (document.getElementById('loading-screen').style.display !== 'none' && !appState.slots.length) {
+              await loadDashboardData();
+            } else {
+              showLoading(false); // Cleanly drop visual spinner mask during silent token updates
+            }
+          } else if (event === 'SIGNED_OUT' || !session) {
             showAuthScreen();
           }
         });
@@ -292,7 +300,6 @@
 
     function checkIsAdmin() {
       if (!appState.user) return false;
-      // Checks database flag OR falls back to your hardcoded email safeguard
       const databaseAdminFlag = appState.profile && appState.profile.is_admin === true;
       const emailSafeguard = appState.user.email.toLowerCase() === BACKUP_ADMIN_EMAIL.toLowerCase();
       return databaseAdminFlag || emailSafeguard;
