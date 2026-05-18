@@ -248,7 +248,7 @@
 
         <div style="margin-bottom: 16px;">
           <label style="font-size:11px; font-weight:700; color:var(--text-muted);">3. WHO ARE YOU REQUESTING TO TAKE YOUR PLACE?</label>
-          <select id="member-swap-incoming-select" class="inline-select" style="margin-top:4px; padding:10px; font-size:14px CONTAINER;"></select>
+          <select id="member-swap-incoming-select" class="inline-select" style="margin-top:4px; padding:10px; font-size:14px;"></select>
         </div>
       </div>
       <div class="modal-actions">
@@ -262,8 +262,9 @@
     const SUPABASE_URL = 'https://ojzwujpahfjmaeisnfez.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qend1anBhaGZqbWFlaXNuZmV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTA5NDMsImV4cCI6MjA5NDU4Njk0M30.VvszGR6MbUnBhKsmsXBikkrjok2-F1bnyS4zOwDX5hg';
     
+    // Updated pools to include official names for Ben Cooper and Colin Cooper
     const MINISTRY_POOLS = {
-      jr_sunday_school: ["Amelie", "Iris Argue", "Adam Cooper", "Dad"],
+      jr_sunday_school: ["Amelie", "Iris Argue", "Ben Cooper", "Colin Cooper"],
       sr_sunday_school: ["Henry", "John", "Kathryn Beggs", "Niall Keys"],
       worship: ["Paul Savage", "Emma Savage", "Carole Mckenna", "Rosemary T", "Godiya Bwala", "andrewbwala"],
       communion: ["Janet McAuley", "Neil", "Andrew Ferguson", "Andrew Pogue"],
@@ -273,10 +274,10 @@
       sound_desk: ["Oluwatosin Ogunkayode St", "Philip Bain", "Michael Quinn", "Cyril Nelson"]
     };
 
-    // Concrete email mapping so Ben can never accidentally masquerade or trigger choices meant for Dad
+    // Explicit profile email to system-name mapping
     const EMAIL_TO_NAME_MAP = {
-      "coopsben0@gmail.com": "Adam Cooper",
-      "coopscolin0@gmail.com": "Dad"
+      "coopsben0@gmail.com": "Ben Cooper",
+      "coopscolin0@gmail.com": "Colin Cooper"
     };
 
     const MINISTRY_LABELS = {
@@ -405,7 +406,6 @@
 
       document.getElementById('context-origin-details').innerText = `${fDateOrig} — ${labelConfig.name} (${slotObj.member_name_text || 'Nobody assigned'})`;
       
-      // Auto lock the requester name to your active profile session
       document.getElementById('member-swap-outgoing-display').value = resolvedName;
 
       let targetDateSelect = document.getElementById('member-swap-target-date');
@@ -464,7 +464,7 @@
 
       const packedStatus = `swap_req::${outgoingPerson}::${formattedTargetDate} with ${incomingPerson}::${targetSlotId}`;
 
-      document.getElementById('loading-text').innerText = "Filing swap request...";
+      document.getElementById('loading-text').innerText = "Filing secure swap request...";
       document.getElementById('loading-screen').style.display = 'flex';
 
       const { error } = await sb.from('rota_slots').update({ status: packedStatus }).eq('id', activeSlotId);
@@ -607,7 +607,6 @@
       appState.dates.forEach(d => {
         let slots = appState.slots.filter(s => s.service_date_id === d.id);
         
-        // Strict mapping: displays only entries containing your explicitly mapped profile name
         let mySlots = slots.filter(s => {
           if (!s.member_name_text) return false;
           return s.member_name_text.toLowerCase().includes(resolvedName);
@@ -636,7 +635,7 @@
         }
       });
 
-      container.innerHTML = html || `<div style="grid-column:1/-1; text-align:center; padding:40px; background:white; border-radius:12px; border:1px solid var(--border-color);">You have no upcoming assignments scheduled under your current account profile.</div>`;
+      container.innerHTML = html || `<div style="grid-column:1/-1; text-align:center; padding:40px; background:white; border-radius:12px; border:1px solid var(--border-color);">You have no upcoming assignments scheduled under your current account profile identity.</div>`;
     }
 
     function renderSwapsTable() {
@@ -651,12 +650,11 @@
         if (isPending) {
           const tokens = s.status.split('::');
           const requesterName = tokens[1];
-          const descInfo = tokens[2]; // "Date with Worker"
+          const descInfo = tokens[2]; 
           const targetSlotId = tokens[3];
 
           const proposedWorker = (descInfo.split(' with ')[1] || "").toLowerCase();
           
-          // STRICT FILTER: You ONLY see it if you are the one they explicitly asked to swap with
           if (proposedWorker === myActiveName) {
             actionRequiredCount++;
             const config = MINISTRY_LABELS[s.role_title] || { name: s.role_title };
@@ -690,7 +688,7 @@
     }
 
     async function pushEightCustomRotas() {
-      if (!confirm("Wipe all data fields and generate fresh ministry baselines?")) return;
+      if (!confirm("Wipe all data fields and generate fresh ministry baselines with updated profile names?")) return;
       document.getElementById('loading-text').innerText = "Deploying configurations...";
       document.getElementById('loading-screen').style.display = 'flex';
 
