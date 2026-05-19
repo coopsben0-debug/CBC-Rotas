@@ -23,19 +23,19 @@
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
-    body { background: var(--bg-main); color: var(--text-main); min-height: 100vh; display: flex; }
+    body { background: var(--bg-main); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: row; }
 
     #loading-screen { position: fixed; inset: 0; background: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; }
     .spinner { border: 3px solid var(--border-color); border-top: 3px solid var(--cbc-teal); border-radius: 50%; width: 42px; height: 42px; animation: spin 1s linear infinite; margin-bottom: 16px; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-    #auth-screen { min-height: 100vh; width: 100vw; background: var(--sidebar-bg); display: flex; align-items: center; justify-content: center; }
-    .auth-card { background: #fff; border-radius: var(--radius); padding: 40px; width: 100%; max-width: 420px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); text-align: center; }
+    #auth-screen { min-height: 100vh; width: 100vw; background: var(--sidebar-bg); display: flex; align-items: center; justify-content: center; padding: 16px; }
+    .auth-card { background: #fff; border-radius: var(--radius); padding: 32px 24px; width: 100%; max-width: 420px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); text-align: center; }
     .auth-logo { width: 80px; height: 80px; border-radius: 50%; margin-bottom: 16px; object-fit: cover; }
-    .auth-btn { width: 100%; padding: 12px; background: var(--cbc-teal); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 12px; transition: background 0.2s; }
+    .auth-btn { width: 100%; padding: 14px; background: var(--cbc-teal); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 12px; transition: background 0.2s; font-size: 15px; }
     .auth-btn:hover { background: #287e7c; }
 
-    #app { display: none; width: 100%; min-height: 100vh; }
+    #app { display: none; width: 100%; min-height: 100vh; flex-direction: row; }
     sidebar { width: 300px; background: var(--sidebar-bg); color: #fff; display: flex; flex-direction: column; padding: 28px; flex-shrink: 0; border-right: 1px solid rgba(255,255,255,0.05); }
     
     .brand-container { display: flex; align-items: center; gap: 12px; margin-bottom: 36px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
@@ -44,26 +44,27 @@
     .sidebar-brand span { display: block; font-family: 'Inter', sans-serif; font-size: 11px; color: #94a3b8; font-weight: 500; }
     
     .nav-group { display: flex; flex-direction: column; gap: 8px; }
-    .sidebar-nav-btn { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 16px; background: transparent; border: none; border-radius: 10px; color: #94a3b8; font-size: 14px; font-weight: 600; cursor: pointer; text-align: left; transition: all 0.2s; }
+    .sidebar-nav-btn { display: flex; align-items: center; gap: 12px; width: 100%; padding: 14px 16px; background: transparent; border: none; border-radius: 10px; color: #94a3b8; font-size: 14px; font-weight: 600; cursor: pointer; text-align: left; transition: all 0.2s; }
     .sidebar-nav-btn.active, .sidebar-nav-btn:hover { background: var(--sidebar-hover); color: #fff; }
 
-    .viewport { flex: 1; padding: 44px; max-width: 1440px; margin: 0 auto; width: 100%; overflow-y: auto; }
-    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 36px; background: #fff; padding: 24px 32px; border-radius: var(--radius); border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); }
+    .viewport { flex: 1; padding: 40px; max-width: 1440px; margin: 0 auto; width: 100%; overflow-y: auto; }
+    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; background: #fff; padding: 24px 32px; border-radius: var(--radius); border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); gap: 16px; }
     .page-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; color: var(--cbc-navy); }
     
     .view-view { display: none; }
     .view-view.active { display: block; }
 
-    .filter-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 28px; }
-    .filter-btn { padding: 8px 18px; border-radius: 20px; background: #fff; border: 1.5px solid var(--border-color); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; color: var(--text-main); }
+    .filter-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 28px; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
+    .filter-btn { padding: 8px 18px; border-radius: 20px; background: #fff; border: 1.5px solid var(--border-color); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; color: var(--text-main); white-space: nowrap; }
     .filter-btn:hover { border-color: var(--cbc-teal); color: var(--cbc-teal); }
     .filter-btn.active { background: var(--cbc-teal); color: #fff; border-color: var(--cbc-teal); }
 
-    .grid-three { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 28px; }
-    .card { background: #fff; border: 1px solid var(--border-color); border-radius: var(--radius); padding: 26px; box-shadow: var(--shadow-md); position: relative; }
+    .grid-three { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 24px; }
+    .card { background: #fff; border: 1px solid var(--border-color); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow-md); position: relative; height: fit-content; }
     .card-date { font-size: 18px; font-weight: 700; color: var(--cbc-navy); margin-bottom: 18px; padding-bottom: 10px; border-bottom: 2px solid #f1f5f9; display: flex; align-items: center; gap: 8px; }
     
     .card-assignment { background: #f8fafc; border: 1px solid var(--border-color); border-radius: 12px; padding: 14px 18px; margin-bottom: 12px; border-left: 4px solid var(--cbc-teal); transition: all 0.2s ease; position: relative; }
+    .card-assignment:last-child { margin-bottom: 0; }
     .card-assignment.jr_sunday_school { border-left-color: #ec4899; }
     .card-assignment.sr_sunday_school { border-left-color: #a855f7; }
     .card-assignment.worship { border-left-color: #0ea5e9; }
@@ -75,21 +76,22 @@
 
     .role-header-box { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
     .role-title { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; }
-    .member-name { font-size: 15px; font-weight: 700; color: var(--cbc-navy); line-height: 1.4; }
+    .member-name { font-size: 15px; font-weight: 700; color: var(--cbc-navy); line-height: 1.4; display: block; }
     
     .inline-editor-box { display: none; margin-top: 10px; gap: 6px; grid-template-columns: 1fr 1fr; }
     body.admin-edit-active .inline-editor-box { display: grid; }
     body.admin-edit-active .member-name { display: none; }
     body.admin-edit-active .swap-member-trigger-btn { display: none; }
-    .inline-select { width: 100%; padding: 8px; font-size: 12px; border-radius: 6px; border: 1px solid var(--border-color); background: #fff; font-weight: 600; color: var(--cbc-navy); }
+    .inline-select { width: 100%; padding: 10px; font-size: 13px; border-radius: 6px; border: 1px solid var(--border-color); background: #fff; font-weight: 600; color: var(--cbc-navy); }
 
-    .swap-member-trigger-btn { background: none; border: none; color: var(--cbc-teal); font-size: 12px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; margin-top: 6px; }
+    .swap-member-trigger-btn { background: none; border: none; color: var(--cbc-teal); font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; margin-top: 8px; padding: 4px 0; }
     .swap-member-trigger-btn:hover { text-decoration: underline; }
 
-    .toggle-admin-mode-btn { padding: 12px 24px; border-radius: 10px; font-weight: 700; cursor: pointer; border: none; font-size: 14px; background: #e2e8f0; color: var(--cbc-navy); display: flex; align-items: center; gap: 8px; transition: all 0.2s; }
+    .toggle-admin-mode-btn { padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; border: none; font-size: 13px; background: #e2e8f0; color: var(--cbc-navy); display: flex; align-items: center; gap: 8px; transition: all 0.2s; white-space: nowrap; }
     .toggle-admin-mode-btn.active { background: #ef4444; color: white; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2); }
 
-    .table-container { width: 100%; border-collapse: collapse; background: #fff; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border-color); box-shadow: var(--shadow-md); margin-top: 20px; }
+    .table-wrapper { width: 100%; overflow-x: auto; background: #fff; border-radius: var(--radius); border: 1px solid var(--border-color); box-shadow: var(--shadow-md); margin-top: 20px; }
+    .table-container { width: 100%; border-collapse: collapse; min-width: 600px; }
     .table-container th, .table-container td { padding: 16px 24px; text-align: left; border-bottom: 1px solid var(--border-color); }
     .table-container th { background: #f8fafc; font-weight: 700; font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
     
@@ -98,32 +100,61 @@
     .badge.role-admin { background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; margin-top: 4px; }
     .badge.role-member { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; margin-top: 4px; }
 
-    .action-btn-sm { padding: 8px 14px; font-size: 12px; font-weight: 600; border-radius: 6px; border: none; cursor: pointer; background: var(--cbc-teal); color: white; transition: background 0.2s; }
+    .action-btn-sm { padding: 10px 16px; font-size: 13px; font-weight: 600; border-radius: 6px; border: none; cursor: pointer; background: var(--cbc-teal); color: white; transition: background 0.2s; white-space: nowrap; }
     .action-btn-sm:hover { background: #287e7c; }
-    .action-btn-danger { background: #ef4444; color: white; padding: 8px 14px; font-size: 12px; font-weight: 600; border-radius: 6px; border: none; cursor: pointer; transition: background 0.2s; }
+    .action-btn-danger { background: #ef4444; color: white; padding: 10px 16px; font-size: 13px; font-weight: 600; border-radius: 6px; border: none; cursor: pointer; transition: background 0.2s; white-space: nowrap; }
     .action-btn-danger:hover { background: #dc2626; }
 
-    .admin-panel-box { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: var(--radius); padding: 26px; margin-bottom: 32px; box-shadow: var(--shadow-sm); }
-    .admin-btn { padding: 12px 24px; background: #16a34a; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 14px; transition: background 0.2s; }
+    .admin-panel-box { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: var(--radius); padding: 24px; margin-bottom: 28px; box-shadow: var(--shadow-sm); }
+    .admin-btn { padding: 12px 24px; background: #16a34a; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 14px; transition: background 0.2s; font-size: 14px; }
     .admin-btn:hover { background: #15803d; }
     
     .user-profile-box { border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; margin-top: auto; font-size: 13px; color: #94a3b8; }
     .input-field { width: 100%; padding: 12px; margin-top: 6px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; background: #fff; }
 
-    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 10000; align-items: center; justify-content: center; }
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 10000; align-items: center; justify-content: center; padding: 16px; }
     .modal-overlay.active { display: flex; }
-    .modal-card { background: #fff; padding: 32px; border-radius: var(--radius); width: 100%; max-width: 500px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); }
+    .modal-card { background: #fff; padding: 28px 24px; border-radius: var(--radius); width: 100%; max-width: 500px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); max-height: 90vh; overflow-y: auto; }
     .modal-header { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--cbc-navy); margin-bottom: 12px; }
     .modal-body { font-size: 14px; color: var(--text-main); margin-bottom: 20px; line-height: 1.5; }
     .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
     
-    .context-highlight-box {
-      background: #f8fafc;
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 12px 16px;
-      margin-bottom: 16px;
-      font-size: 13px;
+    .context-highlight-box { background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; font-size: 13px; }
+
+    /* ==========================================================================
+       📱 MOBILE DEVICE OPTIMIZATIONS (CSS MEDIA QUERY BREAKPOINT)
+       ========================================================================== */
+    @media (max-width: 991px) {
+      body { flex-direction: column; }
+      #app { flex-direction: column; }
+      
+      /* Collapse sidebar into a highly premium sticky horizontal row bar */
+      sidebar {
+        width: 100%;
+        padding: 16px 20px;
+        position: sticky;
+        top: 0;
+        z-index: 999;
+        border-right: none;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      }
+      .brand-container { margin-bottom: 16px; padding-bottom: 12px; }
+      .nav-group { flex-direction: row; overflow-x: auto; gap: 6px; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
+      .sidebar-nav-btn { padding: 10px 14px; font-size: 13px; white-space: nowrap; width: auto; }
+      .user-profile-box { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 12px; margin-top: 8px; font-size: 12px; }
+      .user-profile-box button { margin-top: 0 !important; }
+
+      /* Maximize viewing canvas footprint across fluid phone wrappers */
+      .viewport { padding: 20px 16px; }
+      .page-header { flex-direction: column; align-items: flex-start; padding: 20px; border-radius: 12px; gap: 12px; }
+      .page-title { font-size: 23px; }
+      
+      .grid-three { grid-template-columns: 1fr; gap: 16px; }
+      .card { padding: 18px; }
+      .card-date { font-size: 16px; margin-bottom: 14px; }
+      .card-assignment { padding: 12px 14px; }
+      .member-name { font-size: 14px; }
     }
   </style>
 </head>
@@ -157,14 +188,16 @@
         <div class="sidebar-brand">Craigavon Baptist<span>All-Ministry Terminal</span></div>
       </div>
       <div class="nav-group">
-        <button id="nav-master" class="sidebar-nav-btn active" onclick="switchTab('master')">🗓️ Master Rota Grid</button>
-        <button id="nav-myevents" class="sidebar-nav-btn" onclick="switchTab('myevents')">👤 My Upcoming Events</button>
-        <button id="nav-swaps" class="sidebar-nav-btn" onclick="switchTab('swaps')">🔄 Action Required Swaps <span id="swap-counter-badge" style="background:#ef4444; color:white; font-size:10px; padding:2px 6px; border-radius:10px; margin-left:auto; display:none;">0</span></button>
+        <button id="nav-master" class="sidebar-nav-btn active" onclick="switchTab('master')">🗓️ Master Grid</button>
+        <button id="nav-myevents" class="sidebar-nav-btn" onclick="switchTab('myevents')">👤 My Schedule</button>
+        <button id="nav-swaps" class="sidebar-nav-btn" onclick="switchTab('swaps')">🔄 Swaps <span id="swap-counter-badge" style="background:#ef4444; color:white; font-size:10px; padding:2px 6px; border-radius:10px; margin-left:6px; display:none;">0</span></button>
       </div>
       <div class="user-profile-box">
-        <div id="user-display-email" style="font-weight:700; color:#fff; word-break:break-all;">---</div>
-        <div id="user-role-badge"></div>
-        <button style="background:none; border:none; color:#f87171; cursor:pointer; margin-top:12px; font-weight:600; font-size:13px;" onclick="signOut()">🔒 Sign Out</button>
+        <div>
+          <div id="user-display-email" style="font-weight:700; color:#fff; word-break:break-all;">---</div>
+          <div id="user-role-badge"></div>
+        </div>
+        <button style="background:none; border:none; color:#f87171; cursor:pointer; margin-top:12px; font-weight:600; font-size:13px; white-space:nowrap;" onclick="signOut()">🔒 Sign Out</button>
       </div>
     </sidebar>
 
@@ -209,18 +242,20 @@
           </div>
         </div>
         
-        <table class="table-container">
-          <thead>
-            <tr>
-              <th>Ministry</th>
-              <th>Who Wants to Swap?</th>
-              <th>Your Target Shift Context</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="swap-requests-table-body">
-            </tbody>
-        </table>
+        <div class="table-wrapper">
+          <table class="table-container">
+            <thead>
+              <tr>
+                <th>Ministry</th>
+                <th>Who Wants to Swap?</th>
+                <th>Your Target Shift Context</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="swap-requests-table-body">
+              </tbody>
+          </table>
+        </div>
       </div>
 
     </div>
@@ -262,7 +297,6 @@
     const SUPABASE_URL = 'https://ojzwujpahfjmaeisnfez.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qend1anBhaGZqbWFlaXNuZmV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTA5NDMsImV4cCI6MjA5NDU4Njk0M30.VvszGR6MbUnBhKsmsXBikkrjok2-F1bnyS4zOwDX5hg';
     
-    // Updated pools to include official names for Ben Cooper and Colin Cooper
     const MINISTRY_POOLS = {
       jr_sunday_school: ["Amelie", "Iris Argue", "Ben Cooper", "Colin Cooper"],
       sr_sunday_school: ["Henry", "John", "Kathryn Beggs", "Niall Keys"],
@@ -274,7 +308,6 @@
       sound_desk: ["Oluwatosin Ogunkayode St", "Philip Bain", "Michael Quinn", "Cyril Nelson"]
     };
 
-    // Explicit profile email to system-name mapping
     const EMAIL_TO_NAME_MAP = {
       "coopsben0@gmail.com": "Ben Cooper",
       "coopscolin0@gmail.com": "Colin Cooper"
@@ -328,11 +361,11 @@
       const resolvedName = getLoggedInMemberName();
       
       if (userEmail === 'coopsben0@gmail.com') {
-        badgeBox.innerHTML = `<span class="badge role-admin">🛡️ Admin Role (${resolvedName})</span>`;
+        badgeBox.innerHTML = `<span class="badge role-admin" style="margin-top:2px;">🛡️ Admin (${resolvedName})</span>`;
         document.getElementById('admin-panel').style.display = 'block';
         document.getElementById('admin-lock-btn').style.display = 'block';
       } else {
-        badgeBox.innerHTML = `<span class="badge role-member">👤 Profile: ${resolvedName}</span>`;
+        badgeBox.innerHTML = `<span class="badge role-member" style="margin-top:2px;">👤 ${resolvedName}</span>`;
       }
 
       const [dRes, sRes, rRes] = await Promise.all([
@@ -366,11 +399,11 @@
       const btn = document.getElementById('admin-lock-btn');
       if (isAdminMode) {
         document.body.classList.add('admin-edit-active');
-        btn.innerText = "🔒 Save & Lock Changes";
+        btn.innerText = "🔒 Save Changes";
         btn.classList.add('active');
       } else {
         document.body.classList.remove('admin-edit-active');
-        btn.innerText = "🔓 Enable Live Editing";
+        btn.innerText = "🔓 Live Editing";
         btn.classList.remove('active');
       }
     }
@@ -405,7 +438,6 @@
       const resolvedName = getLoggedInMemberName();
 
       document.getElementById('context-origin-details').innerText = `${fDateOrig} — ${labelConfig.name} (${slotObj.member_name_text || 'Nobody assigned'})`;
-      
       document.getElementById('member-swap-outgoing-display').value = resolvedName;
 
       let targetDateSelect = document.getElementById('member-swap-target-date');
@@ -416,7 +448,7 @@
         const dObj = appState.dates.find(d => d.id === as.service_date_id);
         if (dObj) {
           const fDate = new Date(dObj.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-          dateOptions += `<option value="${as.id}">${fDate} (Current: ${as.member_name_text || 'Empty Slot'})</option>`;
+          dateOptions += `<option value="${as.id}">${fDate} (${as.member_name_text || 'Empty'})</option>`;
         }
       });
       targetDateSelect.innerHTML = dateOptions;
@@ -437,7 +469,7 @@
       const targetSlotObj = appState.slots.find(s => s.id === selectedTargetSlotId);
       let parts = targetSlotObj.member_name_text ? targetSlotObj.member_name_text.split(' & ') : [];
       if(parts.length === 0 || (parts.length === 1 && parts[0] === "")) {
-         incomingSelect.innerHTML = '<option value="">-- No Workers Found on target row --</option>';
+         incomingSelect.innerHTML = '<option value="">-- No Workers Found --</option>';
       } else {
          incomingSelect.innerHTML = parts.map(p => `<option value="${p}">${p}</option>`).join('');
       }
@@ -580,9 +612,9 @@
               <div class="card-assignment ${config.css}" style="${isPending ? 'background:#fffbeb; border-right:4px solid #f59e0b;' : ''}">
                 <div class="role-header-box">
                   <div class="role-title">${config.name}</div>
-                  ${isPending ? '<span class="badge pending" style="font-size:9px;">🔄 Pending Conf</span>' : ''}
+                  ${isPending ? '<span class="badge pending" style="font-size:9px;">🔄 Pending</span>' : ''}
                 </div>
-                <span class="member-name">${s.member_name_text || 'Unassigned Slot'}</span>
+                <span class="member-name">${s.member_name_text || 'Unassigned'}</span>
                 
                 <div class="inline-editor-box">
                   <select class="inline-select" onchange="handleInlineChange('${s.id}', 0, this.value)">${selectOpt1}</select>
@@ -626,7 +658,7 @@
                   <div class="role-title">${config.name}</div>
                   ${isPending ? '<span class="badge pending" style="font-size:9px;">🔄 Swap Pending</span>' : ''}
                 </div>
-                <span class="member-name" style="display:block;">${s.member_name_text}</span>
+                <span class="member-name">${s.member_name_text}</span>
                 ${!isPending ? `<button class="swap-member-trigger-btn" onclick="openMemberSwapModal('${s.id}')">🔄 Ask to Swap</button>` : ''}
               </div>
             `;
@@ -635,7 +667,7 @@
         }
       });
 
-      container.innerHTML = html || `<div style="grid-column:1/-1; text-align:center; padding:40px; background:white; border-radius:12px; border:1px solid var(--border-color);">You have no upcoming assignments scheduled under your current account profile identity.</div>`;
+      container.innerHTML = html || `<div style="grid-column:1/-1; text-align:center; padding:40px; background:white; border-radius:12px; border:1px solid var(--border-color); font-size:14px;">No upcoming assignments found under your profile identity.</div>`;
     }
 
     function renderSwapsTable() {
@@ -667,8 +699,10 @@
                 <td><b>${requesterName}</b> (on ${origDateStr})</td>
                 <td>Your shift on <b>${descInfo.split(' with ')[0]}</b></td>
                 <td>
-                  <button class="action-btn-sm" onclick="peerExecuteSwap('${s.id}', '${targetSlotId}', '${requesterName}', '${descInfo.split(' with ')[1]}')">Accept Trade</button>
-                  <button class="action-btn-danger" style="margin-left:4px;" onclick="peerRejectSwap('${s.id}')">Decline</button>
+                  <div style="display:flex; gap:4px;">
+                    <button class="action-btn-sm" onclick="peerExecuteSwap('${s.id}', '${targetSlotId}', '${requesterName}', '${descInfo.split(' with ')[1]}')">Accept</button>
+                    <button class="action-btn-danger" onclick="peerRejectSwap('${s.id}')">Decline</button>
+                  </div>
                 </td>
               </tr>
             `;
@@ -684,7 +718,7 @@
         badge.style.display = 'none';
       }
 
-      tbody.innerHTML = html || `<tr><td colspan="4" class="empty-msg" style="text-align:center; padding:40px;">🎉 No pending swap invitations require attention right now on this account.</td></tr>`;
+      tbody.innerHTML = html || `<tr><td colspan="4" style="text-align:center; padding:40px; font-size:14px; color:var(--text-muted);">🎉 No pending swap invitations require attention right now on this account.</td></tr>`;
     }
 
     async function pushEightCustomRotas() {
