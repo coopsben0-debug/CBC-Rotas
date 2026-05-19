@@ -74,12 +74,10 @@
     .role-header-box { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
     .role-title { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; }
     .member-name { font-size: 14px; font-weight: 700; color: var(--cbc-navy); line-height: 1.4; display: block; }
-    .member-subtext { font-size: 12px; color: var(--text-muted); display: block; margin-top: 2px; font-style: italic; }
     
     .inline-editor-box { display: none; margin-top: 10px; flex-direction: column; gap: 6px; }
     body.admin-edit-active .inline-editor-box { display: flex; }
     body.admin-edit-active .member-name { display: none; }
-    body.admin-edit-active .member-subtext { display: none; }
     body.admin-edit-active .swap-member-trigger-btn { display: none; }
     .inline-select-input { width: 100%; padding: 10px; font-size: 13px; border-radius: 6px; border: 1px solid var(--border-color); background: #fff; font-weight: 600; color: var(--cbc-navy); }
 
@@ -276,18 +274,6 @@
   <script>
     const SUPABASE_URL = 'https://ojzwujpahfjmaeisnfez.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qend1anBhaGZqbWFlaXNuZmV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTA5NDMsImV4cCI6MjA5NDU4Njk0M30.VvszGR6MbUnBhKsmsXBikkrjok2-F1bnyS4zOwDX5hg';
-    
-    // Master Global Pools mapping
-    const ALL_CHURCH_MEMBERS = [
-      "Amelie", "Iris Argue", "Ben Cooper", "Colin Cooper", "Henry", "John", "Kathryn Beggs", "Niall Keys",
-      "Paul Savage", "Emma Savage", "Carole Mckenna", "Rosemary T", "Godiya Bwala", "andrewbwala", "Janet McAuley",
-      "Neil", "Andrew Ferguson", "Andrew Pogue", "Julie", "Elizabeth", "Stephen McAuley", "Robert", "Tbelle",
-      "Adrian Tomlinson", "Amy Verner", "Glynis", "Harry McCrum", "Lesley Quinn", "Paul", "Ann", "Margaret Jackson",
-      "Ruth Hamilton", "Wes", "Karen Scott", "Janet", "Oluwatosin Ogunkayode St", "Philip Bain", "Michael Quinn",
-      "Cyril Nelson", "Romona", "James", "Sarah", "Leanne", "Hazel", "Niall", "Kathryn", "Emma", "Andrew",
-      "Rhiannon", "Philip", "Adam", "Ceri", "Ben", "Thasia", "Ben Adam", "Tosin", "Suzanne", "Sarah P",
-      "Sarah C", "Harry", "Denise", "Robbie", "Chloe", "Nathanael", "Paul S"
-    ];
 
     const EMAIL_TO_NAME_MAP = {
       "coopsben0@gmail.com": "Ben Cooper",
@@ -445,7 +431,6 @@
          return;
       }
 
-      // Split common denominators cleanly
       let parts = targetSlotObj.member_name_text.split(/, | & | and /);
       incomingSelect.innerHTML = parts.map(p => `<option value="${p.trim()}">${p.trim()}</option>`).join('');
     }
@@ -469,7 +454,6 @@
       const targetDateObj = appState.dates.find(d => d.id === targetSlotObj.service_date_id);
       const formattedTargetDate = new Date(targetDateObj.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 
-      // Clean atomic packed status pattern inside the standard string column
       const packedStatus = `swap_req::${outgoingPerson}::${formattedTargetDate} with ${incomingPerson}::${targetSlotId}`;
 
       document.getElementById('loading-text').innerText = "Broadcasting trade invitation...";
@@ -497,7 +481,6 @@
 
       if (!originSlot || !destinationSlot) return;
 
-      // Immutable swap strings
       let oldOrigin = originSlot.member_name_text || "";
       let oldDest = destinationSlot.member_name_text || "";
 
@@ -666,7 +649,6 @@
       tbody.innerHTML = html || `<tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:30px;">No pending swaps require your confirmation.</td></tr>`;
     }
 
-    // Exact data structures mapped straight from raw source materials 
     async function pushEightCustomRotas() {
       if (!confirm("Wipe previous mock configurations and write real data structures?")) return;
       document.getElementById('loading-text').innerText = "Wiping and updating rows...";
@@ -680,18 +662,17 @@
           sharedRotaId = newR[0].id;
         }
 
-        // Hardcoded source inputs from files
         const musicSource = {
           "2026-05-24": "Neil (Pianist) & Rhiannon (Singer)",
           "2026-05-31": "Kathryn (Pianist), Emma (Singer) & Andrew (Instruments)",
-          "2026-06-07": "Adam (Pianist), Ceri (Singer) & Ben (Instruments)",
-          "2026-06-14": "Paul (Pianist), Thasia (Singer), Ben & Adam (Instruments)",
+          "2026-06-07": "Adam (Pianist) & Ceri (Singer)",
+          "2026-06-14": "Paul (Pianist), Thasia (Singer) & Ben Adam (Instruments)",
           "2026-06-21": "Karen (Pianist), Tosin (Singer) & Philip (Instruments)",
           "2026-06-28": "Kathryn (Pianist), Emma (Singer) & Andrew (Instruments)"
         };
 
         const kidsSource = {
-          "2026-05-24": "", // Bank Holiday
+          "2026-05-24": "", 
           "2026-05-31": "Denise, Carole, Sarah C & Adrian",
           "2026-06-07": "Thasia & Kathryn",
           "2026-06-14": "Robbie",
@@ -709,12 +690,19 @@
         };
 
         const soundSource = {
+          "2026-05-03": "Andrew P & Tosin",
+          "2026-05-10": "Niall",
+          "2026-05-17": "Colin",
           "2026-05-24": "John & Ruth",
           "2026-05-31": "Niall & Philip",
           "2026-06-07": "Leanne & Andrew P",
           "2026-06-14": "Tosin & Niall",
           "2026-06-21": "John & Ruth",
-          "2026-06-28": "Andrew P"
+          "2026-06-28": "Andrew P",
+          "2026-07-05": "Leanne & Colin",
+          "2026-07-12": "Niall & Tosin",
+          "2026-07-19": "Philip",
+          "2026-07-26": "Colin & Henry"
         };
 
         const sportsSource = {
@@ -728,7 +716,7 @@
 
         let payload = [];
         appState.dates.forEach(dObj => {
-          const ISO_DATE = dObj.date; // YYYY-MM-DD
+          const ISO_DATE = dObj.date; 
           
           payload.push({ rota_id: sharedRotaId, service_date_id: dObj.id, role_title: 'music_team', member_name_text: musicSource[ISO_DATE] || "", status: 'normal' });
           payload.push({ rota_id: sharedRotaId, service_date_id: dObj.id, role_title: 'kids_leading', member_name_text: kidsSource[ISO_DATE] || "", status: 'normal' });
