@@ -65,24 +65,23 @@
     
     .card-assignment { background: #f8fafc; border: 1px solid var(--border-color); border-radius: 12px; padding: 14px 18px; margin-bottom: 12px; border-left: 4px solid var(--cbc-teal); transition: all 0.2s ease; position: relative; }
     .card-assignment:last-child { margin-bottom: 0; }
-    .card-assignment.jr_sunday_school { border-left-color: #ec4899; }
-    .card-assignment.sr_sunday_school { border-left-color: #a855f7; }
-    .card-assignment.worship { border-left-color: #0ea5e9; }
-    .card-assignment.communion { border-left-color: #10b981; }
-    .card-assignment.greeting { border-left-color: #f59e0b; }
+    .card-assignment.music_team { border-left-color: #0ea5e9; }
+    .card-assignment.kids_leading { border-left-color: #ec4899; }
     .card-assignment.tea_coffee { border-left-color: #14b8a6; }
-    .card-assignment.hall_duty { border-left-color: #6366f1; }
     .card-assignment.sound_desk { border-left-color: #64748b; }
+    .card-assignment.sports_hall { border-left-color: #6366f1; }
 
     .role-header-box { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
     .role-title { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; }
-    .member-name { font-size: 15px; font-weight: 700; color: var(--cbc-navy); line-height: 1.4; display: block; }
+    .member-name { font-size: 14px; font-weight: 700; color: var(--cbc-navy); line-height: 1.4; display: block; }
+    .member-subtext { font-size: 12px; color: var(--text-muted); display: block; margin-top: 2px; font-style: italic; }
     
-    .inline-editor-box { display: none; margin-top: 10px; gap: 6px; grid-template-columns: 1fr 1fr; }
-    body.admin-edit-active .inline-editor-box { display: grid; }
+    .inline-editor-box { display: none; margin-top: 10px; flex-direction: column; gap: 6px; }
+    body.admin-edit-active .inline-editor-box { display: flex; }
     body.admin-edit-active .member-name { display: none; }
+    body.admin-edit-active .member-subtext { display: none; }
     body.admin-edit-active .swap-member-trigger-btn { display: none; }
-    .inline-select { width: 100%; padding: 10px; font-size: 13px; border-radius: 6px; border: 1px solid var(--border-color); background: #fff; font-weight: 600; color: var(--cbc-navy); }
+    .inline-select-input { width: 100%; padding: 10px; font-size: 13px; border-radius: 6px; border: 1px solid var(--border-color); background: #fff; font-weight: 600; color: var(--cbc-navy); }
 
     .swap-member-trigger-btn { background: none; border: none; color: var(--cbc-teal); font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; margin-top: 8px; padding: 4px 0; }
     .swap-member-trigger-btn:hover { text-decoration: underline; }
@@ -121,40 +120,22 @@
     
     .context-highlight-box { background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; font-size: 13px; }
 
-    /* ==========================================================================
-       📱 MOBILE DEVICE OPTIMIZATIONS (CSS MEDIA QUERY BREAKPOINT)
-       ========================================================================== */
     @media (max-width: 991px) {
       body { flex-direction: column; }
       #app { flex-direction: column; }
-      
-      /* Collapse sidebar into a highly premium sticky horizontal row bar */
-      sidebar {
-        width: 100%;
-        padding: 16px 20px;
-        position: sticky;
-        top: 0;
-        z-index: 999;
-        border-right: none;
-        border-bottom: 1px solid rgba(255,255,255,0.05);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      }
+      sidebar { width: 100%; padding: 16px 20px; position: sticky; top: 0; z-index: 999; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.05); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
       .brand-container { margin-bottom: 16px; padding-bottom: 12px; }
       .nav-group { flex-direction: row; overflow-x: auto; gap: 6px; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
       .sidebar-nav-btn { padding: 10px 14px; font-size: 13px; white-space: nowrap; width: auto; }
       .user-profile-box { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 12px; margin-top: 8px; font-size: 12px; }
       .user-profile-box button { margin-top: 0 !important; }
-
-      /* Maximize viewing canvas footprint across fluid phone wrappers */
       .viewport { padding: 20px 16px; }
       .page-header { flex-direction: column; align-items: flex-start; padding: 20px; border-radius: 12px; gap: 12px; }
       .page-title { font-size: 23px; }
-      
       .grid-three { grid-template-columns: 1fr; gap: 16px; }
       .card { padding: 18px; }
       .card-date { font-size: 16px; margin-bottom: 14px; }
       .card-assignment { padding: 12px 14px; }
-      .member-name { font-size: 14px; }
     }
   </style>
 </head>
@@ -162,19 +143,19 @@
 
   <div id="loading-screen">
     <div class="spinner"></div>
-    <div id="loading-text" style="font-size: 14px; font-weight: 500; color: var(--text-muted);">Syncing Church Terminals...</div>
+    <div id="loading-text" style="font-size: 14px; font-weight: 500; color: var(--text-muted);">Syncing Church Terminal Database...</div>
   </div>
 
   <div id="auth-screen" style="display:none;">
     <div class="auth-card">
-      <img src="https://ojzwujpahfjmaeisnfez.supabase.co/storage/v1/object/public/branding/cbc%20logo.jpg" class="auth-logo" alt="Craigavon Baptist Logo"/>
+      <img src="https://ojzwujpahfjmaeisnfez.supabase.co/storage/v1/object/public/branding/cbc%20logo.jpg" class="auth-logo" alt="Logo"/>
       <h2 style="font-family:'Playfair Display',serif; color:var(--cbc-navy); margin-bottom:24px;">Multi-Rota Portal</h2>
       <div style="text-align:left; margin-bottom:14px;">
         <label style="font-size:12px; font-weight:700; color:var(--text-muted);">Email Address</label>
         <input type="email" id="login-email" class="input-field" value="coopsben0@gmail.com"/>
       </div>
       <div style="text-align:left; margin-bottom:20px;">
-        <label style="font-size:12px; font-weight:700; color:var(--text-muted);">Secure Password</label>
+        <label style="font-size:12px; font-weight:700; color:var(--text-muted);">Password</label>
         <input type="password" id="login-password" class="input-field" placeholder="••••••••"/>
       </div>
       <button class="auth-btn" onclick="handleAuthAction()">Log Into Portal</button>
@@ -184,7 +165,7 @@
   <div id="app">
     <sidebar>
       <div class="brand-container">
-        <img src="https://ojzwujpahfjmaeisnfez.supabase.co/storage/v1/object/public/branding/cbc%20logo.jpg" class="brand-logo" alt="CBC Branding"/>
+        <img src="https://ojzwujpahfjmaeisnfez.supabase.co/storage/v1/object/public/branding/cbc%20logo.jpg" class="brand-logo"/>
         <div class="sidebar-brand">Craigavon Baptist<span>All-Ministry Terminal</span></div>
       </div>
       <div class="nav-group">
@@ -206,8 +187,8 @@
       <div id="view-master" class="view-view active">
         <div id="admin-panel" class="admin-panel-box" style="display:none;">
           <h3 style="color:#166534; display:flex; align-items:center; gap:8px;">⚡ Global System Overrides</h3>
-          <p style="font-size:13px; color:#166534; margin-top:4px;">Deploys default baseline worker rotations across all dates. Warning: Running this action resets manual edits.</p>
-          <button class="admin-btn" onclick="pushEightCustomRotas()">🚀 Regenerate Automated Baseline Schedules</button>
+          <p style="font-size:13px; color:#166534; margin-top:4px;">Deploys real-world configurations across database lines. Warning: Overwrites previous test configurations.</p>
+          <button class="admin-btn" onclick="pushEightCustomRotas()">🚀 Regenerate Document Baseline Schedules</button>
         </div>
 
         <div class="page-header">
@@ -238,7 +219,7 @@
         <div class="page-header">
           <div>
             <h1 class="page-title">Swap Invites For You</h1>
-            <p style="font-size:13px; color:var(--text-muted); margin-top:4px;">Accept or decline trade invitations directed to your profile identities.</p>
+            <p style="font-size:13px; color:var(--text-muted); margin-top:4px;">Accept or decline direct swap requests from church peers.</p>
           </div>
         </div>
         
@@ -247,13 +228,12 @@
             <thead>
               <tr>
                 <th>Ministry</th>
-                <th>Who Wants to Swap?</th>
-                <th>Your Target Shift Context</th>
+                <th>Requester</th>
+                <th>Their Shift Context</th>
                 <th>Actions</th>
               </tr>
             </thead>
-            <tbody id="swap-requests-table-body">
-              </tbody>
+            <tbody id="swap-requests-table-body"></tbody>
           </table>
         </div>
       </div>
@@ -272,18 +252,18 @@
         </div>
         
         <div style="margin-bottom: 16px;">
-          <label style="font-size:11px; font-weight:700; color:var(--text-muted);">1. LOGGED-IN IDENTITY VERIFICATION</label>
+          <label style="font-size:11px; font-weight:700; color:var(--text-muted);">1. OUTGOING IDENTITY VERIFICATION</label>
           <input type="text" id="member-swap-outgoing-display" class="input-field" style="background:#f1f5f9; font-weight:700; color:var(--cbc-navy);" readonly />
         </div>
 
         <div style="margin-bottom: 16px;">
           <label style="font-size:11px; font-weight:700; color:var(--text-muted);">2. SELECT THE DATE YOU WANT TO SWAP WITH</label>
-          <select id="member-swap-target-date" class="inline-select" style="margin-top:4px; padding:10px; font-size:14px;" onchange="populateTargetWorkersDropdown()"></select>
+          <select id="member-swap-target-date" class="inline-select-input" style="margin-top:4px;" onchange="populateTargetWorkersDropdown()"></select>
         </div>
 
         <div style="margin-bottom: 16px;">
-          <label style="font-size:11px; font-weight:700; color:var(--text-muted);">3. WHO ARE YOU REQUESTING TO TAKE YOUR PLACE?</label>
-          <select id="member-swap-incoming-select" class="inline-select" style="margin-top:4px; padding:10px; font-size:14px;"></select>
+          <label style="font-size:11px; font-weight:700; color:var(--text-muted);">3. SPECIFIC PERSON ON THAT DATE TAKING YOUR PLACE</label>
+          <select id="member-swap-incoming-select" class="inline-select-input" style="margin-top:4px;"></select>
         </div>
       </div>
       <div class="modal-actions">
@@ -297,16 +277,17 @@
     const SUPABASE_URL = 'https://ojzwujpahfjmaeisnfez.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qend1anBhaGZqbWFlaXNuZmV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTA5NDMsImV4cCI6MjA5NDU4Njk0M30.VvszGR6MbUnBhKsmsXBikkrjok2-F1bnyS4zOwDX5hg';
     
-    const MINISTRY_POOLS = {
-      jr_sunday_school: ["Amelie", "Iris Argue", "Ben Cooper", "Colin Cooper"],
-      sr_sunday_school: ["Henry", "John", "Kathryn Beggs", "Niall Keys"],
-      worship: ["Paul Savage", "Emma Savage", "Carole Mckenna", "Rosemary T", "Godiya Bwala", "andrewbwala"],
-      communion: ["Janet McAuley", "Neil", "Andrew Ferguson", "Andrew Pogue"],
-      greeting: ["Julie", "Elizabeth", "Stephen McAuley", "Robert", "Tbelle"],
-      tea_coffee: ["Adrian Tomlinson", "Amy Verner", "Glynis", "Harry McCrum", "Lesley Quinn"],
-      hall_duty: ["Paul", "Ann", "Margaret Jackson", "Ruth Hamilton", "Wes", "Karen Scott", "Janet"],
-      sound_desk: ["Oluwatosin Ogunkayode St", "Philip Bain", "Michael Quinn", "Cyril Nelson"]
-    };
+    // Master Global Pools mapping
+    const ALL_CHURCH_MEMBERS = [
+      "Amelie", "Iris Argue", "Ben Cooper", "Colin Cooper", "Henry", "John", "Kathryn Beggs", "Niall Keys",
+      "Paul Savage", "Emma Savage", "Carole Mckenna", "Rosemary T", "Godiya Bwala", "andrewbwala", "Janet McAuley",
+      "Neil", "Andrew Ferguson", "Andrew Pogue", "Julie", "Elizabeth", "Stephen McAuley", "Robert", "Tbelle",
+      "Adrian Tomlinson", "Amy Verner", "Glynis", "Harry McCrum", "Lesley Quinn", "Paul", "Ann", "Margaret Jackson",
+      "Ruth Hamilton", "Wes", "Karen Scott", "Janet", "Oluwatosin Ogunkayode St", "Philip Bain", "Michael Quinn",
+      "Cyril Nelson", "Romona", "James", "Sarah", "Leanne", "Hazel", "Niall", "Kathryn", "Emma", "Andrew",
+      "Rhiannon", "Philip", "Adam", "Ceri", "Ben", "Thasia", "Ben Adam", "Tosin", "Suzanne", "Sarah P",
+      "Sarah C", "Harry", "Denise", "Robbie", "Chloe", "Nathanael", "Paul S"
+    ];
 
     const EMAIL_TO_NAME_MAP = {
       "coopsben0@gmail.com": "Ben Cooper",
@@ -314,14 +295,11 @@
     };
 
     const MINISTRY_LABELS = {
-      jr_sunday_school: { name: "Jr Sunday School", css: "jr_sunday_school" },
-      sr_sunday_school: { name: "Sr Sunday School", css: "sr_sunday_school" },
-      worship: { name: "Worship Team", css: "worship" },
-      communion: { name: "Communion", css: "communion" },
-      greeting: { name: "Greeting", css: "greeting" },
-      tea_coffee: { name: "Tea & Coffee", css: "tea_coffee" },
-      hall_duty: { name: "Hall Duty", css: "hall_duty" },
-      sound_desk: { name: "Sound and Desk", css: "sound_desk" }
+      music_team: { name: "Music Team", css: "music_team" },
+      kids_leading: { name: "CB Sunday Kids", css: "kids_leading" },
+      tea_coffee: { name: "Tea Rota", css: "tea_coffee" },
+      sound_desk: { name: "Sound Rota", css: "sound_desk" },
+      sports_hall: { name: "Sports Hall Rota", css: "sports_hall" }
     };
 
     let sb, appState = { user: null, dates: [], slots: [], rotas: [] }, currentFilter = 'all', isAdminMode = false, activeSlotId = null;
@@ -338,7 +316,8 @@
           document.getElementById('auth-screen').style.display = 'flex';
         }
       } catch (err) {
-        showGlobalError("Initialization failed: " + err.message);
+        document.getElementById('loading-screen').style.display = 'flex';
+        document.getElementById('loading-text').innerHTML = `<b style="color:#ef4444;">System Connection Fault:</b><br>${err.message}`;
       }
     });
 
@@ -351,7 +330,7 @@
 
     function getLoggedInMemberName() {
       if (!appState.user) return "";
-      return EMAIL_TO_NAME_MAP[appState.user.email.toLowerCase()] || "Guest";
+      return EMAIL_TO_NAME_MAP[appState.user.email.toLowerCase()] || "Guest User";
     }
 
     async function initDashboard() {
@@ -361,11 +340,11 @@
       const resolvedName = getLoggedInMemberName();
       
       if (userEmail === 'coopsben0@gmail.com') {
-        badgeBox.innerHTML = `<span class="badge role-admin" style="margin-top:2px;">🛡️ Admin (${resolvedName})</span>`;
+        badgeBox.innerHTML = `<span class="badge role-admin">🛡️ Admin (${resolvedName})</span>`;
         document.getElementById('admin-panel').style.display = 'block';
         document.getElementById('admin-lock-btn').style.display = 'block';
       } else {
-        badgeBox.innerHTML = `<span class="badge role-member" style="margin-top:2px;">👤 ${resolvedName}</span>`;
+        badgeBox.innerHTML = `<span class="badge role-member">👤 ${resolvedName}</span>`;
       }
 
       const [dRes, sRes, rRes] = await Promise.all([
@@ -399,30 +378,24 @@
       const btn = document.getElementById('admin-lock-btn');
       if (isAdminMode) {
         document.body.classList.add('admin-edit-active');
-        btn.innerText = "🔒 Save Changes";
+        btn.innerText = "🔒 Save System Grid";
         btn.classList.add('active');
       } else {
         document.body.classList.remove('admin-edit-active');
-        btn.innerText = "🔓 Live Editing";
+        btn.innerText = "🔓 Enable Live Editing";
         btn.classList.remove('active');
       }
     }
 
-    async function handleInlineChange(slotId, partIndex, selectedName) {
+    async function handleInlineChange(slotId, rawValue) {
       const slotObj = appState.slots.find(s => s.id === slotId);
       if (!slotObj) return;
 
-      let currentParts = slotObj.member_name_text ? slotObj.member_name_text.split(' & ') : ["", ""];
-      if (currentParts.length < 2) currentParts = [currentParts[0] || "", ""];
-
-      currentParts[partIndex] = selectedName;
-      const finalString = currentParts.filter(Boolean).join(' & ');
-
-      const { error } = await sb.from('rota_slots').update({ member_name_text: finalString }).eq('id', slotId);
+      const { error } = await sb.from('rota_slots').update({ member_name_text: rawValue }).eq('id', slotId);
       if (error) {
-        alert("Database error: " + error.message);
+        alert("Database transaction rejected: " + error.message);
       } else {
-        slotObj.member_name_text = finalString;
+        slotObj.member_name_text = rawValue;
         renderGrid();
         renderMyEventsGrid();
         renderSwapsTable();
@@ -437,23 +410,23 @@
       const labelConfig = MINISTRY_LABELS[slotObj.role_title] || { name: slotObj.role_title };
       const resolvedName = getLoggedInMemberName();
 
-      document.getElementById('context-origin-details').innerText = `${fDateOrig} — ${labelConfig.name} (${slotObj.member_name_text || 'Nobody assigned'})`;
+      document.getElementById('context-origin-details').innerText = `${fDateOrig} — ${labelConfig.name} (${slotObj.member_name_text || 'None'})`;
       document.getElementById('member-swap-outgoing-display').value = resolvedName;
 
       let targetDateSelect = document.getElementById('member-swap-target-date');
       let alternateSlots = appState.slots.filter(s => s.role_title === slotObj.role_title && s.id !== originSlotId);
       
-      let dateOptions = '<option value="">-- Choose Target Week --</option>';
+      let dateOptions = '<option value="">-- Choose Target Date --</option>';
       alternateSlots.forEach(as => {
         const dObj = appState.dates.find(d => d.id === as.service_date_id);
         if (dObj) {
           const fDate = new Date(dObj.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-          dateOptions += `<option value="${as.id}">${fDate} (${as.member_name_text || 'Empty'})</option>`;
+          dateOptions += `<option value="${as.id}">${fDate} (${as.member_name_text || 'Empty Slot'})</option>`;
         }
       });
       targetDateSelect.innerHTML = dateOptions;
       
-      document.getElementById('member-swap-incoming-select').innerHTML = '<option value="">-- Select Target Week First --</option>';
+      document.getElementById('member-swap-incoming-select').innerHTML = '<option value="">-- Choose Date Above First --</option>';
       document.getElementById('member-swap-modal').classList.add('active');
     }
 
@@ -462,17 +435,19 @@
       const incomingSelect = document.getElementById('member-swap-incoming-select');
       
       if (!selectedTargetSlotId) {
-        incomingSelect.innerHTML = '<option value="">-- Select Target Week First --</option>';
+        incomingSelect.innerHTML = '<option value="">-- Choose Date Above First --</option>';
         return;
       }
 
       const targetSlotObj = appState.slots.find(s => s.id === selectedTargetSlotId);
-      let parts = targetSlotObj.member_name_text ? targetSlotObj.member_name_text.split(' & ') : [];
-      if(parts.length === 0 || (parts.length === 1 && parts[0] === "")) {
-         incomingSelect.innerHTML = '<option value="">-- No Workers Found --</option>';
-      } else {
-         incomingSelect.innerHTML = parts.map(p => `<option value="${p}">${p}</option>`).join('');
+      if (!targetSlotObj || !targetSlotObj.member_name_text) {
+         incomingSelect.innerHTML = '<option value="">-- No explicit workers allocated --</option>';
+         return;
       }
+
+      // Split common denominators cleanly
+      let parts = targetSlotObj.member_name_text.split(/, | & | and /);
+      incomingSelect.innerHTML = parts.map(p => `<option value="${p.trim()}">${p.trim()}</option>`).join('');
     }
 
     function closeMemberSwapModal() {
@@ -486,7 +461,7 @@
       const incomingPerson = document.getElementById('member-swap-incoming-select').value;
 
       if (!targetSlotId || !outgoingPerson || !incomingPerson) {
-        alert("Please specify all details of your swap arrangement.");
+        alert("Please complete the target selections.");
         return;
       }
 
@@ -494,16 +469,17 @@
       const targetDateObj = appState.dates.find(d => d.id === targetSlotObj.service_date_id);
       const formattedTargetDate = new Date(targetDateObj.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 
+      // Clean atomic packed status pattern inside the standard string column
       const packedStatus = `swap_req::${outgoingPerson}::${formattedTargetDate} with ${incomingPerson}::${targetSlotId}`;
 
-      document.getElementById('loading-text').innerText = "Filing secure swap request...";
+      document.getElementById('loading-text').innerText = "Broadcasting trade invitation...";
       document.getElementById('loading-screen').style.display = 'flex';
 
       const { error } = await sb.from('rota_slots').update({ status: packedStatus }).eq('id', activeSlotId);
       document.getElementById('loading-screen').style.display = 'none';
 
       if (error) {
-        alert("Submission failed: " + error.message);
+        alert("Transaction Failed: " + error.message);
       } else {
         const origin = appState.slots.find(s => s.id === activeSlotId);
         if (origin) origin.status = packedStatus;
@@ -511,7 +487,7 @@
         renderGrid();
         renderMyEventsGrid();
         renderSwapsTable();
-        alert(`Request sent securely! Only ${incomingPerson} will see this pending swap action inside their portal layout.`);
+        alert(`Request logged! ${incomingPerson} can now review and instantly accept this change from their phone portal.`);
       }
     }
 
@@ -521,36 +497,32 @@
 
       if (!originSlot || !destinationSlot) return;
 
-      let originWorkers = originSlot.member_name_text ? originSlot.member_name_text.split(' & ') : [];
-      let idx1 = originWorkers.indexOf(outgoingWorker);
-      if (idx1 !== -1) originWorkers[idx1] = incomingWorker;
-      const newOriginString = originWorkers.filter(Boolean).join(' & ');
+      // Immutable swap strings
+      let oldOrigin = originSlot.member_name_text || "";
+      let oldDest = destinationSlot.member_name_text || "";
 
-      let destWorkers = destinationSlot.member_name_text ? destinationSlot.member_name_text.split(' & ') : [];
-      let idx2 = destWorkers.indexOf(incomingWorker);
-      if (idx2 !== -1) destWorkers[idx2] = outgoingWorker;
-      const newDestString = destWorkers.filter(Boolean).join(' & ');
+      let newOrigin = oldOrigin.replace(outgoingWorker, incomingWorker);
+      let newDest = oldDest.replace(incomingWorker, outgoingWorker);
 
-      document.getElementById('loading-text').innerText = "Processing Trade Swaps...";
+      document.getElementById('loading-text').innerText = "Committing trade to schema cache...";
       document.getElementById('loading-screen').style.display = 'flex';
 
-      const update1 = sb.from('rota_slots').update({ member_name_text: newOriginString, status: 'normal' }).eq('id', originSlot.id);
-      const update2 = sb.from('rota_slots').update({ member_name_text: newDestString, status: 'normal' }).eq('id', destinationSlot.id);
+      await Promise.all([
+        sb.from('rota_slots').update({ member_name_text: newOrigin, status: 'normal' }).eq('id', originSlot.id),
+        sb.from('rota_slots').update({ member_name_text: newDest, status: 'normal' }).eq('id', destinationSlot.id)
+      ]);
 
-      await Promise.all([update1, update2]);
-
-      originSlot.member_name_text = newOriginString; originSlot.status = 'normal';
-      destinationSlot.member_name_text = newDestString; destinationSlot.status = 'normal';
+      originSlot.member_name_text = newOrigin; originSlot.status = 'normal';
+      destinationSlot.member_name_text = newDest; destinationSlot.status = 'normal';
 
       document.getElementById('loading-screen').style.display = 'none';
       renderGrid();
       renderMyEventsGrid();
       renderSwapsTable();
-      alert("Swap successful! Schedules rearranged dynamically.");
+      alert("Trade executed successfully across all live calendars!");
     }
 
     async function peerRejectSwap(slotId) {
-      if (!confirm("Decline this trade request invite?")) return;
       const { error } = await sb.from('rota_slots').update({ status: 'normal' }).eq('id', slotId);
       if (error) {
         alert(error.message);
@@ -565,8 +537,8 @@
 
     function buildFilters() {
       const fBox = document.getElementById('category-filters');
-      let html = `<button class="filter-btn ${currentFilter === 'all' ? 'active' : ''}" onclick="applyFilter('all')">Show Everything</button>`;
-      Object.keys(MINISTRY_POOLS).forEach(k => {
+      let html = `<button class="filter-btn ${currentFilter === 'all' ? 'active' : ''}" onclick="applyFilter('all')">Show All</button>`;
+      Object.keys(MINISTRY_LABELS).forEach(k => {
         html += `<button class="filter-btn ${currentFilter === k ? 'active' : ''}" onclick="applyFilter('${k}')">${MINISTRY_LABELS[k].name}</button>`;
       });
       fBox.innerHTML = html;
@@ -593,42 +565,28 @@
           `;
           slots.forEach(s => {
             const config = MINISTRY_LABELS[s.role_title] || { name: s.role_title, css: 'default' };
-            const pool = MINISTRY_POOLS[s.role_title] || [];
-            
-            let parts = s.member_name_text ? s.member_name_text.split(' & ') : ["", ""];
-            const p1 = parts[0] || "";
-            const p2 = parts[1] || "";
-
-            let selectOpt1 = `<option value="">-- Worker 1 --</option>`;
-            let selectOpt2 = `<option value="">-- Worker 2 --</option>`;
-            pool.forEach(member => {
-              selectOpt1 += `<option value="${member}" ${member === p1 ? 'selected' : ''}>${member}</option>`;
-              selectOpt2 += `<option value="${member}" ${member === p2 ? 'selected' : ''}>${member}</option>`;
-            });
-
             const isPending = s.status && s.status.startsWith('swap_req::');
 
             html += `
               <div class="card-assignment ${config.css}" style="${isPending ? 'background:#fffbeb; border-right:4px solid #f59e0b;' : ''}">
                 <div class="role-header-box">
                   <div class="role-title">${config.name}</div>
-                  ${isPending ? '<span class="badge pending" style="font-size:9px;">🔄 Pending</span>' : ''}
+                  ${isPending ? '<span class="badge pending" style="font-size:9px;">🔄 Pending Swap</span>' : ''}
                 </div>
-                <span class="member-name">${s.member_name_text || 'Unassigned'}</span>
+                <span class="member-name">${s.member_name_text || '<i>Leave Blank / Unassigned</i>'}</span>
                 
                 <div class="inline-editor-box">
-                  <select class="inline-select" onchange="handleInlineChange('${s.id}', 0, this.value)">${selectOpt1}</select>
-                  <select class="inline-select" onchange="handleInlineChange('${s.id}', 1, this.value)">${selectOpt2}</select>
+                  <input type="text" class="inline-select-input" value="${s.member_name_text || ''}" onchange="handleInlineChange('${s.id}', this.value)"/>
                 </div>
 
-                ${!isPending ? `<button class="swap-member-trigger-btn" onclick="openMemberSwapModal('${s.id}')">🔄 Ask to Swap</button>` : ''}
+                ${(!isPending && s.member_name_text) ? `<button class="swap-member-trigger-btn" onclick="openMemberSwapModal('${s.id}')">🔄 Swap Shift</button>` : ''}
               </div>
             `;
           });
           html += `</div>`;
         }
       });
-      container.innerHTML = html || `<div class="empty-msg">No team allocations found.</div>`;
+      container.innerHTML = html || `<div style="padding:20px; color:var(--text-muted);">No entries match this parameter.</div>`;
     }
 
     function renderMyEventsGrid() {
@@ -637,29 +595,21 @@
       const resolvedName = getLoggedInMemberName().toLowerCase();
 
       appState.dates.forEach(d => {
-        let slots = appState.slots.filter(s => s.service_date_id === d.id);
-        
-        let mySlots = slots.filter(s => {
-          if (!s.member_name_text) return false;
-          return s.member_name_text.toLowerCase().includes(resolvedName);
-        });
+        let slots = appState.slots.filter(s => s.service_date_id === d.id && s.member_name_text && s.member_name_text.toLowerCase().includes(resolvedName));
 
-        if (mySlots.length) {
+        if (slots.length) {
           html += `
             <div class="card">
               <div class="card-date">☀️ ${new Date(d.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
           `;
-          mySlots.forEach(s => {
+          slots.forEach(s => {
             const config = MINISTRY_LABELS[s.role_title] || { name: s.role_title, css: 'default' };
-            const isPending = s.status && s.status.startsWith('swap_req::');
             html += `
               <div class="card-assignment ${config.css}">
                 <div class="role-header-box">
                   <div class="role-title">${config.name}</div>
-                  ${isPending ? '<span class="badge pending" style="font-size:9px;">🔄 Swap Pending</span>' : ''}
                 </div>
                 <span class="member-name">${s.member_name_text}</span>
-                ${!isPending ? `<button class="swap-member-trigger-btn" onclick="openMemberSwapModal('${s.id}')">🔄 Ask to Swap</button>` : ''}
               </div>
             `;
           });
@@ -667,7 +617,7 @@
         }
       });
 
-      container.innerHTML = html || `<div style="grid-column:1/-1; text-align:center; padding:40px; background:white; border-radius:12px; border:1px solid var(--border-color); font-size:14px;">No upcoming assignments found under your profile identity.</div>`;
+      container.innerHTML = html || `<div style="grid-column:1/-1; text-align:center; padding:30px; background:#fff; border-radius:12px; font-size:14px;">No upcoming personal shifts flagged.</div>`;
     }
 
     function renderSwapsTable() {
@@ -677,29 +627,24 @@
       const myActiveName = getLoggedInMemberName().toLowerCase();
 
       appState.slots.forEach(s => {
-        const isPending = s.status && s.status.startsWith('swap_req::');
-
-        if (isPending) {
+        if (s.status && s.status.startsWith('swap_req::')) {
           const tokens = s.status.split('::');
           const requesterName = tokens[1];
           const descInfo = tokens[2]; 
           const targetSlotId = tokens[3];
 
-          const proposedWorker = (descInfo.split(' with ')[1] || "").toLowerCase();
+          const proposedTargetWorker = (descInfo.split(' with ')[1] || "").toLowerCase();
           
-          if (proposedWorker === myActiveName) {
+          if (proposedTargetWorker === myActiveName) {
             actionRequiredCount++;
             const config = MINISTRY_LABELS[s.role_title] || { name: s.role_title };
-            const dateObj = appState.dates.find(d => d.id === s.service_date_id);
-            const origDateStr = dateObj ? new Date(dateObj.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : "---";
-
             html += `
               <tr>
                 <td><span class="badge role-member" style="margin:0;">${config.name}</span></td>
-                <td><b>${requesterName}</b> (on ${origDateStr})</td>
+                <td><b>${requesterName}</b></td>
                 <td>Your shift on <b>${descInfo.split(' with ')[0]}</b></td>
                 <td>
-                  <div style="display:flex; gap:4px;">
+                  <div style="display:flex; gap:6px;">
                     <button class="action-btn-sm" onclick="peerExecuteSwap('${s.id}', '${targetSlotId}', '${requesterName}', '${descInfo.split(' with ')[1]}')">Accept</button>
                     <button class="action-btn-danger" onclick="peerRejectSwap('${s.id}')">Decline</button>
                   </div>
@@ -718,54 +663,87 @@
         badge.style.display = 'none';
       }
 
-      tbody.innerHTML = html || `<tr><td colspan="4" style="text-align:center; padding:40px; font-size:14px; color:var(--text-muted);">🎉 No pending swap invitations require attention right now on this account.</td></tr>`;
+      tbody.innerHTML = html || `<tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:30px;">No pending swaps require your confirmation.</td></tr>`;
     }
 
+    // Exact data structures mapped straight from raw source materials 
     async function pushEightCustomRotas() {
-      if (!confirm("Wipe all data fields and generate fresh ministry baselines with updated profile names?")) return;
-      document.getElementById('loading-text').innerText = "Deploying configurations...";
+      if (!confirm("Wipe previous mock configurations and write real data structures?")) return;
+      document.getElementById('loading-text').innerText = "Wiping and updating rows...";
       document.getElementById('loading-screen').style.display = 'flex';
 
       try {
         await sb.from('rota_slots').delete().neq('id', '00000000-0000-0000-0000-000000000000');
         let sharedRotaId = appState.rotas[0]?.id;
-
         if (!sharedRotaId) {
-          const { data: newRota, error: rotaErr } = await sb.from('rotas').insert({ name: 'Master Church Schedule' }).select();
-          if (rotaErr) throw rotaErr;
-          sharedRotaId = newRota[0].id;
+          const { data: newR } = await sb.from('rotas').insert({ name: 'Craigavon Master Grid' }).select();
+          sharedRotaId = newR[0].id;
         }
 
-        let payload = [];
-        appState.dates.forEach((dateObj, dateIndex) => {
-          Object.keys(MINISTRY_POOLS).forEach(key => {
-            const pool = MINISTRY_POOLS[key];
-            const server1 = pool[(dateIndex * 2) % pool.length];
-            const server2 = pool[(dateIndex * 2 + 1) % pool.length];
+        // Hardcoded source inputs from files
+        const musicSource = {
+          "2026-05-24": "Neil (Pianist) & Rhiannon (Singer)",
+          "2026-05-31": "Kathryn (Pianist), Emma (Singer) & Andrew (Instruments)",
+          "2026-06-07": "Adam (Pianist), Ceri (Singer) & Ben (Instruments)",
+          "2026-06-14": "Paul (Pianist), Thasia (Singer), Ben & Adam (Instruments)",
+          "2026-06-21": "Karen (Pianist), Tosin (Singer) & Philip (Instruments)",
+          "2026-06-28": "Kathryn (Pianist), Emma (Singer) & Andrew (Instruments)"
+        };
 
-            payload.push({
-              rota_id: sharedRotaId,
-              service_date_id: dateObj.id,
-              role_title: key, 
-              member_name_text: `${server1} & ${server2}`,
-              status: 'normal'
-            });
-          });
+        const kidsSource = {
+          "2026-05-24": "", // Bank Holiday
+          "2026-05-31": "Denise, Carole, Sarah C & Adrian",
+          "2026-06-07": "Thasia & Kathryn",
+          "2026-06-14": "Robbie",
+          "2026-06-21": "Niall & Sarah P",
+          "2026-06-28": "Henry, Sarah C & Suzanne"
+        };
+
+        const teaSource = {
+          "2026-05-24": "Adrian & Rosemary",
+          "2026-05-31": "Hazel & Niall",
+          "2026-06-07": "Romona & James",
+          "2026-06-14": "Iris & Sarah",
+          "2026-06-21": "Glynis & Janet",
+          "2026-06-28": "Elizabeth & Leanne"
+        };
+
+        const soundSource = {
+          "2026-05-24": "John & Ruth",
+          "2026-05-31": "Niall & Philip",
+          "2026-06-07": "Leanne & Andrew P",
+          "2026-06-14": "Tosin & Niall",
+          "2026-06-21": "John & Ruth",
+          "2026-06-28": "Andrew P"
+        };
+
+        const sportsSource = {
+          "2026-05-24": "Emma & Robbie",
+          "2026-05-31": "Ben & Hazel",
+          "2026-06-07": "Chloe & Nathanael",
+          "2026-06-14": "Andrew P & Thasia",
+          "2026-06-21": "Kathryn & Nathanael",
+          "2026-06-28": "Chloe & Robbie"
+        };
+
+        let payload = [];
+        appState.dates.forEach(dObj => {
+          const ISO_DATE = dObj.date; // YYYY-MM-DD
+          
+          payload.push({ rota_id: sharedRotaId, service_date_id: dObj.id, role_title: 'music_team', member_name_text: musicSource[ISO_DATE] || "", status: 'normal' });
+          payload.push({ rota_id: sharedRotaId, service_date_id: dObj.id, role_title: 'kids_leading', member_name_text: kidsSource[ISO_DATE] || "", status: 'normal' });
+          payload.push({ rota_id: sharedRotaId, service_date_id: dObj.id, role_title: 'tea_coffee', member_name_text: teaSource[ISO_DATE] || "", status: 'normal' });
+          payload.push({ rota_id: sharedRotaId, service_date_id: dObj.id, role_title: 'sound_desk', member_name_text: soundSource[ISO_DATE] || "", status: 'normal' });
+          payload.push({ rota_id: sharedRotaId, service_date_id: dObj.id, role_title: 'sports_hall', member_name_text: sportsSource[ISO_DATE] || "", status: 'normal' });
         });
 
-        const { error: insError } = await sb.from('rota_slots').insert(payload);
-        if (insError) throw insError;
-
+        const { error } = await sb.from('rota_slots').insert(payload);
+        if (error) throw error;
         location.reload();
       } catch (err) {
         document.getElementById('loading-screen').style.display = 'none';
-        alert("Deployment Error: " + err.message);
+        alert("SQL Error mapping parameters: " + err.message);
       }
-    }
-
-    function showGlobalError(msg) {
-      document.getElementById('loading-screen').style.display = 'flex';
-      document.getElementById('loading-text').innerHTML = `<b style="color:#ef4444;">System Error:</b><br>${msg}`;
     }
 
     function signOut() { sb.auth.signOut().then(() => location.reload()); }
