@@ -4,22 +4,22 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Craigavon Baptist Church — Multi-Rota Terminal</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght=400;500;600;700&family=Playfair+Display:wght=700&display=swap" rel="stylesheet"/>
   <script src="https://unpkg.com/@supabase/supabase-js@2.39.8/dist/umd/supabase.js"></script>
   <style>
     :root {
-      --bg-main: #f1f5f9;
-      --sidebar-bg: #0f172a;
-      --sidebar-hover: #1e293b;
+      --bg-main: #f8fafc;
+      --sidebar-bg: #ffffff;
+      --sidebar-hover: #f1f5f9;
       --card-bg: #ffffff;
       --cbc-navy: #0f172a;
-      --cbc-teal: #319795;
+      --cbc-teal: #0d9488;
       --border-color: #e2e8f0;
       --text-main: #334155;
       --text-muted: #64748b;
       --radius: 16px;
-      --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
-      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.02);
+      --shadow-md: 0 4px 12px -1px rgba(15, 23, 42, 0.04);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
@@ -29,23 +29,23 @@
     .spinner { border: 3px solid var(--border-color); border-top: 3px solid var(--cbc-teal); border-radius: 50%; width: 42px; height: 42px; animation: spin 1s linear infinite; margin-bottom: 16px; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-    #auth-screen { min-height: 100vh; width: 100vw; background: var(--sidebar-bg); display: flex; align-items: center; justify-content: center; padding: 16px; }
-    .auth-card { background: #fff; border-radius: var(--radius); padding: 32px 24px; width: 100%; max-width: 420px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); text-align: center; }
+    #auth-screen { min-height: 100vh; width: 100vw; background: #f1f5f9; display: flex; align-items: center; justify-content: center; padding: 16px; }
+    .auth-card { background: #fff; border-radius: var(--radius); padding: 32px 24px; width: 100%; max-width: 420px; box-shadow: var(--shadow-md); border: 1px solid var(--border-color); text-align: center; }
     .auth-logo { width: 80px; height: 80px; border-radius: 50%; margin-bottom: 16px; object-fit: cover; }
     .auth-btn { width: 100%; padding: 14px; background: var(--cbc-teal); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 12px; transition: background 0.2s; font-size: 15px; }
-    .auth-btn:hover { background: #287e7c; }
+    .auth-btn:hover { background: #0f766e; }
 
     #app { display: none; width: 100%; min-height: 100vh; flex-direction: row; }
-    sidebar { width: 300px; background: var(--sidebar-bg); color: #fff; display: flex; flex-direction: column; padding: 28px; flex-shrink: 0; border-right: 1px solid rgba(255,255,255,0.05); }
+    sidebar { width: 300px; background: var(--sidebar-bg); color: var(--text-main); display: flex; flex-direction: column; padding: 28px; flex-shrink: 0; border-right: 1px solid var(--border-color); }
     
-    .brand-container { display: flex; align-items: center; gap: 12px; margin-bottom: 36px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-    .brand-logo { width: 44px; height: 44px; border-radius: 50%; background: #fff; padding: 2px; object-fit: cover; }
-    .sidebar-brand { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; color: #fff; line-height: 1.2; }
-    .sidebar-brand span { display: block; font-family: 'Inter', sans-serif; font-size: 11px; color: #94a3b8; font-weight: 500; }
+    .brand-container { display: flex; align-items: center; gap: 12px; margin-bottom: 36px; padding-bottom: 20px; border-bottom: 1px solid var(--border-color); }
+    .brand-logo { width: 44px; height: 44px; border-radius: 50%; background: #fff; padding: 2px; object-fit: cover; border: 1px solid var(--border-color); }
+    .sidebar-brand { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; color: var(--cbc-navy); line-height: 1.2; }
+    .sidebar-brand span { display: block; font-family: 'Inter', sans-serif; font-size: 11px; color: var(--text-muted); font-weight: 500; }
     
     .nav-group { display: flex; flex-direction: column; gap: 8px; }
-    .sidebar-nav-btn { display: flex; align-items: center; gap: 12px; width: 100%; padding: 14px 16px; background: transparent; border: none; border-radius: 10px; color: #94a3b8; font-size: 14px; font-weight: 600; cursor: pointer; text-align: left; transition: all 0.2s; }
-    .sidebar-nav-btn.active, .sidebar-nav-btn:hover { background: var(--sidebar-hover); color: #fff; }
+    .sidebar-nav-btn { display: flex; align-items: center; gap: 12px; width: 100%; padding: 14px 16px; background: transparent; border: none; border-radius: 10px; color: var(--text-muted); font-size: 14px; font-weight: 600; cursor: pointer; text-align: left; transition: all 0.2s; }
+    .sidebar-nav-btn.active, .sidebar-nav-btn:hover { background: var(--sidebar-hover); color: var(--cbc-teal); }
 
     .viewport { flex: 1; padding: 40px; max-width: 1440px; margin: 0 auto; width: 100%; overflow-y: auto; }
     .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; background: #fff; padding: 24px 32px; border-radius: var(--radius); border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); gap: 16px; }
@@ -54,7 +54,7 @@
     .view-view { display: none; }
     .view-view.active { display: block; }
 
-    .filter-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 28px; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
+    .filter-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 28px; overflow-x: auto; padding-bottom: 4px; }
     .filter-btn { padding: 8px 18px; border-radius: 20px; background: #fff; border: 1.5px solid var(--border-color); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; color: var(--text-main); white-space: nowrap; }
     .filter-btn:hover { border-color: var(--cbc-teal); color: var(--cbc-teal); }
     .filter-btn.active { background: var(--cbc-teal); color: #fff; border-color: var(--cbc-teal); }
@@ -65,11 +65,14 @@
     
     .card-assignment { background: #f8fafc; border: 1px solid var(--border-color); border-radius: 12px; padding: 14px 18px; margin-bottom: 12px; border-left: 4px solid var(--cbc-teal); transition: all 0.2s ease; position: relative; }
     .card-assignment:last-child { margin-bottom: 0; }
-    .card-assignment.music_team { border-left-color: #0ea5e9; }
-    .card-assignment.kids_leading { border-left-color: #ec4899; }
+    .card-assignment.junior_ss { border-left-color: #f59e0b; }
+    .card-assignment.senior_ss { border-left-color: #d97706; }
+    .card-assignment.worship { border-left-color: #0ea5e9; }
+    .card-assignment.sound_computer { border-left-color: #6366f1; }
+    .card-assignment.greeting_welcome { border-left-color: #10b981; }
+    .card-assignment.communion_handout { border-left-color: #ec4899; }
     .card-assignment.tea_coffee { border-left-color: #14b8a6; }
-    .card-assignment.sound_desk { border-left-color: #64748b; }
-    .card-assignment.sports_hall { border-left-color: #6366f1; }
+    .card-assignment.supervising_hall { border-left-color: #8b5cf6; }
 
     .role-header-box { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
     .role-title { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; }
@@ -98,20 +101,22 @@
     .badge.role-member { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; margin-top: 4px; }
 
     .action-btn-sm { padding: 10px 16px; font-size: 13px; font-weight: 600; border-radius: 6px; border: none; cursor: pointer; background: var(--cbc-teal); color: white; transition: background 0.2s; white-space: nowrap; }
-    .action-btn-sm:hover { background: #287e7c; }
+    .action-btn-sm:hover { background: #0f766e; }
     .action-btn-danger { background: #ef4444; color: white; padding: 10px 16px; font-size: 13px; font-weight: 600; border-radius: 6px; border: none; cursor: pointer; transition: background 0.2s; white-space: nowrap; }
     .action-btn-danger:hover { background: #dc2626; }
 
     .admin-panel-box { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: var(--radius); padding: 24px; margin-bottom: 28px; box-shadow: var(--shadow-sm); }
-    .admin-btn { padding: 12px 24px; background: #16a34a; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 14px; transition: background 0.2s; font-size: 14px; }
+    .admin-actions-flex { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 14px; }
+    .admin-btn { padding: 12px 24px; background: #16a34a; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s; font-size: 14px; }
     .admin-btn:hover { background: #15803d; }
+    .file-input-label { padding: 12px 24px; background: #fff; border: 1px solid #bbf7d0; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; color: #16a34a; display: inline-block; }
     
-    .user-profile-box { border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; margin-top: auto; font-size: 13px; color: #94a3b8; }
+    .user-profile-box { border-top: 1px solid var(--border-color); padding-top: 20px; margin-top: auto; font-size: 13px; color: var(--text-muted); }
     .input-field { width: 100%; padding: 12px; margin-top: 6px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; background: #fff; }
 
-    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 10000; align-items: center; justify-content: center; padding: 16px; }
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); z-index: 10000; align-items: center; justify-content: center; padding: 16px; }
     .modal-overlay.active { display: flex; }
-    .modal-card { background: #fff; padding: 28px 24px; border-radius: var(--radius); width: 100%; max-width: 500px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); max-height: 90vh; overflow-y: auto; }
+    .modal-card { background: #fff; padding: 28px 24px; border-radius: var(--radius); width: 100%; max-width: 500px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1); max-height: 90vh; overflow-y: auto; border: 1px solid var(--border-color); }
     .modal-header { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--cbc-navy); margin-bottom: 12px; }
     .modal-body { font-size: 14px; color: var(--text-main); margin-bottom: 20px; line-height: 1.5; }
     .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
@@ -121,19 +126,15 @@
     @media (max-width: 991px) {
       body { flex-direction: column; }
       #app { flex-direction: column; }
-      sidebar { width: 100%; padding: 16px 20px; position: sticky; top: 0; z-index: 999; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.05); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+      sidebar { width: 100%; padding: 16px 20px; position: sticky; top: 0; z-index: 999; border-right: none; border-bottom: 1px solid var(--border-color); }
       .brand-container { margin-bottom: 16px; padding-bottom: 12px; }
-      .nav-group { flex-direction: row; overflow-x: auto; gap: 6px; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
+      .nav-group { flex-direction: row; overflow-x: auto; gap: 6px; padding-bottom: 4px; }
       .sidebar-nav-btn { padding: 10px 14px; font-size: 13px; white-space: nowrap; width: auto; }
-      .user-profile-box { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 12px; margin-top: 8px; font-size: 12px; }
-      .user-profile-box button { margin-top: 0 !important; }
+      .user-profile-box { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 12px; margin-top: 8px; }
       .viewport { padding: 20px 16px; }
       .page-header { flex-direction: column; align-items: flex-start; padding: 20px; border-radius: 12px; gap: 12px; }
       .page-title { font-size: 23px; }
       .grid-three { grid-template-columns: 1fr; gap: 16px; }
-      .card { padding: 18px; }
-      .card-date { font-size: 16px; margin-bottom: 14px; }
-      .card-assignment { padding: 12px 14px; }
     }
   </style>
 </head>
@@ -173,10 +174,10 @@
       </div>
       <div class="user-profile-box">
         <div>
-          <div id="user-display-email" style="font-weight:700; color:#fff; word-break:break-all;">---</div>
+          <div id="user-display-email" style="font-weight:700; color:var(--cbc-navy); word-break:break-all;">---</div>
           <div id="user-role-badge"></div>
         </div>
-        <button style="background:none; border:none; color:#f87171; cursor:pointer; margin-top:12px; font-weight:600; font-size:13px; white-space:nowrap;" onclick="signOut()">🔒 Sign Out</button>
+        <button style="background:none; border:none; color:#ef4444; cursor:pointer; margin-top:12px; font-weight:600; font-size:13px; white-space:nowrap;" onclick="signOut()">🔒 Sign Out</button>
       </div>
     </sidebar>
 
@@ -185,14 +186,20 @@
       <div id="view-master" class="view-view active">
         <div id="admin-panel" class="admin-panel-box" style="display:none;">
           <h3 style="color:#166534; display:flex; align-items:center; gap:8px;">⚡ Global System Overrides</h3>
-          <p style="font-size:13px; color:#166534; margin-top:4px;">Deploys real-world configurations across database lines. Warning: Overwrites previous test configurations.</p>
-          <button class="admin-btn" onclick="pushEightCustomRotas()">🚀 Regenerate Document Baseline Schedules</button>
+          <p style="font-size:13px; color:#166534; margin-top:4px;">Upload updated document sheets or trigger baseline structural regeneration below.</p>
+          <div class="admin-actions-flex">
+            <button class="admin-btn" onclick="pushEightCustomRotas()">🚀 Regenerate Document Baseline Schedules</button>
+            <label class="file-input-label">
+              📁 Upload New Rota (.TXT / .CSV)
+              <input type="file" id="rota-file-uploader" style="display:none;" onchange="handleRotaFileUpload(this)"/>
+            </label>
+          </div>
         </div>
 
         <div class="page-header">
           <div>
             <h1 class="page-title">Master Ministry Schedules</h1>
-            <p style="font-size:13px; color:var(--text-muted); margin-top:4px;">Live overview across all custom operational departments.</p>
+            <p style="font-size:13px; color:var(--text-muted); margin-top:4px;">Live overview across custom structural operational lines.</p>
           </div>
           <button id="admin-lock-btn" class="toggle-admin-mode-btn" onclick="toggleAdminEditMode()" style="display:none;">
             🔓 Enable Live Editing
@@ -207,7 +214,7 @@
         <div class="page-header">
           <div>
             <h1 class="page-title">My Upcoming Schedule</h1>
-            <p style="font-size:13px; color:var(--text-muted); margin-top:4px;">Personal list of shifts assigned to your account.</p>
+            <p style="font-size:13px; color:var(--text-muted); margin-top:4px;">Personalized list of shifts assigned to your profile identity.</p>
           </div>
         </div>
         <div id="my-events-grid" class="grid-three"></div>
@@ -280,12 +287,16 @@
       "coopscolin0@gmail.com": "Colin Cooper"
     };
 
+    // Cleaned up and updated ministry taxonomy based on your explicit layout updates
     const MINISTRY_LABELS = {
-      music_team: { name: "Music Team", css: "music_team" },
-      kids_leading: { name: "CB Sunday Kids", css: "kids_leading" },
-      tea_coffee: { name: "Tea Rota", css: "tea_coffee" },
-      sound_desk: { name: "Sound Rota", css: "sound_desk" },
-      sports_hall: { name: "Sports Hall Rota", css: "sports_hall" }
+      junior_ss: { name: "Junior Sunday School", css: "junior_ss" },
+      senior_ss: { name: "Senior Sunday School", css: "senior_ss" },
+      worship: { name: "Worship", css: "worship" },
+      sound_computer: { name: "Sound Desk and Computer", css: "sound_computer" },
+      greeting_welcome: { name: "Greeting and Welcome", css: "greeting_welcome" },
+      communion_handout: { name: "Communion Hand out", css: "communion_handout" },
+      tea_coffee: { name: "Tea and Coffee", css: "tea_coffee" },
+      supervising_hall: { name: "Supervising the Hall", css: "supervising_hall" }
     };
 
     let sb, appState = { user: null, dates: [], slots: [], rotas: [] }, currentFilter = 'all', isAdminMode = false, activeSlotId = null;
@@ -388,6 +399,20 @@
       }
     }
 
+    // Dynamic file uploader parser framework for automated rota text uploads
+    function handleRotaFileUpload(inputElement) {
+      const file = inputElement.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = async function(e) {
+        const textContent = e.target.result;
+        console.log("Uploaded text trace payload:", textContent);
+        alert("File tracking loaded! Automatic layout structural analysis code goes here to target column parameters.");
+      };
+      reader.readAsText(file);
+    }
+
     function openMemberSwapModal(originSlotId) {
       activeSlotId = originSlotId;
       const slotObj = appState.slots.find(s => s.id === originSlotId);
@@ -427,7 +452,7 @@
 
       const targetSlotObj = appState.slots.find(s => s.id === selectedTargetSlotId);
       if (!targetSlotObj || !targetSlotObj.member_name_text) {
-         incomingSelect.innerHTML = '<option value="">-- No explicit workers allocated --</option>';
+         incomingSelect.innerHTML = '<option value="">-- No workers allocated --</option>';
          return;
       }
 
@@ -471,7 +496,7 @@
         renderGrid();
         renderMyEventsGrid();
         renderSwapsTable();
-        alert(`Request logged! ${incomingPerson} can now review and instantly accept this change from their phone portal.`);
+        alert("Request logged! Peer can now review and instantly accept this change from their dashboard portal.");
       }
     }
 
@@ -649,9 +674,10 @@
       tbody.innerHTML = html || `<tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:30px;">No pending swaps require your confirmation.</td></tr>`;
     }
 
+    // Baseline processing map matching your updated data sources directly
     async function pushEightCustomRotas() {
-      if (!confirm("Wipe previous mock configurations and write real data structures?")) return;
-      document.getElementById('loading-text').innerText = "Wiping and updating rows...";
+      if (!confirm("Wipe previous test layouts and write real source document schedules?")) return;
+      document.getElementById('loading-text').innerText = "Wiping and updating lines...";
       document.getElementById('loading-screen').style.display = 'flex';
 
       try {
@@ -662,7 +688,8 @@
           sharedRotaId = newR[0].id;
         }
 
-        const musicSource = {
+        // Exact match mapping values taken directly from your uploaded papers
+        const worshipSource = {
           "2026-05-24": "Neil (Pianist) & Rhiannon (Singer)",
           "2026-05-31": "Kathryn (Pianist), Emma (Singer) & Andrew (Instruments)",
           "2026-06-07": "Adam (Pianist) & Ceri (Singer)",
@@ -671,13 +698,29 @@
           "2026-06-28": "Kathryn (Pianist), Emma (Singer) & Andrew (Instruments)"
         };
 
-        const kidsSource = {
-          "2026-05-24": "", 
+        const juniorSSSource = {
+          "2026-05-24": "Bank Holiday", 
           "2026-05-31": "Denise, Carole, Sarah C & Adrian",
           "2026-06-07": "Thasia & Kathryn",
           "2026-06-14": "Robbie",
           "2026-06-21": "Niall & Sarah P",
           "2026-06-28": "Henry, Sarah C & Suzanne"
+        };
+
+        const soundSource = {
+          "2026-05-03": "Andrew P & Tosin",
+          "2026-05-10": "Niall",
+          "2026-05-17": "Colin",
+          "2026-05-24": "Niall",
+          "2026-05-31": "John & Philip",
+          "2026-06-07": "Leanne & Andrew P",
+          "2026-06-14": "Tosin & Niall",
+          "2026-06-21": "John & Ruth",
+          "2026-06-28": "Andrew P",
+          "2026-07-05": "Leanne & Colin",
+          "2026-07-12": "Niall & Tosin",
+          "2026-07-19": "Philip",
+          "2026-07-26": "Colin & Henry"
         };
 
         const teaSource = {
@@ -689,23 +732,7 @@
           "2026-06-28": "Elizabeth & Leanne"
         };
 
-        const soundSource = {
-          "2026-05-03": "Andrew P & Tosin",
-          "2026-05-10": "Niall",
-          "2026-05-17": "Colin",
-          "2026-05-24": "John & Ruth",
-          "2026-05-31": "Niall & Philip",
-          "2026-06-07": "Leanne & Andrew P",
-          "2026-06-14": "Tosin & Niall",
-          "2026-06-21": "John & Ruth",
-          "2026-06-28": "Andrew P",
-          "2026-07-05": "Leanne & Colin",
-          "2026-07-12": "Niall & Tosin",
-          "2026-07-19": "Philip",
-          "2026-07-26": "Colin & Henry"
-        };
-
-        const sportsSource = {
+        const hallSource = {
           "2026-05-24": "Emma & Robbie",
           "2026-05-31": "Ben & Hazel",
           "2026-06-07": "Chloe & Nathanael",
@@ -718,11 +745,14 @@
         appState.dates.forEach(dObj => {
           const ISO_DATE = dObj.date; 
           
-          payload.push({ rota_id: sharedRotaId, service_date_id: dObj.id, role_title: 'music_team', member_name_text: musicSource[ISO_DATE] || "", status: 'normal' });
-          payload.push({ rota_id: sharedRotaId, service_date_id: dObj.id, role_title: 'kids_leading', member_name_text: kidsSource[ISO_DATE] || "", status: 'normal' });
+          payload.push({ rota_id: sharedRotaId, service_date_id: dObj.id, role_title: 'junior_ss', member_name_text: juniorSSSource[ISO_DATE] || "", status: 'normal' });
+          payload.push({ rota_id: sharedRotaId, service_date_id: dObj.id, role_title: 'senior_ss', member_name_text: "", status: 'normal' }); // Blank for now
+          payload.push({ rota_id: sharedRotaId, service_date_id: dObj.id, role_title: 'worship', member_name_text: worshipSource[ISO_DATE] || "", status: 'normal' });
+          payload.push({ rota_id: sharedRotaId, service_date_id: dObj.id, role_title: 'sound_computer', member_name_text: soundSource[ISO_DATE] || "", status: 'normal' });
+          payload.push({ rota_id: sharedRotaId, service_date_id: dObj.id, role_title: 'greeting_welcome', member_name_text: "", status: 'normal' }); // Blank for now
+          payload.push({ rota_id: sharedRotaId, service_date_id: dObj.id, role_title: 'communion_handout', member_name_text: "", status: 'normal' }); // Blank for now
           payload.push({ rota_id: sharedRotaId, service_date_id: dObj.id, role_title: 'tea_coffee', member_name_text: teaSource[ISO_DATE] || "", status: 'normal' });
-          payload.push({ rota_id: sharedRotaId, service_date_id: dObj.id, role_title: 'sound_desk', member_name_text: soundSource[ISO_DATE] || "", status: 'normal' });
-          payload.push({ rota_id: sharedRotaId, service_date_id: dObj.id, role_title: 'sports_hall', member_name_text: sportsSource[ISO_DATE] || "", status: 'normal' });
+          payload.push({ rota_id: sharedRotaId, service_date_id: dObj.id, role_title: 'supervising_hall', member_name_text: hallSource[ISO_DATE] || "", status: 'normal' });
         });
 
         const { error } = await sb.from('rota_slots').insert(payload);
@@ -730,7 +760,7 @@
         location.reload();
       } catch (err) {
         document.getElementById('loading-screen').style.display = 'none';
-        alert("SQL Error mapping parameters: " + err.message);
+        alert("SQL Sync Error: " + err.message);
       }
     }
 
