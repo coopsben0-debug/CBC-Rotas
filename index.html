@@ -227,9 +227,9 @@
           <table class="table-container">
             <thead>
               <tr>
-                <th>Ministry</th>
-                <th>Requester</th>
-                <th>Their Shift Context</th>
+                <th>Ministry Line</th>
+                <th>Swap Proposer</th>
+                <th>Trade Exchange Proposal Summary Details</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -252,18 +252,13 @@
         </div>
         
         <div style="margin-bottom: 16px;">
-          <label style="font-size:11px; font-weight:700; color:var(--text-muted);">1. OUTGOING IDENTITY VERIFICATION</label>
+          <label style="font-size:11px; font-weight:700; color:var(--text-muted);">1. LOGGED IN MEMBER OUTGOING IDENTITY</label>
           <input type="text" id="member-swap-outgoing-display" class="input-field" style="background:#f1f5f9; font-weight:700; color:var(--cbc-navy);" readonly />
         </div>
 
         <div style="margin-bottom: 16px;">
-          <label style="font-size:11px; font-weight:700; color:var(--text-muted);">2. SELECT THE DATE YOU WANT TO SWAP WITH</label>
-          <select id="member-swap-target-date" class="inline-select-input" style="margin-top:4px;" onchange="populateTargetWorkersDropdown()"></select>
-        </div>
-
-        <div style="margin-bottom: 16px;">
-          <label style="font-size:11px; font-weight:700; color:var(--text-muted);">3. SPECIFIC PERSON ON THAT DATE TAKING YOUR PLACE</label>
-          <select id="member-swap-incoming-select" class="inline-select-input" style="margin-top:4px;"></select>
+          <label style="font-size:11px; font-weight:700; color:var(--text-muted);">2. CHOOSE THE PEER DATE/ROLE SHIFT YOU WANT TO TAKE INSTEAD</label>
+          <select id="member-swap-target-date" class="inline-select-input" style="margin-top:4px;"></select>
         </div>
       </div>
       <div class="modal-actions">
@@ -405,39 +400,19 @@
       document.getElementById('member-swap-outgoing-display').value = resolvedName;
 
       let targetDateSelect = document.getElementById('member-swap-target-date');
-      let alternateSlots = appState.slots.filter(s => s.role_title === slotObj.role_title && s.id !== originSlotId);
+      let alternateSlots = appState.slots.filter(s => s.id !== originSlotId && s.member_name_text && s.member_name_text.trim() !== "");
       
-      let dateOptions = '<option value="">-- Choose Target Date --</option>';
+      let dateOptions = '<option value="">-- Choose target peer assignment to take --</option>';
       alternateSlots.forEach(as => {
         const dObj = appState.dates.find(d => d.id === as.service_date_id);
+        const categoryLabel = MINISTRY_LABELS[as.role_title]?.name || as.role_title;
         if (dObj) {
           const fDate = new Date(dObj.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-          dateOptions += `<option value="${as.id}">${fDate} (${as.member_name_text || 'Empty Slot'})</option>`;
+          dateOptions += `<option value="${as.id}">${fDate} - ${categoryLabel} (${as.member_name_text})</option>`;
         }
       });
       targetDateSelect.innerHTML = dateOptions;
-      
-      document.getElementById('member-swap-incoming-select').innerHTML = '<option value="">-- Choose Date Above First --</option>';
       document.getElementById('member-swap-modal').classList.add('active');
-    }
-
-    function populateTargetWorkersDropdown() {
-      const selectedTargetSlotId = document.getElementById('member-swap-target-date').value;
-      const incomingSelect = document.getElementById('member-swap-incoming-select');
-      
-      if (!selectedTargetSlotId) {
-        incomingSelect.innerHTML = '<option value="">-- Choose Date Above First --</option>';
-        return;
-      }
-
-      const targetSlotObj = appState.slots.find(s => s.id === selectedTargetSlotId);
-      if (!targetSlotObj || !targetSlotObj.member_name_text) {
-         incomingSelect.innerHTML = '<option value="">-- No workers allocated --</option>';
-         return;
-      }
-
-      let parts = targetSlotObj.member_name_text.split(/, | & | and /);
-      incomingSelect.innerHTML = parts.map(p => `<option value="${p.trim()}">${p.trim()}</option>`).join('');
     }
 
     function closeMemberSwapModal() {
@@ -448,19 +423,15 @@
     async function submitMemberSwapRequest() {
       const targetSlotId = document.getElementById('member-swap-target-date').value;
       const outgoingPerson = document.getElementById('member-swap-outgoing-display').value;
-      const incomingPerson = document.getElementById('member-swap-incoming-select').value;
 
-      if (!targetSlotId || !outgoingPerson || !incomingPerson) {
-        alert("Please complete the target selections.");
+      if (!targetSlotId || !outgoingPerson) {
+        alert("Please select a target trade shift position from the dropdown box option list.");
         return;
       }
 
-      const targetSlotObj = appState.slots.find(s => s.id === targetSlotId);
-      const targetDateObj = appState.dates.find(d => d.id === targetSlotObj.service_date_id);
-      const formattedTargetDate = new Date(targetDateObj.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-
-      // Corrected to update status field seamlessly (prevents non-existent column crash)
-      const packedStatus = `swap_req::${outgoingPerson}::${formattedTargetDate} with ${incomingPerson}::${targetSlotId}`;
+      // Packed status layout schema pattern now uses clear context tracking variables:
+      // swap_v2::{ProposerName}::{TargetSlotId}
+      const packedStatus = `swap_v2::${outgoingPerson}::${targetSlotId}`;
 
       document.getElementById('loading-text').innerText = "Broadcasting trade invitation...";
       document.getElementById('loading-screen').style.display = 'flex';
@@ -477,38 +448,36 @@
         renderGrid();
         renderMyEventsGrid();
         renderSwapsTable();
-        alert("Request logged! Peer can now review and instantly accept this change from their dashboard portal.");
+        alert("Trade notification broadcast successfully to the master dashboard index panel timeline!");
       }
     }
 
-    async function peerExecuteSwap(originSlotId, targetSlotId, outgoingWorker, incomingWorker) {
+    async function peerExecuteSwap(originSlotId, targetSlotId) {
       const originSlot = appState.slots.find(s => s.id === originSlotId);
       const destinationSlot = appState.slots.find(s => s.id === targetSlotId);
 
       if (!originSlot || !destinationSlot) return;
 
-      let oldOrigin = originSlot.member_name_text || "";
-      let oldDest = destinationSlot.member_name_text || "";
+      // Swap the complete raw text parameters explicitly to completely avoid duplicates or double naming glitches!
+      let originalOriginText = originSlot.member_name_text;
+      let originalDestText = destinationSlot.member_name_text;
 
-      let newOrigin = oldOrigin.replace(outgoingWorker, incomingWorker);
-      let newDest = oldDest.replace(incomingWorker, outgoingWorker);
-
-      document.getElementById('loading-text').innerText = "Committing trade to schema cache...";
+      document.getElementById('loading-text').innerText = "Swapping assignments in database...";
       document.getElementById('loading-screen').style.display = 'flex';
 
       await Promise.all([
-        sb.from('rota_slots').update({ member_name_text: newOrigin, status: 'normal' }).eq('id', originSlot.id),
-        sb.from('rota_slots').update({ member_name_text: newDest, status: 'normal' }).eq('id', destinationSlot.id)
+        sb.from('rota_slots').update({ member_name_text: originalDestText, status: 'normal' }).eq('id', originSlot.id),
+        sb.from('rota_slots').update({ member_name_text: originalOriginText, status: 'normal' }).eq('id', destinationSlot.id)
       ]);
 
-      originSlot.member_name_text = newOrigin; originSlot.status = 'normal';
-      destinationSlot.member_name_text = newDest; destinationSlot.status = 'normal';
+      originSlot.member_name_text = originalDestText; originSlot.status = 'normal';
+      destinationSlot.member_name_text = originalOriginText; destinationSlot.status = 'normal';
 
       document.getElementById('loading-screen').style.display = 'none';
       renderGrid();
       renderMyEventsGrid();
       renderSwapsTable();
-      alert("Trade executed successfully across all live calendars!");
+      alert("Trade completely updated in real-time across the Craigavon master ledger arrays!");
     }
 
     async function peerRejectSwap(slotId) {
@@ -554,13 +523,13 @@
           `;
           slots.forEach(s => {
             const config = MINISTRY_LABELS[s.role_title] || { name: s.role_title, css: 'default' };
-            const isPending = s.status && s.status.startsWith('swap_req::');
+            const isPending = s.status && (s.status.startsWith('swap_req::') || s.status.startsWith('swap_v2::'));
 
             html += `
               <div class="card-assignment ${config.css}" style="${isPending ? 'background:#fffbeb; border-right:4px solid #f59e0b;' : ''}">
                 <div class="role-header-box">
                   <div class="role-title">${config.name}</div>
-                  ${isPending ? '<span class="badge pending" style="font-size:9px;">🔄 Pending Swap</span>' : ''}
+                  ${isPending ? '<span class="badge pending" style="font-size:9px;">🔄 Pending Swap Request</span>' : ''}
                 </div>
                 <span class="member-name">${s.member_name_text || '<i>Leave Blank / Unassigned</i>'}</span>
                 
@@ -582,15 +551,14 @@
       const container = document.getElementById('my-events-grid');
       let html = '';
       
-      const fullName = getLoggedInMemberName().toLowerCase();          // "ben cooper"
-      const shortName = fullName.split(' ')[0];                       // "ben"
+      const fullName = getLoggedInMemberName().toLowerCase();          
+      const shortName = fullName.split(' ')[0];                       
       const alternateShortName = fullName.includes('cooper') ? "cooper" : "___"; 
 
       appState.dates.forEach(d => {
         let slots = appState.slots.filter(s => {
           if (!s.member_name_text) return false;
           const text = s.member_name_text.toLowerCase();
-          // Smart fuzzy verification catches "Ben", "Ben Cooper", "Colin", or "Colin Cooper" perfectly
           return text.includes(fullName) || text.includes(shortName) || text.includes(alternateShortName);
         });
 
@@ -621,33 +589,52 @@
       const tbody = document.getElementById('swap-requests-table-body');
       let html = '';
       let actionRequiredCount = 0;
-      const myActiveName = getLoggedInMemberName().toLowerCase();
+      const loggedInName = getLoggedInMemberName().toLowerCase();
+      const loggedInShortName = loggedInName.split(' ')[0];
 
       appState.slots.forEach(s => {
-        if (s.status && s.status.startsWith('swap_req::')) {
+        if (s.status && s.status.startsWith('swap_v2::')) {
           const tokens = s.status.split('::');
-          const requesterName = tokens[1];
-          const descInfo = tokens[2]; 
-          const targetSlotId = tokens[3];
+          const proposerName = tokens[1];
+          const targetSlotId = tokens[2];
 
-          const proposedTargetWorker = (descInfo.split(' with ')[1] || "").toLowerCase();
-          
-          if (proposedTargetWorker === myActiveName || proposedTargetWorker === myActiveName.split(' ')[0]) {
-            actionRequiredCount++;
-            const config = MINISTRY_LABELS[s.role_title] || { name: s.role_title };
-            html += `
-              <tr>
-                <td><span class="badge role-member" style="margin:0;">${config.name}</span></td>
-                <td><b>${requesterName}</b></td>
-                <td>Your shift on <b>${descInfo.split(' with ')[0]}</b></td>
-                <td>
-                  <div style="display:flex; gap:6px;">
-                    <button class="action-btn-sm" onclick="peerExecuteSwap('${s.id}', '${targetSlotId}', '${requesterName}', '${descInfo.split(' with ')[1]}')">Accept</button>
-                    <button class="action-btn-danger" onclick="peerRejectSwap('${s.id}')">Decline</button>
-                  </div>
-                </td>
-              </tr>
-            `;
+          const targetSlotObj = appState.slots.find(ts => ts.id === targetSlotId);
+          if (targetSlotObj) {
+            const targetText = (targetSlotObj.member_name_text || "").toLowerCase();
+            
+            // Only show swap requests targeted at you
+            if (targetText.includes(loggedInName) || targetText.includes(loggedInShortName)) {
+              actionRequiredCount++;
+
+              // Gather metadata context for explicit visual rendering
+              const originDateObj = appState.dates.find(d => d.id === s.service_date_id);
+              const targetDateObj = appState.dates.find(d => d.id === targetSlotObj.service_date_id);
+
+              const originDateFormatted = originDateObj ? new Date(originDateObj.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : "---";
+              const targetDateFormatted = targetDateObj ? new Date(targetDateObj.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : "---";
+
+              const originRoleName = MINISTRY_LABELS[s.role_title]?.name || s.role_title;
+              const targetRoleName = MINISTRY_LABELS[targetSlotObj.role_title]?.name || targetSlotObj.role_title;
+
+              html += `
+                <tr>
+                  <td><span class="badge role-member" style="margin:0; background:#f59e0b; color:white; border:none;">${originRoleName}</span></td>
+                  <td><b>${proposerName}</b></td>
+                  <td style="font-size:14px; line-height:1.4;">
+                    Wants to trade their: <br>
+                    👉 <b style="color:var(--cbc-teal);">${originDateFormatted}</b> — <b>${originRoleName}</b> (${s.member_name_text})<br>
+                    <span style="color:var(--text-muted); font-size:12px;">In exchange for your assignment on:</span><br>
+                    👈 <b style="color:#ef4444;">${targetDateFormatted}</b> — <b>${targetRoleName}</b> (${targetSlotObj.member_name_text})
+                  </td>
+                  <td>
+                    <div style="display:flex; gap:6px;">
+                      <button class="action-btn-sm" style="background:#16a34a;" onclick="peerExecuteSwap('${s.id}', '${targetSlotId}')">Confirm Swap</button>
+                      <button class="action-btn-danger" onclick="peerRejectSwap('${s.id}')">Decline</button>
+                    </div>
+                  </td>
+                </tr>
+              `;
+            }
           }
         }
       });
