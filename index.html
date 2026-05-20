@@ -54,7 +54,7 @@
     .view-view { display: none; }
     .view-view.active { display: block; }
 
-    .filter-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 28px; overflow-x: auto; padding-bottom: 4px; }
+    .filter-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 28px; }
     .filter-btn { padding: 8px 18px; border-radius: 20px; background: #fff; border: 1.5px solid var(--border-color); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; color: var(--text-main); white-space: nowrap; }
     .filter-btn:hover { border-color: var(--cbc-teal); color: var(--cbc-teal); }
     .filter-btn.active { background: var(--cbc-teal); color: #fff; border-color: var(--cbc-teal); }
@@ -90,13 +90,15 @@
     .toggle-admin-mode-btn { padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; border: none; font-size: 13px; background: #e2e8f0; color: var(--cbc-navy); display: flex; align-items: center; gap: 8px; transition: all 0.2s; white-space: nowrap; }
     .toggle-admin-mode-btn.active { background: #ef4444; color: white; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2); }
 
-    .table-wrapper { width: 100%; overflow-x: auto; background: #fff; border-radius: var(--radius); border: 1px solid var(--border-color); box-shadow: var(--shadow-md); margin-top: 20px; }
+    .swap-section-header { font-size: 16px; font-weight: 700; color: var(--cbc-navy); margin: 24px 0 12px 0; display: flex; align-items: center; gap: 8px; }
+    .table-wrapper { width: 100%; overflow-x: auto; background: #fff; border-radius: var(--radius); border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); margin-bottom: 28px; }
     .table-container { width: 100%; border-collapse: collapse; min-width: 600px; }
     .table-container th, .table-container td { padding: 16px 24px; text-align: left; border-bottom: 1px solid var(--border-color); }
     .table-container th { background: #f8fafc; font-weight: 700; font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
     
     .badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; display: inline-flex; align-items: center; gap: 4px; }
     .badge.pending { background: #fef3c7; color: #d97706; border: 1px solid #fde68a; }
+    .badge.open-pool { background: #fee2e2; color: #ef4444; border: 1px solid #fca5a5; }
     .badge.role-admin { background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; margin-top: 4px; }
     .badge.role-member { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; margin-top: 4px; }
 
@@ -129,7 +131,6 @@
       .brand-container { margin-bottom: 16px; padding-bottom: 12px; }
       .nav-group { flex-direction: row; overflow-x: auto; gap: 6px; padding-bottom: 4px; }
       .sidebar-nav-btn { padding: 10px 14px; font-size: 13px; white-space: nowrap; width: auto; }
-      .user-profile-box { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 12px; margin-top: 8px; }
       .viewport { padding: 20px 16px; }
       .page-header { flex-direction: column; align-items: flex-start; padding: 20px; border-radius: 12px; gap: 12px; }
       .page-title { font-size: 23px; }
@@ -169,7 +170,7 @@
       <div class="nav-group">
         <button id="nav-master" class="sidebar-nav-btn active" onclick="switchTab('master')">🗓️ Master Grid</button>
         <button id="nav-myevents" class="sidebar-nav-btn" onclick="switchTab('myevents')">👤 My Schedule</button>
-        <button id="nav-swaps" class="sidebar-nav-btn" onclick="switchTab('swaps')">🔄 Swaps <span id="swap-counter-badge" style="background:#ef4444; color:white; font-size:10px; padding:2px 6px; border-radius:10px; margin-left:6px; display:none;">0</span></button>
+        <button id="nav-swaps" class="sidebar-nav-btn" onclick="switchTab('swaps')">🔄 Swaps Terminal <span id="swap-counter-badge" style="background:#ef4444; color:white; font-size:10px; padding:2px 6px; border-radius:10px; margin-left:6px; display:none;">0</span></button>
       </div>
       <div class="user-profile-box">
         <div>
@@ -185,7 +186,6 @@
       <div id="view-master" class="view-view active">
         <div id="admin-panel" class="admin-panel-box" style="display:none;">
           <h3 style="color:#166534; display:flex; align-items:center; gap:8px;">⚡ Global System Overrides</h3>
-          <p style="font-size:13px; color:#166534; margin-top:4px;">Upload updated document sheets or trigger baseline structural regeneration below.</p>
           <div class="admin-actions-flex">
             <button class="admin-btn" onclick="pushEightCustomRotas()">🚀 Regenerate Document Baseline Schedules</button>
           </div>
@@ -218,22 +218,38 @@
       <div id="view-swaps" class="view-view">
         <div class="page-header">
           <div>
-            <h1 class="page-title">Swap Invites For You</h1>
-            <p style="font-size:13px; color:var(--text-muted); margin-top:4px;">Accept or decline direct swap requests from church peers.</p>
+            <h1 class="page-title">Swaps & Coverage Hub</h1>
+            <p style="font-size:13px; color:var(--text-muted); margin-top:4px;">Manage direct swaps and claim open team roles needing help.</p>
           </div>
         </div>
         
+        <div class="swap-section-header">📥 Direct Swap Proposals Sent to You</div>
         <div class="table-wrapper">
           <table class="table-container">
             <thead>
               <tr>
                 <th>Ministry Line</th>
-                <th>Swap Proposer</th>
-                <th>Trade Exchange Proposal Summary Details</th>
-                <th>Actions</th>
+                <th>From</th>
+                <th>Swap Details</th>
+                <th>Action</th>
               </tr>
             </thead>
-            <tbody id="swap-requests-table-body"></tbody>
+            <tbody id="incoming-swaps-table-body"></tbody>
+          </table>
+        </div>
+
+        <div class="swap-section-header">🚨 Open Exchange Pool (Needs Coverage)</div>
+        <div class="table-wrapper">
+          <table class="table-container">
+            <thead>
+              <tr>
+                <th>Ministry Line</th>
+                <th>Vacant Date</th>
+                <th>Original Member</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="open-pool-table-body"></tbody>
           </table>
         </div>
       </div>
@@ -243,27 +259,35 @@
 
   <div id="member-swap-modal" class="modal-overlay">
     <div class="modal-card">
-      <div class="modal-header">Ask Someone to Swap</div>
+      <div class="modal-header">Request Rota Adjustment</div>
       <div class="modal-body">
         
         <div class="context-highlight-box">
           📍 <b>Your Current Assigned Shift:</b><br>
           <span id="context-origin-details" style="color:var(--cbc-teal); font-weight:700;">--</span>
         </div>
+
+        <div style="margin-bottom: 20px; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 12px; border-radius: 8px;">
+          <p style="font-size: 13px; font-weight: 600; color: #166534; margin-bottom: 8px;">💡 Choose your swap preference:</p>
+          <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; margin-bottom:6px;">
+            <input type="radio" name="swap-strategy" value="pool" checked onchange="toggleSwapStrategyView()"/> 
+            Post to Open Pool (Anyone can claim)
+          </label>
+          <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600;">
+            <input type="radio" name="swap-strategy" value="direct" onchange="toggleSwapStrategyView()"/> 
+            Propose Direct Trade with Peer Date
+          </label>
+        </div>
         
-        <div style="margin-bottom: 16px;">
-          <label style="font-size:11px; font-weight:700; color:var(--text-muted);">1. LOGGED IN MEMBER OUTGOING IDENTITY</label>
-          <input type="text" id="member-swap-outgoing-display" class="input-field" style="background:#f1f5f9; font-weight:700; color:var(--cbc-navy);" readonly />
+        <div id="direct-peer-container" style="display:none; margin-bottom: 16px;">
+          <label style="font-size:11px; font-weight:700; color:var(--text-muted); display:block; margin-bottom:4px;">CHOOSE PEER DATE TO TRADE WITH (SAME ROLE ONLY):</label>
+          <select id="member-swap-target-date" class="inline-select-input"></select>
         </div>
 
-        <div style="margin-bottom: 16px;">
-          <label style="font-size:11px; font-weight:700; color:var(--text-muted);">2. CHOOSE THE PEER DATE/ROLE SHIFT YOU WANT TO TAKE INSTEAD</label>
-          <select id="member-swap-target-date" class="inline-select-input" style="margin-top:4px;"></select>
-        </div>
       </div>
       <div class="modal-actions">
         <button class="action-btn-danger" style="background:#e2e8f0; color:var(--cbc-navy);" onclick="closeMemberSwapModal()">Cancel</button>
-        <button class="action-btn-sm" onclick="submitMemberSwapRequest()">Send Swap Request</button>
+        <button class="action-btn-sm" onclick="submitSystemAdjustmentRequest()">Submit Request</button>
       </div>
     </div>
   </div>
@@ -280,8 +304,8 @@
     const MINISTRY_LABELS = {
       junior_ss: { name: "Junior Sunday School", css: "junior_ss" },
       senior_ss: { name: "Senior Sunday School", css: "senior_ss" },
-      worship: { name: "Worship", css: "worship" },
-      sound_computer: { name: "Sound Desk and Computer", css: "sound_computer" },
+      worship: { name: "Worship Team", css: "worship" },
+      sound_computer: { name: "Sound & Computer Desk", css: "sound_computer" },
       greeting_welcome: { name: "Greeting and Welcome", css: "greeting_welcome" },
       communion_handout: { name: "Communion Hand out", css: "communion_handout" },
       tea_coffee: { name: "Tea and Coffee", css: "tea_coffee" },
@@ -347,7 +371,7 @@
       buildFilters();
       renderGrid();
       renderMyEventsGrid();
-      renderSwapsTable();
+      renderSwapsHub();
       document.getElementById('loading-screen').style.display = 'none';
       document.getElementById('app').style.display = 'flex';
     }
@@ -379,12 +403,12 @@
 
       const { error } = await sb.from('rota_slots').update({ member_name_text: rawValue }).eq('id', slotId);
       if (error) {
-        alert("Database transaction rejected: " + error.message);
+        alert("Database error: " + error.message);
       } else {
         slotObj.member_name_text = rawValue;
         renderGrid();
         renderMyEventsGrid();
-        renderSwapsTable();
+        renderSwapsHub();
       }
     }
 
@@ -394,25 +418,33 @@
       const dateObj = appState.dates.find(d => d.id === slotObj.service_date_id);
       const fDateOrig = new Date(dateObj.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
       const labelConfig = MINISTRY_LABELS[slotObj.role_title] || { name: slotObj.role_title };
-      const resolvedName = getLoggedInMemberName();
 
       document.getElementById('context-origin-details').innerText = `${fDateOrig} — ${labelConfig.name} (${slotObj.member_name_text || 'None'})`;
-      document.getElementById('member-swap-outgoing-display').value = resolvedName;
-
-      let targetDateSelect = document.getElementById('member-swap-target-date');
-      let alternateSlots = appState.slots.filter(s => s.id !== originSlotId && s.member_name_text && s.member_name_text.trim() !== "");
       
-      let dateOptions = '<option value="">-- Choose target peer assignment to take --</option>';
+      // Default Strategy Reset
+      document.querySelector('input[name="swap-strategy"][value="pool"]').checked = true;
+      toggleSwapStrategyView();
+
+      // Filter Target Box so it ONLY shows alternative dates for the SAME ministry role!
+      let targetDateSelect = document.getElementById('member-swap-target-date');
+      let alternateSlots = appState.slots.filter(s => s.id !== originSlotId && s.role_title === slotObj.role_title && s.member_name_text && s.member_name_text.trim() !== "");
+      
+      let dateOptions = '<option value="">-- Choose peer date/person to trade with --</option>';
       alternateSlots.forEach(as => {
         const dObj = appState.dates.find(d => d.id === as.service_date_id);
-        const categoryLabel = MINISTRY_LABELS[as.role_title]?.name || as.role_title;
         if (dObj) {
           const fDate = new Date(dObj.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-          dateOptions += `<option value="${as.id}">${fDate} - ${categoryLabel} (${as.member_name_text})</option>`;
+          dateOptions += `<option value="${as.id}">${fDate} - with ${as.member_name_text}</option>`;
         }
       });
       targetDateSelect.innerHTML = dateOptions;
       document.getElementById('member-swap-modal').classList.add('active');
+    }
+
+    function toggleSwapStrategyView() {
+      const strategy = document.querySelector('input[name="swap-strategy"]:checked').value;
+      const peerContainer = document.getElementById('direct-peer-container');
+      peerContainer.style.display = (strategy === 'direct') ? 'block' : 'none';
     }
 
     function closeMemberSwapModal() {
@@ -420,20 +452,22 @@
       activeSlotId = null;
     }
 
-    async function submitMemberSwapRequest() {
-      const targetSlotId = document.getElementById('member-swap-target-date').value;
-      const outgoingPerson = document.getElementById('member-swap-outgoing-display').value;
+    async function submitSystemAdjustmentRequest() {
+      const strategy = document.querySelector('input[name="swap-strategy"]:checked').value;
+      let packedStatus = 'normal';
 
-      if (!targetSlotId || !outgoingPerson) {
-        alert("Please select a target trade shift position from the dropdown box option list.");
-        return;
+      if (strategy === 'pool') {
+        packedStatus = 'pool_open';
+      } else {
+        const targetSlotId = document.getElementById('member-swap-target-date').value;
+        if (!targetSlotId) {
+          alert("Please select a valid peer date from the dropdown to offer a direct trade.");
+          return;
+        }
+        packedStatus = `swap_v3::${getLoggedInMemberName()}::${targetSlotId}`;
       }
 
-      // Packed status layout schema pattern now uses clear context tracking variables:
-      // swap_v2::{ProposerName}::{TargetSlotId}
-      const packedStatus = `swap_v2::${outgoingPerson}::${targetSlotId}`;
-
-      document.getElementById('loading-text').innerText = "Broadcasting trade invitation...";
+      document.getElementById('loading-text').innerText = "Updating rota terminal configurations...";
       document.getElementById('loading-screen').style.display = 'flex';
 
       const { error } = await sb.from('rota_slots').update({ status: packedStatus }).eq('id', activeSlotId);
@@ -447,66 +481,73 @@
         closeMemberSwapModal();
         renderGrid();
         renderMyEventsGrid();
-        renderSwapsTable();
-        alert("Trade notification broadcast successfully to the master dashboard index panel timeline!");
+        renderSwapsHub();
+        alert("Your rota status has been updated on the live dashboards successfully!");
       }
     }
 
-    async function peerExecuteSwap(originSlotId, targetSlotId) {
+    async function processConfirmDirectSwap(originSlotId, targetSlotId) {
       const originSlot = appState.slots.find(s => s.id === originSlotId);
       const destinationSlot = appState.slots.find(s => s.id === targetSlotId);
-
       if (!originSlot || !destinationSlot) return;
 
-      // Swap the complete raw text parameters explicitly to completely avoid duplicates or double naming glitches!
-      let originalOriginText = originSlot.member_name_text;
-      let originalDestText = destinationSlot.member_name_text;
+      let oldOriginText = originSlot.member_name_text;
+      let oldDestText = destinationSlot.member_name_text;
 
-      document.getElementById('loading-text').innerText = "Swapping assignments in database...";
+      document.getElementById('loading-text').innerText = "Swapping ledger lines cleanly...";
       document.getElementById('loading-screen').style.display = 'flex';
 
       await Promise.all([
-        sb.from('rota_slots').update({ member_name_text: originalDestText, status: 'normal' }).eq('id', originSlot.id),
-        sb.from('rota_slots').update({ member_name_text: originalOriginText, status: 'normal' }).eq('id', destinationSlot.id)
+        sb.from('rota_slots').update({ member_name_text: oldDestText, status: 'normal' }).eq('id', originSlot.id),
+        sb.from('rota_slots').update({ member_name_text: oldOriginText, status: 'normal' }).eq('id', destinationSlot.id)
       ]);
 
-      originSlot.member_name_text = originalDestText; originSlot.status = 'normal';
-      destinationSlot.member_name_text = originalOriginText; destinationSlot.status = 'normal';
+      originSlot.member_name_text = oldDestText; originSlot.status = 'normal';
+      destinationSlot.member_name_text = oldOriginText; destinationSlot.status = 'normal';
 
       document.getElementById('loading-screen').style.display = 'none';
-      renderGrid();
-      renderMyEventsGrid();
-      renderSwapsTable();
-      alert("Trade completely updated in real-time across the Craigavon master ledger arrays!");
+      renderGrid(); renderMyEventsGrid(); renderSwapsHub();
+      alert("Trade verified and applied automatically across your master grid!");
     }
 
-    async function peerRejectSwap(slotId) {
-      const { error } = await sb.from('rota_slots').update({ status: 'normal' }).eq('id', slotId);
+    async function processClaimPoolShift(slotId) {
+      const currentUserName = getLoggedInMemberName();
+      if (!confirm(`Are you sure you want to volunteer and take full responsibility for this shift? Your name will be written in place.`)) return;
+
+      document.getElementById('loading-text').innerText = "Writing assignment details...";
+      document.getElementById('loading-screen').style.display = 'flex';
+
+      const { error } = await sb.from('rota_slots').update({ member_name_text: currentUserName, status: 'normal' }).eq('id', slotId);
+      document.getElementById('loading-screen').style.display = 'none';
+
       if (error) {
         alert(error.message);
       } else {
         const target = appState.slots.find(s => s.id === slotId);
-        if (target) target.status = 'normal';
-        renderGrid();
-        renderMyEventsGrid();
-        renderSwapsTable();
+        if (target) { target.member_name_text = currentUserName; target.status = 'normal'; }
+        renderGrid(); renderMyEventsGrid(); renderSwapsHub();
+        alert("Thank you! You are now locked into this shift layout schedule.");
       }
+    }
+
+    async function processCancelOrRejectSwap(slotId) {
+      const { error } = await sb.from('rota_slots').update({ status: 'normal' }).eq('id', slotId);
+      if (error) { alert(error.message); return; }
+      const target = appState.slots.find(s => s.id === slotId);
+      if (target) target.status = 'normal';
+      renderGrid(); renderMyEventsGrid(); renderSwapsHub();
     }
 
     function buildFilters() {
       const fBox = document.getElementById('category-filters');
-      let html = `<button class="filter-btn ${currentFilter === 'all' ? 'active' : ''}" onclick="applyFilter('all')">Show All</button>`;
+      let html = `<button class="filter-btn ${currentFilter === 'all' ? 'active' : ''}" onclick="applyFilter('all')">Show All Departments</button>`;
       Object.keys(MINISTRY_LABELS).forEach(k => {
         html += `<button class="filter-btn ${currentFilter === k ? 'active' : ''}" onclick="applyFilter('${k}')">${MINISTRY_LABELS[k].name}</button>`;
       });
       fBox.innerHTML = html;
     }
 
-    function applyFilter(k) {
-      currentFilter = k;
-      buildFilters();
-      renderGrid();
-    }
+    function applyFilter(k) { currentFilter = k; buildFilters(); renderGrid(); }
 
     function renderGrid() {
       const container = document.getElementById('master-grid');
@@ -517,63 +558,63 @@
         if (currentFilter !== 'all') slots = slots.filter(s => s.role_title === currentFilter);
 
         if (slots.length) {
-          html += `
-            <div class="card">
-              <div class="card-date">☀️ ${new Date(d.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
-          `;
+          html += `<div class="card"><div class="card-date">☀️ ${new Date(d.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</div>`;
           slots.forEach(s => {
             const config = MINISTRY_LABELS[s.role_title] || { name: s.role_title, css: 'default' };
-            const isPending = s.status && (s.status.startsWith('swap_req::') || s.status.startsWith('swap_v2::'));
+            const isDirectPending = s.status && s.status.startsWith('swap_v3::');
+            const isOpenPool = s.status === 'pool_open';
+
+            let specialBg = '';
+            let statusBadgeMarkup = '';
+            if (isDirectPending) {
+              specialBg = 'background:#fffbeb; border-right:4px solid #f59e0b;';
+              statusBadgeMarkup = '<span class="badge pending" style="font-size:9px;">🔄 Direct Swap Out</span>';
+            } else if (isOpenPool) {
+              specialBg = 'background:#fef2f2; border-right:4px solid #ef4444;';
+              statusBadgeMarkup = '<span class="badge open-pool" style="font-size:9px;">🚨 HELP NEEDED / OPEN</span>';
+            }
 
             html += `
-              <div class="card-assignment ${config.css}" style="${isPending ? 'background:#fffbeb; border-right:4px solid #f59e0b;' : ''}">
+              <div class="card-assignment ${config.css}" style="${specialBg}">
                 <div class="role-header-box">
                   <div class="role-title">${config.name}</div>
-                  ${isPending ? '<span class="badge pending" style="font-size:9px;">🔄 Pending Swap Request</span>' : ''}
+                  ${statusBadgeMarkup}
                 </div>
-                <span class="member-name">${s.member_name_text || '<i>Leave Blank / Unassigned</i>'}</span>
-                
+                <span class="member-name">${isOpenPool ? '<b style="color:#ef4444;">[OPEN - NEEDS HELP]</b>' : (s.member_name_text || '<i>Leave Blank / Unassigned</i>')}</span>
                 <div class="inline-editor-box">
                   <input type="text" class="inline-select-input" value="${s.member_name_text || ''}" onchange="handleInlineChange('${s.id}', this.value)"/>
                 </div>
-
-                ${(!isPending && s.member_name_text) ? `<button class="swap-member-trigger-btn" onclick="openMemberSwapModal('${s.id}')">🔄 Swap Shift</button>` : ''}
+                ${(!isDirectPending && !isOpenPool && s.member_name_text) ? `<button class="swap-member-trigger-btn" onclick="openMemberSwapModal('${s.id}')">🔄 Swap / Cover Shift</button>` : ''}
+                ${isOpenPool ? `<button class="swap-member-trigger-btn" style="color:#ef4444; font-weight:700;" onclick="switchTab('swaps')">👉 Claim Shift Now</button>` : ''}
               </div>
             `;
           });
           html += `</div>`;
         }
       });
-      container.innerHTML = html || `<div style="padding:20px; color:var(--text-muted);">No entries match this parameter.</div>`;
+      container.innerHTML = html || `<div style="padding:20px; color:var(--text-muted);">No logs record matching variables.</div>`;
     }
 
     function renderMyEventsGrid() {
       const container = document.getElementById('my-events-grid');
       let html = '';
-      
       const fullName = getLoggedInMemberName().toLowerCase();          
       const shortName = fullName.split(' ')[0];                       
-      const alternateShortName = fullName.includes('cooper') ? "cooper" : "___"; 
 
       appState.dates.forEach(d => {
         let slots = appState.slots.filter(s => {
-          if (!s.member_name_text) return false;
+          if (!s.member_name_text || s.status === 'pool_open') return false;
           const text = s.member_name_text.toLowerCase();
-          return text.includes(fullName) || text.includes(shortName) || text.includes(alternateShortName);
+          return text.includes(fullName) || text.includes(shortName);
         });
 
         if (slots.length) {
-          html += `
-            <div class="card">
-              <div class="card-date">☀️ ${new Date(d.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
-          `;
+          html += `<div class="card"><div class="card-date">☀️ ${new Date(d.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</div>`;
           slots.forEach(s => {
             const config = MINISTRY_LABELS[s.role_title] || { name: s.role_title, css: 'default' };
             html += `
               <div class="card-assignment ${config.css}">
-                <div class="role-header-box">
-                  <div class="role-title">${config.name}</div>
-                </div>
+                <div class="role-header-box"><div class="role-title">${config.name}</div></div>
                 <span class="member-name">${s.member_name_text}</span>
               </div>
             `;
@@ -581,19 +622,23 @@
           html += `</div>`;
         }
       });
-
-      container.innerHTML = html || `<div style="grid-column:1/-1; text-align:center; padding:30px; background:#fff; border-radius:12px; font-size:14px;">No upcoming personal shifts flagged.</div>`;
+      container.innerHTML = html || `<div style="grid-column:1/-1; text-align:center; padding:30px; background:#fff; border-radius:12px;">No personal schedule matches found.</div>`;
     }
 
-    function renderSwapsTable() {
-      const tbody = document.getElementById('swap-requests-table-body');
-      let html = '';
-      let actionRequiredCount = 0;
+    function renderSwapsHub() {
+      const incomingTbody = document.getElementById('incoming-swaps-table-body');
+      const poolTbody = document.getElementById('open-pool-table-body');
+      
+      let incomingHtml = '';
+      let poolHtml = '';
+      let badgeCount = 0;
+
       const loggedInName = getLoggedInMemberName().toLowerCase();
       const loggedInShortName = loggedInName.split(' ')[0];
 
       appState.slots.forEach(s => {
-        if (s.status && s.status.startsWith('swap_v2::')) {
+        // 1. Direct Swaps Processing
+        if (s.status && s.status.startsWith('swap_v3::')) {
           const tokens = s.status.split('::');
           const proposerName = tokens[1];
           const targetSlotId = tokens[2];
@@ -602,34 +647,26 @@
           if (targetSlotObj) {
             const targetText = (targetSlotObj.member_name_text || "").toLowerCase();
             
-            // Only show swap requests targeted at you
             if (targetText.includes(loggedInName) || targetText.includes(loggedInShortName)) {
-              actionRequiredCount++;
-
-              // Gather metadata context for explicit visual rendering
+              badgeCount++;
               const originDateObj = appState.dates.find(d => d.id === s.service_date_id);
               const targetDateObj = appState.dates.find(d => d.id === targetSlotObj.service_date_id);
 
-              const originDateFormatted = originDateObj ? new Date(originDateObj.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : "---";
-              const targetDateFormatted = targetDateObj ? new Date(targetDateObj.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : "---";
+              const oDateF = originDateObj ? new Date(originDateObj.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : "---";
+              const tDateF = targetDateObj ? new Date(targetDateObj.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : "---";
+              const roleLabel = MINISTRY_LABELS[s.role_title]?.name || s.role_title;
 
-              const originRoleName = MINISTRY_LABELS[s.role_title]?.name || s.role_title;
-              const targetRoleName = MINISTRY_LABELS[targetSlotObj.role_title]?.name || targetSlotObj.role_title;
-
-              html += `
+              incomingHtml += `
                 <tr>
-                  <td><span class="badge role-member" style="margin:0; background:#f59e0b; color:white; border:none;">${originRoleName}</span></td>
+                  <td><span class="badge role-member" style="background:var(--cbc-teal); color:white; border:none; margin:0;">${roleLabel}</span></td>
                   <td><b>${proposerName}</b></td>
-                  <td style="font-size:14px; line-height:1.4;">
-                    Wants to trade their: <br>
-                    👉 <b style="color:var(--cbc-teal);">${originDateFormatted}</b> — <b>${originRoleName}</b> (${s.member_name_text})<br>
-                    <span style="color:var(--text-muted); font-size:12px;">In exchange for your assignment on:</span><br>
-                    👈 <b style="color:#ef4444;">${targetDateFormatted}</b> — <b>${targetRoleName}</b> (${targetSlotObj.member_name_text})
+                  <td style="font-size:13px; line-height:1.4;">
+                    Wants to trade their <b>${oDateF}</b> shift for your <b>${tDateF}</b> shift.
                   </td>
                   <td>
-                    <div style="display:flex; gap:6px;">
-                      <button class="action-btn-sm" style="background:#16a34a;" onclick="peerExecuteSwap('${s.id}', '${targetSlotId}')">Confirm Swap</button>
-                      <button class="action-btn-danger" onclick="peerRejectSwap('${s.id}')">Decline</button>
+                    <div style="display:flex; gap:4px;">
+                      <button class="action-btn-sm" style="background:#16a34a; padding:6px 12px;" onclick="processConfirmDirectSwap('${s.id}', '${targetSlotId}')">Accept</button>
+                      <button class="action-btn-danger" style="padding:6px 12px;" onclick="processCancelOrRejectSwap('${s.id}')">Decline</button>
                     </div>
                   </td>
                 </tr>
@@ -637,22 +674,49 @@
             }
           }
         }
+
+        // 2. Open Coverage Pool Processing
+        if (s.status === 'pool_open') {
+          const dateObj = appState.dates.find(d => d.id === s.service_date_id);
+          const dateF = dateObj ? new Date(dateObj.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : "---";
+          const roleLabel = MINISTRY_LABELS[s.role_title]?.name || s.role_title;
+          
+          // Don't count your own open shifts as actionable badge counts
+          const isOwnOpenShift = (s.member_name_text || "").toLowerCase().includes(loggedInShortName);
+          if (!isOwnOpenShift) badgeCount++;
+
+          poolHtml += `
+            <tr>
+              <td><span class="badge open-pool" style="margin:0;">${roleLabel}</span></td>
+              <td><b>${dateF}</b></td>
+              <td>${s.member_name_text || 'Unknown'}</td>
+              <td>
+                ${isOwnOpenShift ? 
+                  `<button class="action-btn-danger" style="padding:6px 12px;" onclick="processCancelOrRejectSwap('${s.id}')">Remove Post</button>` :
+                  `<button class="action-btn-sm" style="padding:6px 12px;" onclick="processClaimPoolShift('${s.id}')">🙋 Claim Shift</button>`
+                }
+              </td>
+            </tr>
+          `;
+        }
       });
 
+      // Update Notifications count indicator
       const badge = document.getElementById('swap-counter-badge');
-      if (actionRequiredCount > 0) {
-        badge.innerText = actionRequiredCount;
+      if (badgeCount > 0) {
+        badge.innerText = badgeCount;
         badge.style.display = 'inline-block';
       } else {
         badge.style.display = 'none';
       }
 
-      tbody.innerHTML = html || `<tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:30px;">No pending swaps require your confirmation.</td></tr>`;
+      incomingTbody.innerHTML = incomingHtml || `<tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:20px; font-size:13px;">No direct offers targeted at your profile currently.</td></tr>`;
+      poolTbody.innerHTML = poolHtml || `<tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:20px; font-size:13px;">Excellent! Every roster line is fully staffed right now.</td></tr>`;
     }
 
     async function pushEightCustomRotas() {
-      if (!confirm("Wipe previous test layouts and write real source document schedules?")) return;
-      document.getElementById('loading-text').innerText = "Wiping and updating lines...";
+      if (!confirm("Wipe structural history and re-deploy full database matrix rules?")) return;
+      document.getElementById('loading-text').innerText = "Wiping and updating baseline vectors...";
       document.getElementById('loading-screen').style.display = 'flex';
 
       try {
@@ -682,43 +746,23 @@
         };
 
         const soundSource = {
-          "2026-05-03": "Andrew P & Tosin",
-          "2026-05-10": "Niall",
-          "2026-05-17": "Colin",
-          "2026-05-24": "Niall",
-          "2026-05-31": "John & Philip",
-          "2026-06-07": "Leanne & Andrew P",
-          "2026-06-14": "Tosin & Niall",
-          "2026-06-21": "John & Ruth",
-          "2026-06-28": "Andrew P",
-          "2026-07-05": "Leanne & Colin",
-          "2026-07-12": "Niall & Tosin",
-          "2026-07-19": "Philip",
-          "2026-07-26": "Colin & Henry"
+          "2026-05-24": "Niall", "2026-05-31": "John & Philip", "2026-06-07": "Leanne & Andrew P",
+          "2026-06-14": "Tosin & Niall", "2026-06-21": "John & Ruth", "2026-06-28": "Andrew P"
         };
 
         const teaSource = {
-          "2026-05-24": "Adrian & Rosemary",
-          "2026-05-31": "Hazel & Niall",
-          "2026-06-07": "Romona & James",
-          "2026-06-14": "Iris & Sarah",
-          "2026-06-21": "Glynis & Janet",
-          "2026-06-28": "Elizabeth & Leanne"
+          "2026-05-24": "Adrian & Rosemary", "2026-05-31": "Hazel & Niall", "2026-06-07": "Romona & James",
+          "2026-06-14": "Iris & Sarah", "2026-06-21": "Glynis & Janet", "2026-06-28": "Elizabeth & Leanne"
         };
 
         const hallSource = {
-          "2026-05-24": "Emma & Robbie",
-          "2026-05-31": "Ben & Hazel",
-          "2026-06-07": "Chloe & Nathanael",
-          "2026-06-14": "Andrew P & Thasia",
-          "2026-06-21": "Kathryn & Nathanael",
-          "2026-06-28": "Chloe & Robbie"
+          "2026-05-24": "Emma & Robbie", "2026-05-31": "Ben & Hazel", "2026-06-07": "Chloe & Nathanael",
+          "2026-06-14": "Andrew P & Thasia", "2026-06-21": "Kathryn & Nathanael", "2026-06-28": "Chloe & Robbie"
         };
 
         let payload = [];
         appState.dates.forEach(dObj => {
           const ISO_DATE = dObj.date; 
-          
           payload.push({ rota_id: sharedRotaId, service_date_id: dObj.id, role_title: 'junior_ss', member_name_text: juniorSSSource[ISO_DATE] || "", status: 'normal' });
           payload.push({ rota_id: sharedRotaId, service_date_id: dObj.id, role_title: 'senior_ss', member_name_text: "", status: 'normal' });
           payload.push({ rota_id: sharedRotaId, service_date_id: dObj.id, role_title: 'worship', member_name_text: worshipSource[ISO_DATE] || "", status: 'normal' });
@@ -734,7 +778,7 @@
         location.reload();
       } catch (err) {
         document.getElementById('loading-screen').style.display = 'none';
-        alert("SQL Sync Error: " + err.message);
+        alert("SQL Error: " + err.message);
       }
     }
 
