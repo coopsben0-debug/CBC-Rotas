@@ -109,7 +109,6 @@
     .admin-actions-flex { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 14px; }
     .admin-btn { padding: 12px 24px; background: #16a34a; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s; font-size: 14px; }
     .admin-btn:hover { background: #15803d; }
-    .file-input-label { padding: 12px 24px; background: #fff; border: 1px solid #bbf7d0; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; color: #16a34a; display: inline-block; }
     
     .user-profile-box { border-top: 1px solid var(--border-color); padding-top: 20px; margin-top: auto; font-size: 13px; color: var(--text-muted); }
     .input-field { width: 100%; padding: 12px; margin-top: 6px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; background: #fff; }
@@ -189,10 +188,6 @@
           <p style="font-size:13px; color:#166534; margin-top:4px;">Upload updated document sheets or trigger baseline structural regeneration below.</p>
           <div class="admin-actions-flex">
             <button class="admin-btn" onclick="pushEightCustomRotas()">🚀 Regenerate Document Baseline Schedules</button>
-            <label class="file-input-label">
-              📁 Upload New Rota (.TXT / .CSV)
-              <input type="file" id="rota-file-uploader" style="display:none;" onchange="handleRotaFileUpload(this)"/>
-            </label>
           </div>
         </div>
 
@@ -287,7 +282,6 @@
       "coopscolin0@gmail.com": "Colin Cooper"
     };
 
-    // Cleaned up and updated ministry taxonomy based on your explicit layout updates
     const MINISTRY_LABELS = {
       junior_ss: { name: "Junior Sunday School", css: "junior_ss" },
       senior_ss: { name: "Senior Sunday School", css: "senior_ss" },
@@ -399,20 +393,6 @@
       }
     }
 
-    // Dynamic file uploader parser framework for automated rota text uploads
-    function handleRotaFileUpload(inputElement) {
-      const file = inputElement.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = async function(e) {
-        const textContent = e.target.result;
-        console.log("Uploaded text trace payload:", textContent);
-        alert("File tracking loaded! Automatic layout structural analysis code goes here to target column parameters.");
-      };
-      reader.readAsText(file);
-    }
-
     function openMemberSwapModal(originSlotId) {
       activeSlotId = originSlotId;
       const slotObj = appState.slots.find(s => s.id === originSlotId);
@@ -479,6 +459,7 @@
       const targetDateObj = appState.dates.find(d => d.id === targetSlotObj.service_date_id);
       const formattedTargetDate = new Date(targetDateObj.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 
+      // Corrected to update status field seamlessly (prevents non-existent column crash)
       const packedStatus = `swap_req::${outgoingPerson}::${formattedTargetDate} with ${incomingPerson}::${targetSlotId}`;
 
       document.getElementById('loading-text').innerText = "Broadcasting trade invitation...";
@@ -600,10 +581,18 @@
     function renderMyEventsGrid() {
       const container = document.getElementById('my-events-grid');
       let html = '';
-      const resolvedName = getLoggedInMemberName().toLowerCase();
+      
+      const fullName = getLoggedInMemberName().toLowerCase();          // "ben cooper"
+      const shortName = fullName.split(' ')[0];                       // "ben"
+      const alternateShortName = fullName.includes('cooper') ? "cooper" : "___"; 
 
       appState.dates.forEach(d => {
-        let slots = appState.slots.filter(s => s.service_date_id === d.id && s.member_name_text && s.member_name_text.toLowerCase().includes(resolvedName));
+        let slots = appState.slots.filter(s => {
+          if (!s.member_name_text) return false;
+          const text = s.member_name_text.toLowerCase();
+          // Smart fuzzy verification catches "Ben", "Ben Cooper", "Colin", or "Colin Cooper" perfectly
+          return text.includes(fullName) || text.includes(shortName) || text.includes(alternateShortName);
+        });
 
         if (slots.length) {
           html += `
@@ -643,7 +632,7 @@
 
           const proposedTargetWorker = (descInfo.split(' with ')[1] || "").toLowerCase();
           
-          if (proposedTargetWorker === myActiveName) {
+          if (proposedTargetWorker === myActiveName || proposedTargetWorker === myActiveName.split(' ')[0]) {
             actionRequiredCount++;
             const config = MINISTRY_LABELS[s.role_title] || { name: s.role_title };
             html += `
@@ -674,7 +663,6 @@
       tbody.innerHTML = html || `<tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:30px;">No pending swaps require your confirmation.</td></tr>`;
     }
 
-    // Baseline processing map matching your updated data sources directly
     async function pushEightCustomRotas() {
       if (!confirm("Wipe previous test layouts and write real source document schedules?")) return;
       document.getElementById('loading-text').innerText = "Wiping and updating lines...";
@@ -688,7 +676,6 @@
           sharedRotaId = newR[0].id;
         }
 
-        // Exact match mapping values taken directly from your uploaded papers
         const worshipSource = {
           "2026-05-24": "Neil (Pianist) & Rhiannon (Singer)",
           "2026-05-31": "Kathryn (Pianist), Emma (Singer) & Andrew (Instruments)",
@@ -746,11 +733,11 @@
           const ISO_DATE = dObj.date; 
           
           payload.push({ rota_id: sharedRotaId, service_date_id: dObj.id, role_title: 'junior_ss', member_name_text: juniorSSSource[ISO_DATE] || "", status: 'normal' });
-          payload.push({ rota_id: sharedRotaId, service_date_id: dObj.id, role_title: 'senior_ss', member_name_text: "", status: 'normal' }); // Blank for now
+          payload.push({ rota_id: sharedRotaId, service_date_id: dObj.id, role_title: 'senior_ss', member_name_text: "", status: 'normal' });
           payload.push({ rota_id: sharedRotaId, service_date_id: dObj.id, role_title: 'worship', member_name_text: worshipSource[ISO_DATE] || "", status: 'normal' });
           payload.push({ rota_id: sharedRotaId, service_date_id: dObj.id, role_title: 'sound_computer', member_name_text: soundSource[ISO_DATE] || "", status: 'normal' });
-          payload.push({ rota_id: sharedRotaId, service_date_id: dObj.id, role_title: 'greeting_welcome', member_name_text: "", status: 'normal' }); // Blank for now
-          payload.push({ rota_id: sharedRotaId, service_date_id: dObj.id, role_title: 'communion_handout', member_name_text: "", status: 'normal' }); // Blank for now
+          payload.push({ rota_id: sharedRotaId, service_date_id: dObj.id, role_title: 'greeting_welcome', member_name_text: "", status: 'normal' });
+          payload.push({ rota_id: sharedRotaId, service_date_id: dObj.id, role_title: 'communion_handout', member_name_text: "", status: 'normal' });
           payload.push({ rota_id: sharedRotaId, service_date_id: dObj.id, role_title: 'tea_coffee', member_name_text: teaSource[ISO_DATE] || "", status: 'normal' });
           payload.push({ rota_id: sharedRotaId, service_date_id: dObj.id, role_title: 'supervising_hall', member_name_text: hallSource[ISO_DATE] || "", status: 'normal' });
         });
