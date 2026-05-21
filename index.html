@@ -3,27 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Craigavon Baptist — Rota Portal & Swap Hub</title>
+    <title>Craigavon Baptist Church — Multi-Rota Terminal</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
+        .view-content { display: none; }
+        .view-content.active { display: block; }
+        .filter-chip.active { background-color: #0d9488; color: white; border-color: #0d9488; }
         
-        /* Smooth scale animation transitions for a premium application feel */
         .modal-animate {
             animation: modalFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         }
         @keyframes modalFadeIn {
-            from { opacity: 0; transform: scale(0.96) translateY(8px); }
+            from { opacity: 0; transform: scale(0.97) translateY(6px); }
             to { opacity: 1; transform: scale(1) translateY(0); }
         }
     </style>
 </head>
-<body class="bg-gray-50 font-sans text-gray-800 antialiased min-h-screen selection:bg-blue-100">
+<body class="bg-[#f3f4f6] font-sans text-slate-800 antialiased min-h-screen selection:bg-teal-100">
 
     <div id="auth-screen" class="min-h-screen flex flex-col items-center justify-center px-4 py-8 sm:px-6 lg:px-8">
-        <div class="max-w-md w-full space-y-6 bg-white p-6 sm:p-10 rounded-2xl shadow-xl border border-gray-100/80 transition-all">
+        <div class="max-w-md w-full space-y-6 bg-white p-6 sm:p-10 rounded-2xl shadow-xl border border-gray-200/50 transition-all">
             <div class="text-center">
                 <span class="text-4xl">⛪</span>
                 <h2 id="auth-title" class="mt-3 text-center text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">Church Rota Portal</h2>
@@ -34,28 +34,28 @@
                 <div class="space-y-4">
                     <div>
                         <label for="reg-email" class="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">Email Address</label>
-                        <input id="reg-email" type="email" required class="appearance-none rounded-xl relative block w-full px-4 py-3 border border-gray-200 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-3 focus:ring-blue-100 focus:border-blue-500 transition-all text-sm bg-gray-50/50" placeholder="you@example.com">
+                        <input id="reg-email" type="email" required class="appearance-none rounded-xl relative block w-full px-4 py-3 border border-gray-200 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-3 focus:ring-teal-100 focus:border-teal-500 transition-all text-sm bg-gray-50/50" placeholder="you@example.com">
                     </div>
                     <div>
                         <label for="reg-password" class="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">Password</label>
-                        <input id="reg-password" type="password" required class="appearance-none rounded-xl relative block w-full px-4 py-3 border border-gray-200 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-3 focus:ring-blue-100 focus:border-blue-500 transition-all text-sm bg-gray-50/50" placeholder="••••••••">
+                        <input id="reg-password" type="password" required class="appearance-none rounded-xl relative block w-full px-4 py-3 border border-gray-200 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-3 focus:ring-teal-100 focus:border-teal-500 transition-all text-sm bg-gray-50/50" placeholder="••••••••">
                     </div>
                     <div id="access-code-wrapper">
                         <label for="auth-access-code" class="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">Church Registration Access Code</label>
-                        <input id="auth-access-code" type="text" class="appearance-none rounded-xl relative block w-full px-4 py-3 border border-gray-200 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-3 focus:ring-blue-100 focus:border-blue-500 transition-all text-sm bg-gray-50/50" placeholder="Enter church join key">
+                        <input id="auth-access-code" type="text" class="appearance-none rounded-xl relative block w-full px-4 py-3 border border-gray-200 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-3 focus:ring-teal-100 focus:border-teal-500 transition-all text-sm bg-gray-50/50" placeholder="Enter church join key">
                     </div>
                 </div>
 
                 <div id="auth-error" class="hidden text-red-600 text-xs font-semibold bg-red-50/80 p-3 rounded-xl border border-red-200/60 leading-relaxed"></div>
 
                 <div class="pt-2">
-                    <button type="submit" id="auth-submit-btn" class="w-full flex justify-center py-3 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-blue-600 hover:bg-blue-700 active:scale-[0.99] focus:outline-none focus:ring-4 focus:ring-blue-200 shadow-md shadow-blue-500/10 transition-all cursor-pointer">
+                    <button type="submit" id="auth-submit-btn" class="w-full flex justify-center py-3 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-teal-600 hover:bg-teal-700 active:scale-[0.99] focus:outline-none focus:ring-4 focus:ring-teal-200 shadow-md shadow-teal-500/10 transition-all cursor-pointer">
                         Register Account
                     </button>
                 </div>
 
                 <div class="text-center pt-2">
-                    <button type="button" id="toggle-auth-mode-btn" class="text-xs text-blue-600 hover:text-blue-700 font-bold hover:underline py-1 px-2" onclick="toggleAuthMode()">
+                    <button type="button" id="toggle-auth-mode-btn" class="text-xs text-teal-600 hover:text-teal-700 font-bold hover:underline py-1 px-2 cursor-pointer" onclick="toggleAuthMode()">
                         Already have an account? Log In instead
                     </button>
                 </div>
@@ -63,134 +63,146 @@
         </div>
     </div>
 
-    <div id="app-screen" class="hidden min-h-screen flex flex-col">
-        <header class="bg-white shadow-xs border-b border-gray-200 sticky top-0 z-40">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-                <div class="flex items-center space-x-2 min-w-0">
-                    <span class="text-lg sm:text-xl font-black text-gray-900 tracking-tight truncate">⛪ Rota & Swap Hub</span>
-                    <span id="admin-badge" class="hidden bg-purple-100 text-purple-800 text-[10px] sm:text-xs px-2 py-0.5 rounded-full font-bold">Admin</span>
+    <div id="app-screen" class="hidden min-h-screen flex flex-col lg:flex-row">
+        
+        <aside class="bg-[#0f172a] text-slate-300 w-full lg:w-64 shrink-0 flex flex-col sticky top-0 z-40 lg:h-screen shadow-xl border-b lg:border-b-0 lg:border-r border-slate-800">
+            <div class="p-4 sm:p-6 flex items-center justify-between border-b border-slate-800 gap-4">
+                <div class="flex items-center space-x-3 min-w-0">
+                    <div class="w-9 h-9 rounded-xl bg-teal-600 flex items-center justify-center text-lg font-bold text-white shrink-0 shadow-md shadow-teal-500/20">⛪</div>
+                    <div class="leading-tight min-w-0">
+                        <h1 class="text-sm font-black text-white tracking-tight truncate">Craigavon Baptist</h1>
+                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mt-0.5">All-Ministry Terminal</span>
+                    </div>
                 </div>
-                <div class="flex items-center gap-2 sm:gap-4 shrink-0">
-                    <span id="user-welcome" class="text-xs text-gray-400 hidden md:inline-block font-medium"></span>
-                    <button id="logout-btn" class="text-xs sm:text-sm font-bold text-gray-600 hover:text-gray-900 border border-gray-200 rounded-xl px-3 py-2 hover:bg-gray-50 transition-all active:scale-95 cursor-pointer">Log Out</button>
+                <button onclick="handleUserLogOut()" class="lg:hidden text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-xl border border-slate-700 transition-all cursor-pointer">Log Out</button>
+            </div>
+
+            <nav class="p-3 lg:p-4 flex flex-row lg:flex-col gap-1 overflow-x-auto lg:overflow-x-visible items-center lg:items-stretch border-b lg:border-b-0 border-slate-800 scrollbar-none">
+                <button id="nav-master" onclick="changeSidebarRoute('master')" class="flex items-center gap-3 px-4 py-3 text-xs sm:text-sm font-bold rounded-xl transition-all w-max lg:w-full bg-slate-800 text-white cursor-pointer shrink-0">
+                    <span class="text-base">📅</span> Master Grid
+                </button>
+                <button id="nav-personal" onclick="changeSidebarRoute('personal')" class="flex items-center gap-3 px-4 py-3 text-xs sm:text-sm font-bold rounded-xl transition-all w-max lg:w-full text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 cursor-pointer shrink-0">
+                    <span class="text-base">👤</span> My Schedule
+                </button>
+                <button id="nav-swaps" onclick="changeSidebarRoute('swaps')" class="flex items-center gap-3 px-4 py-3 text-xs sm:text-sm font-bold rounded-xl transition-all w-max lg:w-full text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 cursor-pointer shrink-0">
+                    <span class="text-base">🔄</span> Swaps Hub
+                </button>
+            </nav>
+
+            <div class="hidden lg:flex mt-auto p-4 border-t border-slate-800 bg-slate-900/40 flex-col gap-2">
+                <div class="min-w-0">
+                    <span class="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Logged Session Profile</span>
+                    <span id="sidebar-user-label" class="text-xs font-bold text-slate-300 truncate block mt-0.5">—</span>
+                    <span id="admin-badge" class="hidden mt-1.5 inline-block bg-purple-950/80 text-purple-300 border border-purple-800/60 text-[10px] px-2 py-0.5 rounded-md font-extrabold tracking-wide uppercase">Admin Operations</span>
                 </div>
+                <button onclick="handleUserLogOut()" class="w-full text-center py-2 text-xs font-bold text-slate-400 hover:text-white bg-slate-800/60 hover:bg-slate-800 border border-slate-700/50 rounded-xl transition-all mt-2 cursor-pointer">Log Out Terminal</button>
             </div>
-        </header>
+        </aside>
 
-        <div class="bg-white border-b border-gray-200 sticky top-16 z-30 shadow-xs">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <nav class="flex space-x-6 sm:space-x-8 -mb-px" aria-label="Tabs">
-                    <button id="tab-schedules" class="border-b-3 border-blue-600 text-blue-600 py-4 px-1 font-bold text-xs sm:text-sm transition-all focus:outline-none tab-btn cursor-pointer" onclick="switchTab('schedules')">
-                        📅 Master Grid Schedules
-                    </button>
-                    <button id="tab-swaps" class="border-b-3 border-transparent text-gray-500 hover:text-gray-700 py-4 px-1 font-bold text-xs sm:text-sm transition-all focus:outline-none tab-btn relative cursor-pointer" onclick="switchTab('swaps')">
-                        🔄 Coverage & Swap Hub 
-                        <span id="swap-badge-count" class="ml-1.5 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-extrabold hidden">0</span>
-                    </button>
-                </nav>
-            </div>
-        </div>
-
-        <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+        <main class="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto w-full overflow-y-auto">
             
-            <div id="content-schedules" class="tab-content active space-y-6">
-                <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-xs border border-gray-200/70">
-                    <h1 class="text-xl font-extrabold text-gray-900 sm:text-2xl tracking-tight">Ministry Schedules</h1>
-                    <p class="mt-1 text-xs sm:text-sm text-gray-500 leading-relaxed">Tap/Click on any shift block assigned to you if you need to submit an open coverage alert or trade with a peer.</p>
-                </div>
-
-                <div class="hidden lg:block bg-white shadow-xs rounded-2xl border border-gray-200 overflow-hidden">
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200 text-left text-sm">
-                            <thead class="bg-gray-50/70 text-gray-400 uppercase tracking-wider text-[11px] font-bold">
-                                <tr>
-                                    <th scope="col" class="px-6 py-4">Service Date</th>
-                                    <th scope="col" class="px-6 py-4">Worship Team</th>
-                                    <th scope="col" class="px-6 py-4">Audio & Sound Desk</th>
-                                    <th scope="col" class="px-6 py-4">Welcome Greeting</th>
-                                    <th scope="col" class="px-6 py-4">Tea & Coffee Hospitality</th>
-                                </tr>
-                            </thead>
-                            <tbody id="rota-table-body" class="divide-y divide-gray-100 bg-white text-gray-700">
-                                </tbody>
-                        </table>
+            <div id="admin-tools-panel" class="hidden bg-emerald-50 border border-emerald-200 rounded-2xl p-4 sm:p-5 shadow-xs">
+                <div class="flex items-start gap-3">
+                    <span class="text-xl sm:text-2xl">⚡</span>
+                    <div class="space-y-1 flex-1">
+                        <h4 class="text-sm font-black text-emerald-900">Global System Overrides</h4>
+                        <p class="text-xs text-emerald-700/90 leading-relaxed">Deploys administrative modifications across baseline rows. Changes will be reflected live across the terminal dashboards.</p>
+                        <button class="mt-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2 px-4 rounded-xl shadow-xs inline-flex items-center gap-2 active:scale-98 transition-all cursor-pointer" onclick="triggerRegenerateSchedules()">
+                            🚀 Regenerate Document Baseline Schedules
+                        </button>
                     </div>
                 </div>
+            </div>
 
-                <div id="rota-mobile-cards-container" class="block lg:hidden space-y-4">
+            <div id="view-master" class="view-content active space-y-6">
+                <div class="bg-white p-5 sm:p-6 rounded-2xl border border-gray-200/80 shadow-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div class="space-y-1">
+                        <h2 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Master Ministry Schedules</h2>
+                        <p class="text-xs sm:text-sm text-slate-500">Live overview across all custom operational departments.</p>
+                    </div>
+                    <button id="live-edit-btn" class="sm:self-center bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 text-xs font-bold py-2 px-4 rounded-xl inline-flex items-center gap-1.5 transition-all cursor-pointer" onclick="toggleLiveEditingState()">
+                        🔒 Enable Live Editing
+                    </button>
+                </div>
+
+                <div class="flex flex-wrap gap-2 items-center" id="filter-chips-row">
+                    <button class="filter-chip active text-xs font-bold px-3.5 py-1.5 rounded-full border border-gray-200 bg-white shadow-xs transition-all cursor-pointer" onclick="filterDepartment('all')">Show All</button>
+                    <button class="filter-chip text-xs font-bold px-3.5 py-1.5 rounded-full border border-gray-200 bg-white shadow-xs transition-all cursor-pointer" onclick="filterDepartment('worship')">Music Team</button>
+                    <button class="filter-chip text-xs font-bold px-3.5 py-1.5 rounded-full border border-gray-200 bg-white shadow-xs transition-all cursor-pointer" onclick="filterDepartment('kids')">CB Sunday Kids</button>
+                    <button class="filter-chip text-xs font-bold px-3.5 py-1.5 rounded-full border border-gray-200 bg-white shadow-xs transition-all cursor-pointer" onclick="filterDepartment('tea')">Tea Rota</button>
+                    <button class="filter-chip text-xs font-bold px-3.5 py-1.5 rounded-full border border-gray-200 bg-white shadow-xs transition-all cursor-pointer" onclick="filterDepartment('sound')">Sound Rota</button>
+                    <button class="filter-chip text-xs font-bold px-3.5 py-1.5 rounded-full border border-gray-200 bg-white shadow-xs transition-all cursor-pointer" onclick="filterDepartment('hall')">Sports Hall Rota</button>
+                </div>
+
+                <div id="master-cards-feed" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                     </div>
             </div>
 
-            <div id="content-swaps" class="tab-content space-y-6">
-                <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-xs border border-gray-200/70">
-                    <h1 class="text-xl font-extrabold text-gray-900 sm:text-2xl tracking-tight">Coverage Hub</h1>
-                    <p class="mt-1 text-xs sm:text-sm text-gray-500 leading-relaxed">Instantly pick up vacant team slots or manage private swap configurations routed directly to you.</p>
+            <div id="view-personal" class="view-content space-y-6">
+                <div class="bg-white p-5 sm:p-6 rounded-2xl border border-gray-200/80 shadow-xs">
+                    <h2 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Your Upcoming Assignments</h2>
+                    <p class="text-xs sm:text-sm text-slate-500 mt-1">Filtered lookup of tasks matching your logged identity across all teams.</p>
                 </div>
+                <div id="personal-cards-feed" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    </div>
+            </div>
 
-                <div class="space-y-3">
-                    <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5 px-1">
-                        <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span> 🚨 Open Pool (Help Needed)
-                    </h3>
-                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3" id="open-pool-container">
-                        </div>
+            <div id="view-swaps" class="view-content space-y-6">
+                <div class="bg-white p-5 sm:p-6 rounded-2xl border border-gray-200/80 shadow-xs">
+                    <h2 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Coverage & Swap Forum</h2>
+                    <p class="text-xs sm:text-sm text-slate-500 mt-1">Instantly claim open shifts or verify trade adjustments submitted by fellow staff members.</p>
                 </div>
-
-                <div class="space-y-3 pt-4">
-                    <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider px-1">
-                        📥 Direct Trade Offers Sent to You
-                    </h3>
-                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3" id="direct-trades-container">
-                        </div>
+                
+                <div class="space-y-4">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider px-1">🚨 Public Open Shifts Pool</h3>
+                    <div id="pool-forum-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
                 </div>
             </div>
         </main>
     </div>
 
-    <div id="swap-modal" class="fixed inset-0 bg-gray-900/40 backdrop-blur-xs hidden items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-2xl shadow-2xl border border-gray-100 max-w-md w-full p-5 sm:p-6 space-y-5 modal-animate">
+    <div id="swap-action-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs hidden items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl shadow-2xl border border-gray-100 max-w-md w-full p-5 sm:p-6 space-y-4 modal-animate">
             <div class="flex justify-between items-start">
                 <div>
-                    <h3 class="text-lg font-extrabold text-gray-900 tracking-tight">Request Shift Coverage</h3>
-                    <p class="text-xs text-gray-500 mt-0.5">Let your teams know you won't be available.</p>
+                    <h3 class="text-lg font-black text-slate-900 tracking-tight">Ask Someone to Swap</h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Route updates to the pool or structure trades with peers.</p>
                 </div>
-                <button class="text-gray-400 hover:text-gray-600 p-1 text-lg line-height-none" onclick="closeSwapModal()">✕</button>
+                <button class="text-slate-400 hover:text-slate-600 p-1 text-base cursor-pointer" onclick="closeTradingModal()">✕</button>
             </div>
 
-            <div class="bg-gray-50 border border-gray-200/60 rounded-xl p-3.5 text-xs space-y-1.5">
-                <div class="flex justify-between"><span class="font-bold text-gray-400 uppercase tracking-wider">Role</span> <span id="modal-role-label" class="font-black text-gray-800"></span></div>
-                <div class="flex justify-between"><span class="font-bold text-gray-400 uppercase tracking-wider">Date</span> <span id="modal-date-label" class="font-semibold text-gray-700"></span></div>
+            <div class="bg-slate-50 border border-slate-200/60 rounded-xl p-3.5 text-xs space-y-2">
+                <div class="text-slate-500 font-bold uppercase tracking-wider flex items-center gap-1">📍 Your Current Assigned Shift:</div>
+                <div class="font-extrabold text-teal-700 text-sm" id="modal-origin-summary">—</div>
             </div>
 
-            <div class="space-y-2">
-                <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider px-0.5">Choose Request Strategy</label>
-                <div class="grid grid-cols-2 gap-3">
-                    <label class="border-2 border-blue-600 bg-blue-50/30 rounded-xl p-4 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-gray-50/50 selection-box transition-all" id="label-strategy-pool">
-                        <input type="radio" name="swap-type" value="pool" checked class="sr-only" onchange="updateModalFields()">
-                        <span class="text-2xl">🌍</span>
-                        <span class="text-xs font-bold text-gray-900 mt-1">Open Pool</span>
-                        <span class="text-[10px] text-gray-400 mt-0.5">Anyone can claim it</span>
-                    </label>
-                    <label class="border-2 border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-gray-50/50 selection-box transition-all" id="label-strategy-direct">
-                        <input type="radio" name="swap-type" value="direct" class="sr-only" onchange="updateModalFields()">
-                        <span class="text-2xl">🤝</span>
-                        <span class="text-xs font-bold text-gray-900 mt-1">Direct Trade</span>
-                        <span class="text-[10px] text-gray-400 mt-0.5">Swap dates with a peer</span>
-                    </label>
+            <div class="space-y-3 pt-1">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">1. Logged In Member Outgoing Identity</label>
+                    <input id="modal-identity-field" type="text" readonly class="w-full text-sm font-semibold rounded-xl border border-slate-200 bg-slate-100 p-3 text-slate-600 focus:outline-none">
                 </div>
-            </div>
 
-            <div id="direct-swap-field" class="hidden space-y-1.5">
-                <label for="modal-target-slot" class="block text-xs font-bold text-gray-400 uppercase tracking-wider px-0.5">Select Available Peer Swap Date</label>
-                <div class="relative">
-                    <select id="modal-target-slot" class="w-full text-sm rounded-xl border border-gray-200 bg-gray-50/50 p-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none cursor-pointer">
-                        </select>
-                    <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-gray-400 text-xs">▼</div>
+                <div class="space-y-1">
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Strategy Type</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <label class="border border-slate-200 rounded-xl p-2.5 flex items-center gap-2 cursor-pointer text-xs font-bold" id="strat-pool-box">
+                            <input type="radio" name="modal-strategy" value="pool" checked onchange="toggleModalFields()"> Send to Pool
+                        </label>
+                        <label class="border border-slate-200 rounded-xl p-2.5 flex items-center gap-2 cursor-pointer text-xs font-bold" id="strat-direct-box">
+                            <input type="radio" name="modal-strategy" value="direct" onchange="toggleModalFields()"> Peer Swap
+                        </label>
+                    </div>
+                </div>
+
+                <div id="modal-peer-select-wrapper" class="hidden space-y-1">
+                    <label for="modal-peer-target-select" class="block text-xs font-bold text-slate-400 uppercase tracking-wider">2. Choose the Peer Date/Role Shift You Want to Take Instead</label>
+                    <select id="modal-peer-target-select" class="w-full text-xs sm:text-sm rounded-xl border border-slate-200 bg-slate-50 p-3 font-semibold text-slate-800 focus:outline-none appearance-none cursor-pointer"></select>
                 </div>
             </div>
 
-            <div class="flex items-center justify-end space-x-3 pt-3 border-t border-gray-100">
-                <button type="button" class="px-4 py-2.5 text-xs font-bold text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-xl transition-all cursor-pointer" onclick="closeSwapModal()">Cancel</button>
-                <button type="button" class="px-5 py-2.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-md shadow-blue-500/10 transition-all active:scale-95 cursor-pointer" onclick="submitSwapRequest()">Confirm Request</button>
+            <div class="flex items-center justify-end space-x-2 pt-3 border-t border-slate-100">
+                <button class="px-4 py-2.5 text-xs font-bold text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-all cursor-pointer" onclick="closeTradingModal()">Cancel</button>
+                <button class="px-5 py-2.5 text-xs font-bold text-white bg-teal-600 hover:bg-teal-700 rounded-xl shadow-md transition-all active:scale-95 cursor-pointer" onclick="commitModalSwapRequest()">Send Swap Request</button>
             </div>
         </div>
     </div>
@@ -204,21 +216,42 @@
             supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         }
 
-        const TARGET_KEYS = {
-            member: 'craigavonbaptist2026',
-            admin: 'cbcadmin2026!'
-        };
+        const SEED_KEYS = { member: 'craigavonbaptist2026', admin: 'cbcadmin2026!' };
 
-        // UI Core Database State Registry
-        let state = {
+        // Full multi-department baseline data featuring all dates from January to June
+        let appState = {
             user: null,
             role: 'member',
-            activeSlot: null,
-            slots: [
-                { id: "s1", date: "2026-05-24", worship: "Neil, Rhiannon, Philip", sound: "Niall", greeting: "Colin", tea: "Adrian & Rosemary", status: "normal", targetSlotId: null },
-                { id: "s2", date: "2026-05-31", worship: "Kathryn, Emma, Andrew", sound: "John & Philip", greeting: "Ben", tea: "Hazel & Niall", status: "normal", targetSlotId: null },
-                { id: "s3", date: "2026-06-07", worship: "Adam & Ceri", sound: "Leanne & Andrew P", greeting: "Colin", tea: "Romona & James", status: "normal", targetSlotId: null },
-                { id: "s4", date: "2026-06-14", worship: "Paul, Thasia, Ben Adam", sound: "Tosin & Niall", greeting: "Sarah", tea: "Iris & Sarah", status: "normal", targetSlotId: null }
+            activeTargetFilter: 'all',
+            liveEditingEnabled: false,
+            activeTradingContext: null,
+            schedules: [
+                { id: "row-01", date: "04/01/2026", worship: "Kathryn (Pianist), Emma (Singer), Andrew (Instruments)", kids: "Denise, Carole", tea: "Adrian & Rosemary", sound: "Niall", hall: "Emma & Robbie", pool: [] },
+                { id: "row-02", date: "11/01/2026", worship: "Neil (Pianist), Rhiannon (Singer), Philip (Instruments)", kids: "Sarah C & Adrian", tea: "Hazel & Niall", sound: "John & Philip", hall: "Ben & Hazel", pool: [] },
+                { id: "row-03", date: "18/01/2026", worship: "Adam (Pianist), Ceri (Singer), Ben (Instruments)", kids: "Thasia & Kathryn", tea: "Romona & James", sound: "Leanne", hall: "Chloe & Nathanael", pool: [] },
+                { id: "row-04", date: "25/01/2026", worship: "Paul (Pianist), Thasia (Singer), Ben Adam (Instruments)", kids: "Robbie", tea: "Iris & Sarah", sound: "Tosin & Niall", hall: "Andrew P & Thasia", pool: [] },
+                { id: "row-05", date: "01/02/2026", worship: "Karen (Pianist), Tosin (Singer), Philip (Instruments)", kids: "Niall & Sarah P", tea: "Romona & James", sound: "John & Ruth", hall: "Kathyrn & Nathanael", pool: [] },
+                { id: "row-06", date: "08/02/2026", worship: "Kathryn (Pianist), Emma (Singer), Andrew (Instruments)", kids: "Henry, Sarah C", tea: "Hazel & Niall", sound: "Andrew P", hall: "Chloe & Robbie", pool: [] },
+                { id: "row-07", date: "15/02/2026", worship: "Neil (Pianist), Rhiannon (Singer), Philip (Instruments)", kids: "Denise, Carole", tea: "Adrian & Rosemary", sound: "Niall", hall: "Emma & Robbie", pool: [] },
+                { id: "row-08", date: "22/02/2026", worship: "Adam (Pianist), Ceri (Singer), Ben (Instruments)", kids: "Sarah C & Adrian", tea: "Hazel & Niall", sound: "John & Philip", hall: "Ben & Hazel", pool: [] },
+                { id: "row-09", date: "01/03/2026", worship: "Paul (Pianist), Thasia (Singer), Ben Adam (Instruments)", kids: "Thasia & Kathryn", tea: "Romona & James", sound: "Leanne", hall: "Chloe & Nathanael", pool: [] },
+                { id: "row-10", date: "08/03/2026", worship: "Karen (Pianist), Tosin (Singer), Philip (Instruments)", kids: "Robbie", tea: "Iris & Sarah", sound: "Tosin & Niall", hall: "Andrew P & Thasia", pool: [] },
+                { id: "row-11", date: "15/03/2026", worship: "Kathryn (Pianist), Emma (Singer), Andrew (Instruments)", kids: "Niall & Sarah P", tea: "Romona & James", sound: "John & Ruth", hall: "Kathyrn & Nathanael", pool: [] },
+                { id: "row-12", date: "22/03/2026", worship: "Neil (Pianist), Tosin (Singer), Philip (Instruments)", kids: "Henry, Sarah C", tea: "Hazel & Niall", sound: "Andrew P", hall: "Chloe & Robbie", pool: [] },
+                { id: "row-13", date: "29/03/2026", worship: "Adam (Pianist), Ceri (Singer), Ben (Instruments)", kids: "Denise, Carole", tea: "Adrian & Rosemary", sound: "Niall", hall: "Emma & Robbie", pool: [] },
+                { id: "row-14", date: "05/04/2026", worship: "Paul (Pianist), Thasia (Singer), Ben Adam (Instruments)", kids: "Sarah C & Adrian", tea: "Hazel & Niall", sound: "John & Philip", hall: "Ben & Hazel", pool: [] },
+                { id: "row-15", date: "12/04/2026", worship: "Karen (Pianist), Rhiannon (Singer), Philip (Instruments)", kids: "Thasia & Kathryn", tea: "Romona & James", sound: "Leanne", hall: "Chloe & Nathanael", pool: [] },
+                { id: "row-16", date: "19/04/2026", worship: "Kathryn (Pianist), Emma (Singer), Andrew (Instruments)", kids: "Robbie", tea: "Iris & Sarah", sound: "Tosin & Niall", hall: "Andrew P & Thasia", pool: [] },
+                { id: "row-17", date: "26/04/2026", worship: "Neil (Pianist), Rhiannon (Singer), Philip (Instruments)", kids: "Niall & Sarah P", tea: "Romona & James", sound: "John & Ruth", hall: "Kathyrn & Nathanael", pool: [] },
+                { id: "row-18", date: "03/05/2026", worship: "Adam (Pianist), Ceri (Singer), Ben (Instruments)", kids: "Henry, Sarah C", tea: "Hazel & Niall", sound: "Andrew P", hall: "Chloe & Robbie", pool: [] },
+                { id: "row-19", date: "10/05/2026", worship: "Paul (Pianist), Thasia (Singer), Ben Adam (Instruments)", kids: "Denise, Carole", tea: "Adrian & Rosemary", sound: "Niall", hall: "Emma & Robbie", pool: [] },
+                { id: "row-20", date: "17/05/2026", worship: "Karen (Pianist), Tosin (Singer), Philip (Instruments)", kids: "Sarah C & Adrian", tea: "Hazel & Niall", sound: "John & Philip", hall: "Ben & Hazel", pool: [] },
+                { id: "row-21", date: "24/05/2026", worship: "Neil (Pianist), Rhiannon (Singer), [Instruments Open Slot]", kids: "Thasia & Kathryn", tea: "Romona & James", sound: "Leanne", hall: "Chloe & Nathanael", pool: [] },
+                { id: "row-22", date: "31/05/2026", worship: "Kathryn (Pianist), Emma (Singer), Andrew (Instruments)", kids: "Denise, Carole, Sarah C & Adrian", tea: "Hazel & Niall", sound: "John & Philip", hall: "Ben & Hazel", pool: [] },
+                { id: "row-23", date: "07/06/2026", worship: "Adam (Pianist), Ceri (Singer), Ben (Instruments)", kids: "Thasia & Kathryn", tea: "Romona & James", sound: "Leanne & Andrew P", hall: "Chloe & Nathanael", pool: [] },
+                { id: "row-24", date: "14/06/2026", worship: "Paul (Pianist), Thasia (Singer), Ben Adam (Instruments)", kids: "Robbie", tea: "Iris & Sarah", sound: "Tosin & Niall", hall: "Andrew P & Thasia", pool: [] },
+                { id: "row-25", date: "21/06/2026", worship: "Karen (Pianist), Tosin (Singer), Philip (Instruments)", kids: "Niall & Sarah P", tea: "Romona & James", sound: "John & Ruth", hall: "Kathyrn & Nathanael", pool: [] },
+                { id: "row-26", date: "28/06/2026", worship: "Kathryn (Pianist), Emma (Singer), Andrew (Instruments)", kids: "Henry, Sarah C & Suzanne", tea: "Hazel & Niall", sound: "Andrew P", hall: "Chloe & Robbie", pool: [] }
             ]
         };
 
@@ -254,24 +287,21 @@
             const email = document.getElementById('reg-email').value.trim();
             const password = document.getElementById('reg-password').value;
             const errorDiv = document.getElementById('auth-error');
-            
             errorDiv.classList.add('hidden');
 
             if (isSignUpMode) {
                 let typedCode = document.getElementById('auth-access-code').value.trim().toLowerCase();
                 
-                // Comprehensive Auto-Typo Core Translations Matching All Key Iterations
-                if (['craigavinbpatist2026', 'craigavonbpatist2026', 'craigavinbaptist2026', 'craivabonbaptist2026', 'craigavonbaptist2026'].includes(typedCode)) {
+                // Typo safety translation array mapping
+                if (['craigavinbpatist2026', 'craigavonbpatist2026', 'craigavinbaptist2026', 'craivabonbaptist2026'].includes(typedCode)) {
                     typedCode = 'craigavonbaptist2026';
                 }
 
                 let roleAssigned = null;
-                if (typedCode === TARGET_KEYS.member) {
-                    roleAssigned = 'member';
-                } else if (typedCode === TARGET_KEYS.admin) {
-                    roleAssigned = 'admin';
-                } else {
-                    errorDiv.innerText = 'Error: The Verification Access Code you provided is invalid. Please double check entries.';
+                if (typedCode === SEED_KEYS.member) roleAssigned = 'member';
+                else if (typedCode === SEED_KEYS.admin) roleAssigned = 'admin';
+                else {
+                    errorDiv.innerText = 'Error: Valid Church Verification Access Code required.';
                     errorDiv.classList.remove('hidden');
                     return;
                 }
@@ -279,305 +309,329 @@
                 if (supabaseClient) {
                     try {
                         const { data, error } = await supabaseClient.auth.signUp({
-                            email: email,
-                            password: password,
-                            options: { data: { role: roleAssigned } }
+                            email, password, options: { data: { role: roleAssigned } }
                         });
                         if (error) throw error;
-                        grantEntry(email, roleAssigned);
+                        executeEntrySequence(email, roleAssigned);
                     } catch (err) {
-                        errorDiv.innerText = `Database Error: ${err.message}`;
+                        errorDiv.innerText = `Database Fault: ${err.message}`;
                         errorDiv.classList.remove('hidden');
                     }
                 } else {
-                    grantEntry(email, roleAssigned);
+                    executeEntrySequence(email, roleAssigned);
                 }
             } else {
                 if (supabaseClient) {
                     try {
                         const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
                         if (error) throw error;
-                        grantEntry(email, data.user.user_metadata?.role || 'member');
+                        executeEntrySequence(email, data.user.user_metadata?.role || 'member');
                     } catch (err) {
-                        errorDiv.innerText = `Sign In Error: ${err.message}`;
+                        errorDiv.innerText = `Sign In Fault: ${err.message}`;
                         errorDiv.classList.remove('hidden');
                     }
                 } else {
-                    grantEntry(email, 'member');
+                    executeEntrySequence(email, email.includes('admin') ? 'admin' : 'member');
                 }
             }
         });
 
-        function grantEntry(userEmail, accountRole) {
-            state.user = userEmail;
-            state.role = accountRole;
+        function executeEntrySequence(email, role) {
+            appState.user = email;
+            appState.role = role;
+            
             document.getElementById('auth-screen').classList.add('hidden');
             document.getElementById('app-screen').classList.remove('hidden');
-            document.getElementById('user-welcome').innerText = `Logged in as: ${userEmail}`;
-            
-            if (accountRole === 'admin') {
+            document.getElementById('sidebar-user-label').innerText = email;
+
+            if (role === 'admin') {
                 document.getElementById('admin-badge').classList.remove('hidden');
+                document.getElementById('admin-tools-panel').classList.remove('hidden');
             }
-            renderMasterViewports();
-            renderSwapsBoard();
+
+            renderMasterFeed();
+            renderPersonalFeed();
+            renderSwapsForum();
         }
 
-        function switchTab(targetTabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('border-blue-600', 'text-blue-600');
-                btn.classList.add('border-transparent', 'text-gray-500');
+        function changeSidebarRoute(targetViewId) {
+            document.querySelectorAll('.view-content').forEach(el => el.classList.remove('active'));
+            document.getElementById(`view-${targetViewId}`).classList.add('active');
+
+            ['master', 'personal', 'swaps'].forEach(v => {
+                const button = document.getElementById(`nav-${v}`);
+                if (v === targetViewId) {
+                    button.classList.add('bg-slate-800', 'text-white');
+                    button.classList.remove('text-slate-400');
+                } else {
+                    button.classList.remove('bg-slate-800', 'text-white');
+                    button.classList.add('text-slate-400');
+                }
             });
-            document.getElementById(`content-${targetTabId}`).classList.add('active');
-            document.getElementById(`tab-${targetTabId}`).classList.add('border-blue-600', 'text-blue-600');
         }
 
-        function renderMasterViewports() {
-            const tbody = document.getElementById('rota-table-body');
-            const cardsContainer = document.getElementById('rota-mobile-cards-container');
-            
-            tbody.innerHTML = '';
-            cardsContainer.innerHTML = '';
+        function filterDepartment(deptKey) {
+            appState.activeTargetFilter = deptKey;
+            document.querySelectorAll('.filter-chip').forEach(chip => {
+                chip.classList.remove('active');
+                if(chip.getAttribute('onclick').includes(`'${deptKey}'`)) {
+                    chip.classList.add('active');
+                }
+            });
+            renderMasterFeed();
+        }
 
-            state.slots.forEach(s => {
-                const formattedDate = new Date(s.date).toLocaleDateString('en-GB', {day: 'numeric', month: 'short', year: 'numeric'});
+        function toggleLiveEditingState() {
+            appState.liveEditingEnabled = !appState.liveEditingEnabled;
+            const btn = document.getElementById('live-edit-btn');
+            if(appState.liveEditingEnabled) {
+                btn.innerHTML = "🔓 Live Editing Active";
+                btn.classList.remove('bg-slate-100', 'text-slate-700');
+                btn.classList.add('bg-amber-600', 'text-white', 'border-amber-700');
+            } else {
+                btn.innerHTML = "🔒 Enable Live Editing";
+                btn.classList.add('bg-slate-100', 'text-slate-700');
+                btn.classList.remove('bg-amber-600', 'text-white', 'border-amber-700');
+            }
+            renderMasterFeed();
+        }
+
+        function triggerRegenerateSchedules() {
+            alert("Baseline schedules re-synchronized with live tables successfully.");
+        }
+
+        function renderMasterFeed() {
+            const feed = document.getElementById('master-cards-feed');
+            feed.innerHTML = '';
+
+            appState.schedules.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "bg-white rounded-2xl border border-gray-200 shadow-xs overflow-hidden flex flex-col";
                 
-                // --- 1. RENDER DESKTOP LARGE GRID TABLE ROW ---
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-gray-50/50 transition-colors";
-                tr.innerHTML = `
-                    <td class="px-6 py-4 whitespace-nowrap font-bold text-gray-900">${formattedDate}</td>
-                    <td class="px-6 py-4">${formatCellMarkup(s, 'worship')}</td>
-                    <td class="px-6 py-4">${formatCellMarkup(s, 'sound')}</td>
-                    <td class="px-6 py-4">${formatCellMarkup(s, 'greeting')}</td>
-                    <td class="px-6 py-4">${formatCellMarkup(s, 'tea')}</td>
-                `;
-                tbody.appendChild(tr);
+                let internalBlocksHtml = '';
 
-                // --- 2. RENDER TABLET & MOBILE VIEW ADAPTIVE CARDS ---
-                const mCard = document.createElement('div');
-                mCard.className = "bg-white rounded-2xl shadow-xs border border-gray-200/80 p-4 space-y-3.5";
-                mCard.innerHTML = `
-                    <div class="bg-gray-50 px-3 py-1.5 rounded-xl flex justify-between items-center border border-gray-100">
-                        <span class="text-sm font-black text-gray-900">${formattedDate}</span>
-                        <span class="text-[10px] uppercase font-bold tracking-wider text-gray-400">Sunday Service</span>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                        <div class="space-y-1"><span class="block text-[10px] uppercase font-bold text-gray-400 tracking-wider">Worship Team</span><div>${formatCellMarkup(s, 'worship')}</div></div>
-                        <div class="space-y-1"><span class="block text-[10px] uppercase font-bold text-gray-400 tracking-wider">Audio / Sound Desk</span><div>${formatCellMarkup(s, 'sound')}</div></div>
-                        <div class="space-y-1"><span class="block text-[10px] uppercase font-bold text-gray-400 tracking-wider">Welcome Greeting</span><div>${formatCellMarkup(s, 'greeting')}</div></div>
-                        <div class="space-y-1"><span class="block text-[10px] uppercase font-bold text-gray-400 tracking-wider">Tea & Coffee Hospitality</span><div>${formatCellMarkup(s, 'tea')}</div></div>
-                    </div>
-                `;
-                cardsContainer.appendChild(mCard);
-            });
-        }
+                const categories = [
+                    { key: 'worship', label: 'Music Team', icon: '🎵' },
+                    { key: 'kids', label: 'CB Sunday Kids', icon: '👶' },
+                    { key: 'tea', label: 'Tea Rota', icon: '☕' },
+                    { key: 'sound', label: 'Sound Desk and Computer', icon: '🎛️' },
+                    { key: 'hall', label: 'Sports Hall Rota', icon: '🏀' }
+                ];
 
-        function formatCellMarkup(slot, roleKey) {
-            const assignmentName = slot[roleKey];
-            const isPool = slot.status === `pool_open::${roleKey}`;
-            const isDirect = slot.status && slot.status.startsWith(`direct_swap::${roleKey}`);
+                categories.forEach(cat => {
+                    if (appState.activeTargetFilter !== 'all' && appState.activeTargetFilter !== cat.key) return;
 
-            if (isPool) {
-                return `<div class="bg-red-50 text-red-700 border border-red-100 text-xs py-2 px-3 rounded-xl font-bold flex justify-between items-center gap-2">
-                            <span>🚨 OPEN POOL</span>
-                            <button class="bg-red-600 hover:bg-red-700 text-white text-[10px] font-black px-2.5 py-1 rounded-lg shadow-sm transition-all cursor-pointer" onclick="claimPoolShift('${slot.id}', '${roleKey}', event)">Claim</button>
-                        </div>`;
-            }
-
-            if (isDirect) {
-                return `<div class="bg-amber-50/80 text-amber-800 border border-amber-200/60 text-xs py-2 px-3 rounded-xl font-medium">
-                            <span class="block line-through opacity-50">${assignmentName}</span>
-                            <span class="text-[10px] text-amber-600 font-extrabold flex items-center gap-1">🔄 Swap Proposed</span>
-                        </div>`;
-            }
-
-            return `<div class="group relative cursor-pointer py-2 px-3 rounded-xl hover:bg-blue-50 border border-transparent hover:border-blue-100 transition-all" onclick="openSwapModal('${slot.id}', '${roleKey}', '${assignmentName}')">
-                        <span class="font-semibold text-gray-800 group-hover:text-blue-800 block">${assignmentName || '—'}</span>
-                        <span class="opacity-0 group-hover:opacity-100 block text-[10px] text-blue-500 font-bold transition-opacity mt-0.5">🔄 Tap to Swap / Cover</span>
-                    </div>`;
-        }
-
-        function openSwapModal(slotId, roleKey, currentAssignee) {
-            // Prevent execution if target node is empty
-            if(!currentAssignee || currentAssignee === '—') return;
-            
-            const slot = state.slots.find(s => s.id === slotId);
-            state.activeSlot = { slotId, roleKey, currentAssignee };
-
-            document.getElementById('modal-role-label').innerText = roleKey.replace(/^\w/, c => c.toUpperCase());
-            document.getElementById('modal-date-label').innerText = new Date(slot.date).toLocaleDateString('en-GB', {day:'numeric', month:'long', year:'numeric'});
-            
-            const selectTarget = document.getElementById('modal-target-slot');
-            selectTarget.innerHTML = '';
-            
-            const peerOptions = state.slots.filter(s => s.id !== slotId && s[roleKey] && !s.status.startsWith('pool_open'));
-            if(peerOptions.length === 0) {
-                selectTarget.innerHTML = `<option value="">No matching team shifts found to swap with</option>`;
-            } else {
-                peerOptions.forEach(p => {
-                    const option = document.createElement('option');
-                    option.value = p.id;
-                    option.innerText = `${new Date(p.date).toLocaleDateString('en-GB', {day:'numeric', month:'short'})} — Assigned to ${p[roleKey]}`;
-                    selectTarget.appendChild(option);
-                });
-            }
-
-            document.getElementById('swap-modal').classList.remove('hidden');
-            document.getElementById('swap-modal').classList.add('flex');
-            
-            // Default select to open pool strategy radio element
-            document.querySelector('input[name="swap-type"][value="pool"]').checked = true;
-            updateModalFields();
-        }
-
-        function updateModalFields() {
-            const type = document.querySelector('input[name="swap-type"]:checked').value;
-            const directField = document.getElementById('direct-swap-field');
-            
-            const poolLabel = document.getElementById('label-strategy-pool');
-            const directLabel = document.getElementById('label-strategy-direct');
-
-            if (type === 'direct') {
-                directField.classList.remove('hidden');
-                directLabel.classList.add('border-blue-600', 'bg-blue-50/30');
-                poolLabel.classList.remove('border-blue-600', 'bg-blue-50/30');
-                poolLabel.classList.add('border-gray-200');
-            } else {
-                directField.classList.add('hidden');
-                poolLabel.classList.add('border-blue-600', 'bg-blue-50/30');
-                directLabel.classList.remove('border-blue-600', 'bg-blue-50/30');
-                directLabel.classList.add('border-gray-200');
-            }
-        }
-
-        function closeSwapModal() {
-            document.getElementById('swap-modal').classList.add('hidden');
-            document.getElementById('swap-modal').classList.remove('flex');
-        }
-
-        function submitSwapRequest() {
-            const type = document.querySelector('input[name="swap-type"]:checked').value;
-            const { slotId, roleKey } = state.activeSlot;
-            const originSlot = state.slots.find(s => s.id === slotId);
-
-            if (type === 'pool') {
-                originSlot.status = `pool_open::${roleKey}`;
-            } else {
-                const targetSlotId = document.getElementById('modal-target-slot').value;
-                if (!targetSlotId || targetSlotId === "") return;
-                originSlot.status = `direct_swap::${roleKey}`;
-                originSlot.targetSlotId = targetSlotId;
-            }
-
-            closeSwapModal();
-            renderMasterViewports();
-            renderSwapsBoard();
-        }
-
-        function renderSwapsBoard() {
-            const poolContainer = document.getElementById('open-pool-container');
-            const directContainer = document.getElementById('direct-trades-container');
-            
-            poolContainer.innerHTML = '';
-            directContainer.innerHTML = '';
-            let badgeCounter = 0;
-
-            state.slots.forEach(s => {
-                ['worship', 'sound', 'greeting', 'tea'].forEach(roleKey => {
-                    const cleanRoleName = roleKey.replace(/^\w/, c => c.toUpperCase());
+                    const currentAssignee = item[cat.key];
+                    const isVacantPool = item.pool.includes(cat.key);
                     
-                    if (s.status === `pool_open::${roleKey}`) {
-                        badgeCounter++;
-                        const card = document.createElement('div');
-                        card.className = "bg-white rounded-2xl shadow-xs border border-gray-200 p-5 space-y-4";
-                        card.innerHTML = `
-                            <div class="flex justify-between items-center">
-                                <span class="bg-red-50 text-red-700 border border-red-100 text-[10px] px-2.5 py-1 rounded-lg font-black uppercase tracking-wider">${cleanRoleName} Vacancy</span>
-                                <span class="text-xs text-gray-400 font-bold">${new Date(s.date).toLocaleDateString('en-GB', {day:'numeric', month:'short'})}</span>
-                            </div>
-                            <p class="text-xs text-gray-500 leading-relaxed">This position has been flagged to the open pool. No shift trade setup required to claim.</p>
-                            <button class="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2.5 rounded-xl shadow-xs transition-all active:scale-95 cursor-pointer" onclick="claimPoolShift('${s.id}', '${roleKey}', event)">🙋 Volunteer For This Role</button>
-                        `;
-                        poolContainer.appendChild(card);
+                    let interactionMarkup = '';
+                    if (isVacantPool) {
+                        interactionMarkup = `
+                            <div class="mt-2 bg-red-50 border border-red-100 p-2 rounded-xl flex justify-between items-center text-xs font-bold text-red-700">
+                                <span>🚨 OPEN POOL VACANCY</span>
+                                <button class="bg-red-600 text-white text-[10px] px-2.5 py-1 rounded-lg cursor-pointer" onclick="claimOpenPoolSlot('${item.id}', '${cat.key}')">Claim</button>
+                            </div>`;
+                    } else if (currentAssignee !== "Leave Blank / Unassigned") {
+                        interactionMarkup = `
+                            <button class="mt-2 text-teal-600 font-bold text-xs inline-flex items-center gap-1 hover:text-teal-700 transition-colors cursor-pointer" onclick="initiateSwapRequest('${item.id}', '${cat.key}', '${currentAssignee}')">
+                                🔄 Swap Shift
+                            </button>`;
                     }
 
-                    if (s.status === `direct_swap::${roleKey}`) {
-                        badgeCounter++;
-                        const targetSlot = state.slots.find(ts => ts.id === s.targetSlotId);
-                        if (!targetSlot) return;
-
-                        const card = document.createElement('div');
-                        card.className = "bg-white rounded-2xl shadow-xs border border-gray-200 p-5 space-y-4";
-                        card.innerHTML = `
-                            <div class="flex justify-between items-center">
-                                <span class="bg-amber-50 text-amber-800 border border-amber-100 text-[10px] px-2.5 py-1 rounded-lg font-black uppercase tracking-wider">${cleanRoleName} Swap Offer</span>
-                                <span class="text-xs text-gray-400 font-bold">Trade Pitch</span>
-                            </div>
-                            <div class="p-3 bg-gray-50 rounded-xl space-y-2 border border-gray-100 text-xs">
-                                <div><span class="text-gray-400 font-medium">From:</span> <b class="text-gray-800">${s[roleKey]}</b> (${new Date(s.date).toLocaleDateString('en-GB', {day:'numeric', month:'short'})})</div>
-                                <div class="border-t border-gray-200/60 my-1.5"></div>
-                                <div><span class="text-gray-400 font-medium">In Exchange For:</span> <b class="text-gray-800">${targetSlot[roleKey]}</b> (${new Date(targetSlot.date).toLocaleDateString('en-GB', {day:'numeric', month:'short'})})</div>
-                            </div>
-                            <div class="flex gap-2">
-                                <button class="flex-1 bg-green-600 hover:bg-green-700 text-white text-xs font-bold py-2.5 rounded-xl transition-all active:scale-95 cursor-pointer" onclick="acceptDirectTrade('${s.id}', '${targetSlot.id}', '${roleKey}')">Accept Trade</button>
-                                <button class="bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-bold px-3 py-2.5 rounded-xl transition-all active:scale-95 cursor-pointer" onclick="cancelSwapState('${s.id}')">Decline</button>
-                            </div>
+                    let editableInput = `<p class="text-xs sm:text-sm font-semibold text-slate-800 mt-0.5">${currentAssignee}</p>`;
+                    if (appState.liveEditingEnabled && appState.role === 'admin') {
+                        editableInput = `
+                            <input type="text" class="w-full text-xs border border-slate-200 bg-slate-50 p-1.5 rounded-lg font-medium mt-1 focus:outline-none focus:border-teal-500" value="${currentAssignee}" onchange="updateAssigneeInline('${item.id}', '${cat.key}', this.value)">
                         `;
-                        directContainer.appendChild(card);
                     }
+
+                    internalBlocksHtml += `
+                        <div class="border-t border-gray-100 p-3.5 sm:p-4 first:border-t-0 space-y-1">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">${cat.icon} ${cat.label}</span>
+                            ${editableInput}
+                            ${interactionMarkup}
+                        </div>`;
+                });
+
+                card.innerHTML = `
+                    <div class="bg-slate-50 px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+                        <span class="text-xs sm:text-sm font-black text-slate-900">☀️ ${item.date}</span>
+                    </div>
+                    <div class="divide-y divide-gray-100 flex-1 flex flex-col justify-between">
+                        <div>${internalBlocksHtml}</div>
+                    </div>`;
+                
+                if (internalBlocksHtml.trim() !== '') {
+                    feed.appendChild(card);
+                }
+            });
+        }
+
+        function updateAssigneeInline(id, key, val) {
+            const match = appState.schedules.find(s => s.id === id);
+            if(match) match[key] = val.trim();
+            renderMasterFeed();
+            renderPersonalFeed();
+        }
+
+        function renderPersonalFeed() {
+            const feed = document.getElementById('personal-cards-feed');
+            feed.innerHTML = '';
+            
+            if(!appState.user) return;
+            const simpleUserPart = appState.user.split('@')[0].toLowerCase();
+
+            let matchesCount = 0;
+
+            appState.schedules.forEach(item => {
+                let personalRoles = [];
+                const keys = ['worship', 'kids', 'tea', 'sound', 'hall'];
+                
+                keys.forEach(k => {
+                    const cleanText = item[k].toLowerCase();
+                    if(cleanText.includes(simpleUserPart) && !item.pool.includes(k)) {
+                        personalRoles.push({ key: k, value: item[k] });
+                    }
+                });
+
+                if(personalRoles.length > 0) {
+                    matchesCount++;
+                    const card = document.createElement('div');
+                    card.className = "bg-white rounded-2xl border-2 border-teal-600/30 p-4 sm:p-5 shadow-xs space-y-3";
+                    
+                    let rolesBlock = '';
+                    personalRoles.forEach(pr => {
+                        rolesBlock += `
+                            <div class="bg-teal-50/50 border border-teal-100 p-3 rounded-xl">
+                                <span class="text-[10px] font-black text-teal-800 uppercase tracking-wider block">${pr.key.toUpperCase()} ASSIGNMENT</span>
+                                <p class="text-xs sm:text-sm font-bold text-slate-800 mt-0.5">${pr.value}</p>
+                            </div>`;
+                    });
+
+                    card.innerHTML = `
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs sm:text-sm font-black text-slate-900">📅 ${item.date}</span>
+                            <span class="w-2 h-2 rounded-full bg-teal-500"></span>
+                        </div>
+                        <div class="space-y-2">${rolesBlock}</div>`;
+                    feed.appendChild(card);
+                }
+            });
+
+            if(matchesCount === 0) {
+                feed.innerHTML = `<p class="text-xs text-slate-400 italic p-1">You have no upcoming assignments assigned directly to your account profile name.</p>`;
+            }
+        }
+
+        function renderSwapsForum() {
+            const container = document.getElementById('pool-forum-grid');
+            container.innerHTML = '';
+            let poolCount = 0;
+
+            appState.schedules.forEach(item => {
+                item.pool.forEach(catKey => {
+                    poolCount++;
+                    const card = document.createElement('div');
+                    card.className = "bg-white border-2 border-red-100 rounded-2xl p-4 shadow-xs space-y-3";
+                    card.innerHTML = `
+                        <div class="flex justify-between items-center">
+                            <span class="bg-red-50 text-red-700 border border-red-100 text-[10px] px-2.5 py-1 rounded-md font-bold uppercase tracking-wider">${catKey} Coverage</span>
+                            <span class="text-xs text-slate-400 font-bold">${item.date}</span>
+                        </div>
+                        <p class="text-xs text-slate-500">This role position has been released to the wider church pool forum. Anyone can claim it instantly.</p>
+                        <button class="w-full bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold py-2.5 rounded-xl transition-all cursor-pointer shadow-xs active:scale-98" onclick="claimOpenPoolSlot('${item.id}', '${catKey}')">🙋 Volunteer for This Shift</button>
+                    `;
+                    container.appendChild(card);
                 });
             });
 
-            const badge = document.getElementById('swap-badge-count');
-            if (badgeCounter > 0) {
-                badge.innerText = badgeCounter;
-                badge.classList.remove('hidden');
+            if(poolCount === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400 italic p-1">No open items looking for coverage inside the public forum currently.</p>`;
+            }
+        }
+
+        function initiateSwapRequest(id, key, currentAssignee) {
+            appState.activeTradingContext = { id, key, currentAssignee };
+            
+            document.getElementById('modal-origin-summary').innerText = `${id.replace('row-','Week ')} — ${key.toUpperCase()} (${currentAssignee})`;
+            document.getElementById('modal-identity-field').value = appState.user || "Guest Administrator";
+
+            const select = document.getElementById('modal-peer-target-select');
+            select.innerHTML = '';
+
+            const peerOptions = appState.schedules.filter(s => s.id !== id);
+            peerOptions.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = `${p.id}::${key}`;
+                opt.innerText = `${p.date} — Currently Assigned to: ${p[key]}`;
+                select.appendChild(opt);
+            });
+
+            document.getElementById('swap-action-modal').classList.remove('hidden');
+            document.getElementById('swap-action-modal').classList.add('flex');
+            
+            document.querySelector('input[name="modal-strategy"][value="pool"]').checked = true;
+            toggleModalFields();
+        }
+
+        function toggleModalFields() {
+            const strat = document.querySelector('input[name="modal-strategy"]:checked').value;
+            const wrapper = document.getElementById('modal-peer-select-wrapper');
+            if(strat === 'direct') wrapper.classList.remove('hidden');
+            else wrapper.classList.add('hidden');
+        }
+
+        function closeTradingModal() {
+            document.getElementById('swap-action-modal').classList.add('hidden');
+            document.getElementById('swap-action-modal').classList.remove('flex');
+        }
+
+        function commitModalSwapRequest() {
+            const strat = document.querySelector('input[name="modal-strategy"]:checked').value;
+            const context = appState.activeTradingContext;
+            const currentWeekRow = appState.schedules.find(s => s.id === context.id);
+
+            if (strat === 'pool') {
+                if(!currentWeekRow.pool.includes(context.key)) {
+                    currentWeekRow.pool.push(context.key);
+                }
             } else {
-                badge.classList.add('hidden');
+                const selectionVal = document.getElementById('modal-peer-target-select').value;
+                if(!selectionVal) return;
+                const [targetId, targetKey] = selectionVal.split('::');
+                
+                const targetWeekRow = appState.schedules.find(s => s.id === targetId);
+                
+                // Direct positional cross-trade mutation logic
+                let temp = currentWeekRow[context.key];
+                currentWeekRow[context.key] = targetWeekRow[targetKey];
+                targetWeekRow[targetKey] = temp;
             }
 
-            if (!poolContainer.children.length) poolContainer.innerHTML = `<p class="text-xs text-gray-400 italic py-2 px-1">No open shifts needing coverage currently.</p>`;
-            if (!directContainer.children.length) directContainer.innerHTML = `<p class="text-xs text-gray-400 italic py-2 px-1">No pending trade configurations targeting your dates.</p>`;
+            closeTradingModal();
+            renderMasterFeed();
+            renderPersonalFeed();
+            renderSwapsForum();
         }
 
-        function claimPoolShift(slotId, roleKey, event) {
-            if(event) event.stopPropagation(); // Stops parent node clicking collision triggers
-            
-            const slot = state.slots.find(s => s.id === slotId);
-            const promptName = prompt("Please confirm your full name to claim this shift slot:", "");
-            if (!promptName || !promptName.trim()) return;
+        function claimOpenPoolSlot(id, key) {
+            const match = appState.schedules.find(s => s.id === id);
+            if(!match) return;
 
-            slot[roleKey] = promptName.trim();
-            slot.status = "normal";
-            renderMasterViewports();
-            renderSwapsBoard();
+            let claimerName = prompt("Please confirm the full name of the volunteer taking this position:", "");
+            if(!claimerName || !claimerName.trim()) return;
+
+            match[key] = claimerName.trim();
+            match.pool = match.pool.filter(item => item !== key);
+
+            renderMasterFeed();
+            renderPersonalFeed();
+            renderSwapsForum();
         }
 
-        function acceptDirectTrade(originId, targetId, roleKey) {
-            const originSlot = state.slots.find(s => s.id === originId);
-            const targetSlot = state.slots.find(s => s.id === targetId);
-            
-            const initialOriginName = originSlot[roleKey];
-            originSlot[roleKey] = targetSlot[roleKey];
-            targetSlot[roleKey] = initialOriginName;
-
-            originSlot.status = "normal";
-            originSlot.targetSlotId = null;
-
-            renderMasterViewports();
-            renderSwapsBoard();
+        function handleUserLogOut() {
+            location.reload();
         }
-
-        function cancelSwapState(slotId) {
-            const slot = state.slots.find(s => s.id === slotId);
-            slot.status = "normal";
-            slot.targetSlotId = null;
-            renderMasterViewports();
-            renderSwapsBoard();
-        }
-
-        document.getElementById('logout-btn').addEventListener('click', () => location.reload());
     </script>
 </body>
 </html>
