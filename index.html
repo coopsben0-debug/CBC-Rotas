@@ -34,6 +34,9 @@
     .auth-logo { width: 80px; height: 80px; border-radius: 50%; margin-bottom: 16px; object-fit: cover; }
     .auth-btn { width: 100%; padding: 14px; background: var(--cbc-teal); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 12px; transition: background 0.2s; font-size: 15px; }
     .auth-btn:hover { background: #0f766e; }
+    
+    .auth-toggle-link { color: var(--cbc-teal); font-weight: 600; cursor: pointer; font-size: 13px; background: none; border: none; text-decoration: underline; margin-top: 16px; display: inline-block; }
+    .auth-note-box { background: #fffbeb; border: 1px solid #fef3c7; color: #b45309; padding: 12px; border-radius: 8px; font-size: 12px; font-weight: 500; text-align: left; margin-bottom: 16px; line-height: 1.4; }
 
     #app { display: none; width: 100%; min-height: 100vh; flex-direction: row; }
     sidebar { width: 300px; background: var(--sidebar-bg); color: var(--text-main); display: flex; flex-direction: column; padding: 28px; flex-shrink: 0; border-right: 1px solid var(--border-color); }
@@ -148,16 +151,37 @@
   <div id="auth-screen" style="display:none;">
     <div class="auth-card">
       <img src="https://ojzwujpahfjmaeisnfez.supabase.co/storage/v1/object/public/branding/cbc%20logo.jpg" class="auth-logo" alt="Logo"/>
-      <h2 style="font-family:'Playfair Display',serif; color:var(--cbc-navy); margin-bottom:24px;">Multi-Rota Portal</h2>
+      <h2 id="auth-title" style="font-family:'Playfair Display',serif; color:var(--cbc-navy); margin-bottom:24px;">Multi-Rota Portal</h2>
+      
+      <div id="auth-warning-note" class="auth-note-box" style="display:none;">
+        ⚠️ <b>Important Profile Rule:</b> Please make sure you write out your full first name and surname exactly as it is written on the printout rotas. This ensures the system syncs perfectly with your roster positions.
+      </div>
+
+      <div id="signup-name-container" style="text-align:left; margin-bottom:14px; display:none;">
+        <label style="font-size:12px; font-weight:700; color:var(--text-muted);">Your Full Name (e.g., Ben Cooper)</label>
+        <input type="text" id="auth-name" class="input-field" placeholder="First and Last Name"/>
+      </div>
+
       <div style="text-align:left; margin-bottom:14px;">
         <label style="font-size:12px; font-weight:700; color:var(--text-muted);">Email Address</label>
-        <input type="email" id="login-email" class="input-field" value="coopsben0@gmail.com"/>
+        <input type="email" id="login-email" class="input-field" value=""/>
       </div>
-      <div style="text-align:left; margin-bottom:20px;">
+
+      <div style="text-align:left; margin-bottom:14px;">
         <label style="font-size:12px; font-weight:700; color:var(--text-muted);">Password</label>
         <input type="password" id="login-password" class="input-field" placeholder="••••••••"/>
       </div>
-      <button class="auth-btn" onclick="handleAuthAction()">Log Into Portal</button>
+
+      <div id="signup-code-container" style="text-align:left; margin-bottom:20px; display:none;">
+        <label style="font-size:12px; font-weight:700; color:var(--text-muted);">Church Access Verification Code</label>
+        <input type="text" id="auth-access-code" class="input-field" placeholder="Enter church token code"/>
+      </div>
+
+      <button id="auth-primary-btn" class="auth-btn" onclick="handleAuthAction()">Log Into Portal</button>
+      
+      <div>
+        <button id="auth-toggle-mode-btn" class="auth-toggle-link" onclick="toggleAuthMode()">Don't have an account? Sign Up</button>
+      </div>
     </div>
   </div>
 
@@ -295,11 +319,9 @@
   <script>
     const SUPABASE_URL = 'https://ojzwujpahfjmaeisnfez.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qend1anBhaGZqbWFlaXNuZmV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTA5NDMsImV4cCI6MjA5NDU4Njk0M30.VvszGR6MbUnBhKsmsXBikkrjok2-F1bnyS4zOwDX5hg';
-
-    const EMAIL_TO_NAME_MAP = {
-      "coopsben0@gmail.com": "Ben Cooper",
-      "coopscolin0@gmail.com": "Colin Cooper"
-    };
+    
+    // Safety token configuration requirement
+    const CHURCH_SECRET_PASSCODE = 'CBC2026';
 
     const MINISTRY_LABELS = {
       junior_ss: { name: "Junior Sunday School", css: "junior_ss" },
@@ -313,6 +335,7 @@
     };
 
     let sb, appState = { user: null, dates: [], slots: [], rotas: [] }, currentFilter = 'all', isAdminMode = false, activeSlotId = null;
+    let authMode = 'login'; // 'login' or 'signup'
 
     window.addEventListener('load', async () => {
       try {
@@ -331,16 +354,99 @@
       }
     });
 
+    function toggleAuthMode() {
+      const nameBox = document.getElementById('signup-name-container');
+      const codeBox = document.getElementById('signup-code-container');
+      const warningNote = document.getElementById('auth-warning-note');
+      const title = document.getElementById('auth-title');
+      const primaryBtn = document.getElementById('auth-primary-btn');
+      const switchLink = document.getElementById('auth-toggle-mode-btn');
+
+      if (authMode === 'login') {
+        authMode = 'signup';
+        nameBox.style.display = 'block';
+        codeBox.style.display = 'block';
+        warningNote.style.display = 'block';
+        title.innerText = "Register Member Account";
+        primaryBtn.innerText = "Complete Registration";
+        switchLink.innerText = "Already registered? Log In";
+      } else {
+        authMode = 'login';
+        nameBox.style.display = 'none';
+        codeBox.style.display = 'none';
+        warningNote.style.display = 'none';
+        title.innerText = "Multi-Rota Portal";
+        primaryBtn.innerText = "Log Into Portal";
+        switchLink.innerText = "Don't have an account? Sign Up";
+      }
+    }
+
     async function handleAuthAction() {
       const email = document.getElementById('login-email').value.trim();
       const pass = document.getElementById('login-password').value;
-      const { error } = await sb.auth.signInWithPassword({ email, password: pass });
-      if (error) alert(error.message); else location.reload();
+
+      if (!email || !pass) {
+        alert("Please provide both an email address and a password.");
+        return;
+      }
+
+      document.getElementById('loading-text').innerText = authMode === 'login' ? "Verifying Credentials..." : "Creating Account Layout...";
+      document.getElementById('loading-screen').style.display = 'flex';
+
+      if (authMode === 'login') {
+        // Log In Attempt
+        const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+        document.getElementById('loading-screen').style.display = 'none';
+        if (error) alert(error.message); else location.reload();
+      } else {
+        // Sign Up Attempt
+        const fullName = document.getElementById('auth-name').value.trim();
+        const inputCode = document.getElementById('auth-access-code').value.trim();
+
+        if (!fullName) {
+          document.getElementById('loading-screen').style.display = 'none';
+          alert("Please fill in your name exactly as it appears on church records.");
+          return;
+        }
+
+        if (inputCode !== CHURCH_SECRET_PASSCODE) {
+          document.getElementById('loading-screen').style.display = 'none';
+          alert("Invalid Verification Passcode. Please confirm the code with the Church Administrator.");
+          return;
+        }
+
+        // Sign up user with display metadata
+        const { data, error } = await sb.auth.signUp({
+          email: email,
+          password: pass,
+          options: {
+            data: {
+              full_name: fullName
+            }
+          }
+        });
+
+        document.getElementById('loading-screen').style.display = 'none';
+        if (error) {
+          alert(error.message);
+        } else {
+          alert("Registration Successful! You have been logged in automatically.");
+          location.reload();
+        }
+      }
     }
 
     function getLoggedInMemberName() {
       if (!appState.user) return "";
-      return EMAIL_TO_NAME_MAP[appState.user.email.toLowerCase()] || "Guest User";
+      // Returns metadata name inputted by user, fallback to hardcoded records or email handle
+      if (appState.user.user_metadata && appState.user.user_metadata.full_name) {
+        return appState.user.user_metadata.full_name;
+      }
+      const EMAIL_TO_NAME_MAP = {
+        "coopsben0@gmail.com": "Ben Cooper",
+        "coopscolin0@gmail.com": "Colin Cooper"
+      };
+      return EMAIL_TO_NAME_MAP[appState.user.email.toLowerCase()] || appState.user.email.split('@')[0];
     }
 
     async function initDashboard() {
@@ -421,11 +527,9 @@
 
       document.getElementById('context-origin-details').innerText = `${fDateOrig} — ${labelConfig.name} (${slotObj.member_name_text || 'None'})`;
       
-      // Default Strategy Reset
       document.querySelector('input[name="swap-strategy"][value="pool"]').checked = true;
       toggleSwapStrategyView();
 
-      // Filter Target Box so it ONLY shows alternative dates for the SAME ministry role!
       let targetDateSelect = document.getElementById('member-swap-target-date');
       let alternateSlots = appState.slots.filter(s => s.id !== originSlotId && s.role_title === slotObj.role_title && s.member_name_text && s.member_name_text.trim() !== "");
       
@@ -637,7 +741,6 @@
       const loggedInShortName = loggedInName.split(' ')[0];
 
       appState.slots.forEach(s => {
-        // 1. Direct Swaps Processing
         if (s.status && s.status.startsWith('swap_v3::')) {
           const tokens = s.status.split('::');
           const proposerName = tokens[1];
@@ -675,13 +778,11 @@
           }
         }
 
-        // 2. Open Coverage Pool Processing
         if (s.status === 'pool_open') {
           const dateObj = appState.dates.find(d => d.id === s.service_date_id);
           const dateF = dateObj ? new Date(dateObj.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : "---";
           const roleLabel = MINISTRY_LABELS[s.role_title]?.name || s.role_title;
           
-          // Don't count your own open shifts as actionable badge counts
           const isOwnOpenShift = (s.member_name_text || "").toLowerCase().includes(loggedInShortName);
           if (!isOwnOpenShift) badgeCount++;
 
@@ -701,7 +802,6 @@
         }
       });
 
-      // Update Notifications count indicator
       const badge = document.getElementById('swap-counter-badge');
       if (badgeCount > 0) {
         badge.innerText = badgeCount;
