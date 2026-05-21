@@ -9,43 +9,53 @@
     <style>
         .tab-content { display: none; }
         .tab-content.active { display: block; }
+        
+        /* Smooth scale animation transitions for a premium application feel */
+        .modal-animate {
+            animation: modalFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.96) translateY(8px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
     </style>
 </head>
-<body class="bg-gray-50 font-sans text-gray-800">
+<body class="bg-gray-50 font-sans text-gray-800 antialiased min-h-screen selection:bg-blue-100">
 
-    <div id="auth-screen" class="min-h-screen flex items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
-        <div class="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg border border-gray-100">
-            <div>
-                <h2 id="auth-title" class="text-center text-3xl font-extrabold text-gray-900 tracking-tight">Church Rota Portal</h2>
-                <p id="auth-subtitle" class="mt-2 text-center text-sm text-gray-600">Create your account to manage your rota assignments</p>
+    <div id="auth-screen" class="min-h-screen flex flex-col items-center justify-center px-4 py-8 sm:px-6 lg:px-8">
+        <div class="max-w-md w-full space-y-6 bg-white p-6 sm:p-10 rounded-2xl shadow-xl border border-gray-100/80 transition-all">
+            <div class="text-center">
+                <span class="text-4xl">⛪</span>
+                <h2 id="auth-title" class="mt-3 text-center text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">Church Rota Portal</h2>
+                <p id="auth-subtitle" class="mt-2 text-center text-sm text-gray-500 font-medium">Create an account to manage your upcoming team assignments</p>
             </div>
             
-            <form id="registration-form" class="mt-8 space-y-4">
-                <div class="rounded-md shadow-sm space-y-3">
+            <form id="registration-form" class="space-y-4 pt-2">
+                <div class="space-y-4">
                     <div>
-                        <label for="reg-email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                        <input id="reg-email" type="email" required class="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm" placeholder="you@example.com">
+                        <label for="reg-email" class="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">Email Address</label>
+                        <input id="reg-email" type="email" required class="appearance-none rounded-xl relative block w-full px-4 py-3 border border-gray-200 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-3 focus:ring-blue-100 focus:border-blue-500 transition-all text-sm bg-gray-50/50" placeholder="you@example.com">
                     </div>
                     <div>
-                        <label for="reg-password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                        <input id="reg-password" type="password" required class="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm" placeholder="••••••••">
+                        <label for="reg-password" class="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">Password</label>
+                        <input id="reg-password" type="password" required class="appearance-none rounded-xl relative block w-full px-4 py-3 border border-gray-200 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-3 focus:ring-blue-100 focus:border-blue-500 transition-all text-sm bg-gray-50/50" placeholder="••••••••">
                     </div>
                     <div id="access-code-wrapper">
-                        <label for="auth-access-code" class="block text-sm font-medium text-gray-700 mb-1">Church Registration Access Code</label>
-                        <input id="auth-access-code" type="text" class="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm" placeholder="Enter church join key">
+                        <label for="auth-access-code" class="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">Church Registration Access Code</label>
+                        <input id="auth-access-code" type="text" class="appearance-none rounded-xl relative block w-full px-4 py-3 border border-gray-200 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-3 focus:ring-blue-100 focus:border-blue-500 transition-all text-sm bg-gray-50/50" placeholder="Enter church join key">
                     </div>
                 </div>
 
-                <div id="auth-error" class="hidden text-red-600 text-xs font-medium bg-red-50 p-2 rounded-lg border border-red-200"></div>
+                <div id="auth-error" class="hidden text-red-600 text-xs font-semibold bg-red-50/80 p-3 rounded-xl border border-red-200/60 leading-relaxed"></div>
 
-                <div>
-                    <button type="submit" id="auth-submit-btn" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                <div class="pt-2">
+                    <button type="submit" id="auth-submit-btn" class="w-full flex justify-center py-3 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-blue-600 hover:bg-blue-700 active:scale-[0.99] focus:outline-none focus:ring-4 focus:ring-blue-200 shadow-md shadow-blue-500/10 transition-all cursor-pointer">
                         Register Account
                     </button>
                 </div>
 
-                <div class="text-center mt-4">
-                    <button type="button" id="toggle-auth-mode-btn" class="text-xs text-blue-600 hover:underline font-medium" onclick="toggleAuthMode()">
+                <div class="text-center pt-2">
+                    <button type="button" id="toggle-auth-mode-btn" class="text-xs text-blue-600 hover:text-blue-700 font-bold hover:underline py-1 px-2" onclick="toggleAuthMode()">
                         Already have an account? Log In instead
                     </button>
                 </div>
@@ -54,27 +64,28 @@
     </div>
 
     <div id="app-screen" class="hidden min-h-screen flex flex-col">
-        <header class="bg-white shadow-sm border-b border-gray-200">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-                <div class="flex items-center space-x-3">
-                    <span class="text-xl font-bold text-gray-900 tracking-tight">⛪ Rota & Swap Terminal</span>
-                    <span id="admin-badge" class="hidden bg-purple-100 text-purple-800 text-xs px-2.5 py-0.5 rounded-full font-semibold">Admin</span>
+        <header class="bg-white shadow-xs border-b border-gray-200 sticky top-0 z-40">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+                <div class="flex items-center space-x-2 min-w-0">
+                    <span class="text-lg sm:text-xl font-black text-gray-900 tracking-tight truncate">⛪ Rota & Swap Hub</span>
+                    <span id="admin-badge" class="hidden bg-purple-100 text-purple-800 text-[10px] sm:text-xs px-2 py-0.5 rounded-full font-bold">Admin</span>
                 </div>
-                <div class="flex items-center gap-4">
-                    <span id="user-welcome" class="text-xs text-gray-500 font-medium"></span>
-                    <button id="logout-btn" class="text-sm font-medium text-gray-500 hover:text-gray-700 border border-gray-300 rounded-lg px-3 py-1.5 hover:bg-gray-50 transition-colors">Log Out</button>
+                <div class="flex items-center gap-2 sm:gap-4 shrink-0">
+                    <span id="user-welcome" class="text-xs text-gray-400 hidden md:inline-block font-medium"></span>
+                    <button id="logout-btn" class="text-xs sm:text-sm font-bold text-gray-600 hover:text-gray-900 border border-gray-200 rounded-xl px-3 py-2 hover:bg-gray-50 transition-all active:scale-95 cursor-pointer">Log Out</button>
                 </div>
             </div>
         </header>
 
-        <div class="bg-white border-b border-gray-200 shadow-xs">
+        <div class="bg-white border-b border-gray-200 sticky top-16 z-30 shadow-xs">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <nav class="flex space-x-8 -mb-px" aria-label="Tabs">
-                    <button id="tab-schedules" class="border-b-2 border-blue-500 text-blue-600 py-4 px-1 font-medium text-sm transition-all focus:outline-none tab-btn" onclick="switchTab('schedules')">
+                <nav class="flex space-x-6 sm:space-x-8 -mb-px" aria-label="Tabs">
+                    <button id="tab-schedules" class="border-b-3 border-blue-600 text-blue-600 py-4 px-1 font-bold text-xs sm:text-sm transition-all focus:outline-none tab-btn cursor-pointer" onclick="switchTab('schedules')">
                         📅 Master Grid Schedules
                     </button>
-                    <button id="tab-swaps" class="border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 py-4 px-1 font-medium text-sm transition-all focus:outline-none tab-btn" onclick="switchTab('swaps')">
-                        🔄 Coverage & Swap Hub <span id="swap-badge-count" class="ml-1 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full hidden">0</span>
+                    <button id="tab-swaps" class="border-b-3 border-transparent text-gray-500 hover:text-gray-700 py-4 px-1 font-bold text-xs sm:text-sm transition-all focus:outline-none tab-btn relative cursor-pointer" onclick="switchTab('swaps')">
+                        🔄 Coverage & Swap Hub 
+                        <span id="swap-badge-count" class="ml-1.5 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-extrabold hidden">0</span>
                     </button>
                 </nav>
             </div>
@@ -83,46 +94,51 @@
         <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
             
             <div id="content-schedules" class="tab-content active space-y-6">
-                <div class="sm:flex sm:items-center sm:justify-between bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <div>
-                        <h1 class="text-xl font-bold text-gray-900">Ministry Schedules</h1>
-                        <p class="mt-1 text-sm text-gray-500">Click on any shift assigned to you to swap it or list it to the open pool.</p>
-                    </div>
+                <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-xs border border-gray-200/70">
+                    <h1 class="text-xl font-extrabold text-gray-900 sm:text-2xl tracking-tight">Ministry Schedules</h1>
+                    <p class="mt-1 text-xs sm:text-sm text-gray-500 leading-relaxed">Tap/Click on any shift block assigned to you if you need to submit an open coverage alert or trade with a peer.</p>
                 </div>
 
-                <div class="bg-white shadow-sm rounded-xl border border-gray-200 overflow-hidden">
+                <div class="hidden lg:block bg-white shadow-xs rounded-2xl border border-gray-200 overflow-hidden">
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200 text-left text-sm">
-                            <thead class="bg-gray-50 text-gray-500 uppercase tracking-wider text-xs font-semibold">
+                            <thead class="bg-gray-50/70 text-gray-400 uppercase tracking-wider text-[11px] font-bold">
                                 <tr>
-                                    <th scope="col" class="px-6 py-3">Service Date</th>
-                                    <th scope="col" class="px-6 py-3">Worship Team</th>
-                                    <th scope="col" class="px-6 py-3">Audio & Sound Desk</th>
-                                    <th scope="col" class="px-6 py-3">Welcome Greeting</th>
-                                    <th scope="col" class="px-6 py-3">Tea & Coffee Hospitality</th>
+                                    <th scope="col" class="px-6 py-4">Service Date</th>
+                                    <th scope="col" class="px-6 py-4">Worship Team</th>
+                                    <th scope="col" class="px-6 py-4">Audio & Sound Desk</th>
+                                    <th scope="col" class="px-6 py-4">Welcome Greeting</th>
+                                    <th scope="col" class="px-6 py-4">Tea & Coffee Hospitality</th>
                                 </tr>
                             </thead>
-                            <tbody id="rota-table-body" class="divide-y divide-gray-200 bg-white text-gray-700">
+                            <tbody id="rota-table-body" class="divide-y divide-gray-100 bg-white text-gray-700">
                                 </tbody>
                         </table>
                     </div>
                 </div>
+
+                <div id="rota-mobile-cards-container" class="block lg:hidden space-y-4">
+                    </div>
             </div>
 
             <div id="content-swaps" class="tab-content space-y-6">
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <h1 class="text-xl font-bold text-gray-900">Coverage Hub</h1>
-                    <p class="mt-1 text-sm text-gray-500">Claim roles needing coverage or accept targeted peer trade configurations.</p>
+                <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-xs border border-gray-200/70">
+                    <h1 class="text-xl font-extrabold text-gray-900 sm:text-2xl tracking-tight">Coverage Hub</h1>
+                    <p class="mt-1 text-xs sm:text-sm text-gray-500 leading-relaxed">Instantly pick up vacant team slots or manage private swap configurations routed directly to you.</p>
                 </div>
 
-                <div class="space-y-4">
-                    <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider">🚨 Open Pool (Help Needed)</h3>
+                <div class="space-y-3">
+                    <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5 px-1">
+                        <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span> 🚨 Open Pool (Help Needed)
+                    </h3>
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3" id="open-pool-container">
                         </div>
                 </div>
 
-                <div class="space-y-4 pt-4">
-                    <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider">📥 Direct Trade Offers Sent to You</h3>
+                <div class="space-y-3 pt-4">
+                    <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider px-1">
+                        📥 Direct Trade Offers Sent to You
+                    </h3>
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3" id="direct-trades-container">
                         </div>
                 </div>
@@ -131,61 +147,69 @@
     </div>
 
     <div id="swap-modal" class="fixed inset-0 bg-gray-900/40 backdrop-blur-xs hidden items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-xl shadow-xl border border-gray-100 max-w-md w-full p-6 space-y-4 animate-in fade-in zoom-in-95 duration-150">
-            <div>
-                <h3 class="text-lg font-bold text-gray-900">Request Shift Coverage</h3>
-                <p class="text-xs text-gray-500 mt-1">Adjust scheduling constraints for your upcoming team slot cleanly.</p>
+        <div class="bg-white rounded-2xl shadow-2xl border border-gray-100 max-w-md w-full p-5 sm:p-6 space-y-5 modal-animate">
+            <div class="flex justify-between items-start">
+                <div>
+                    <h3 class="text-lg font-extrabold text-gray-900 tracking-tight">Request Shift Coverage</h3>
+                    <p class="text-xs text-gray-500 mt-0.5">Let your teams know you won't be available.</p>
+                </div>
+                <button class="text-gray-400 hover:text-gray-600 p-1 text-lg line-height-none" onclick="closeSwapModal()">✕</button>
             </div>
 
-            <div class="bg-gray-50 border border-gray-200 rounded-lg p-3 text-xs space-y-1">
-                <div><span class="font-semibold text-gray-400">ROLE:</span> <span id="modal-role-label" class="font-bold text-gray-800"></span></div>
-                <div><span class="font-semibold text-gray-400">DATE:</span> <span id="modal-date-label" class="font-medium text-gray-700"></span></div>
+            <div class="bg-gray-50 border border-gray-200/60 rounded-xl p-3.5 text-xs space-y-1.5">
+                <div class="flex justify-between"><span class="font-bold text-gray-400 uppercase tracking-wider">Role</span> <span id="modal-role-label" class="font-black text-gray-800"></span></div>
+                <div class="flex justify-between"><span class="font-bold text-gray-400 uppercase tracking-wider">Date</span> <span id="modal-date-label" class="font-semibold text-gray-700"></span></div>
             </div>
 
             <div class="space-y-2">
-                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">Choose Request Strategy</label>
-                <div class="grid grid-cols-2 gap-2">
-                    <label class="border border-gray-200 rounded-lg p-3 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-gray-50 selection-box">
+                <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider px-0.5">Choose Request Strategy</label>
+                <div class="grid grid-cols-2 gap-3">
+                    <label class="border-2 border-blue-600 bg-blue-50/30 rounded-xl p-4 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-gray-50/50 selection-box transition-all" id="label-strategy-pool">
                         <input type="radio" name="swap-type" value="pool" checked class="sr-only" onchange="updateModalFields()">
-                        <span class="text-lg">🌍</span>
+                        <span class="text-2xl">🌍</span>
                         <span class="text-xs font-bold text-gray-900 mt-1">Open Pool</span>
                         <span class="text-[10px] text-gray-400 mt-0.5">Anyone can claim it</span>
                     </label>
-                    <label class="border border-gray-200 rounded-lg p-3 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-gray-50 selection-box">
+                    <label class="border-2 border-gray-200 rounded-xl p-4 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-gray-50/50 selection-box transition-all" id="label-strategy-direct">
                         <input type="radio" name="swap-type" value="direct" class="sr-only" onchange="updateModalFields()">
-                        <span class="text-lg">🤝</span>
+                        <span class="text-2xl">🤝</span>
                         <span class="text-xs font-bold text-gray-900 mt-1">Direct Trade</span>
                         <span class="text-[10px] text-gray-400 mt-0.5">Swap dates with a peer</span>
                     </label>
                 </div>
             </div>
 
-            <div id="direct-swap-field" class="hidden space-y-1">
-                <label for="modal-target-slot" class="block text-xs font-bold text-gray-500 uppercase tracking-wider">Select Available Peer Swap Date</label>
-                <select id="modal-target-slot" class="w-full text-xs rounded-lg border border-gray-300 bg-white p-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    </select>
+            <div id="direct-swap-field" class="hidden space-y-1.5">
+                <label for="modal-target-slot" class="block text-xs font-bold text-gray-400 uppercase tracking-wider px-0.5">Select Available Peer Swap Date</label>
+                <div class="relative">
+                    <select id="modal-target-slot" class="w-full text-sm rounded-xl border border-gray-200 bg-gray-50/50 p-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none cursor-pointer">
+                        </select>
+                    <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-gray-400 text-xs">▼</div>
+                </div>
             </div>
 
-            <div class="flex justify-end space-x-2 pt-2 border-t border-gray-100">
-                <button type="button" class="px-3 py-1.5 text-xs font-semibold text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors" onclick="closeSwapModal()">Cancel</button>
-                <button type="button" class="px-4 py-1.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition-colors" onclick="submitSwapRequest()">Confirm Request</button>
+            <div class="flex items-center justify-end space-x-3 pt-3 border-t border-gray-100">
+                <button type="button" class="px-4 py-2.5 text-xs font-bold text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-xl transition-all cursor-pointer" onclick="closeSwapModal()">Cancel</button>
+                <button type="button" class="px-5 py-2.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-md shadow-blue-500/10 transition-all active:scale-95 cursor-pointer" onclick="submitSwapRequest()">Confirm Request</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Use standard placeholders or connect your verified Supabase tokens here
-        const SUPABASE_URL = "https://ojzwujpahfjmaeisnfez.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qend1anBhaGZqbWFlaXNuZmV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTA5NDMsImV4cCI6MjA5NDU4Njk0M30.VvszGR6MbUnBhKsmsXBikkrjok2-F1bnyS4zOwDX5hg";
+        const SUPABASE_URL = "https://your-supabase-project.supabase.co";
+        const SUPABASE_ANON_KEY = "your-anon-public-api-key-here";
         
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        let supabaseClient = null;
+        if (SUPABASE_URL !== "https://your-supabase-project.supabase.co") {
+            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
 
         const TARGET_KEYS = {
             member: 'craigavonbaptist2026',
             admin: 'cbcadmin2026!'
         };
 
-        // Simulated Rota Ledger State falling back securely if tables aren't populated
+        // UI Core Database State Registry
         let state = {
             user: null,
             role: 'member',
@@ -210,14 +234,14 @@
 
             if (isSignUpMode) {
                 title.innerText = "Church Rota Portal";
-                subtitle.innerText = "Create your account to manage your rota assignments";
+                subtitle.innerText = "Create an account to manage your upcoming team assignments";
                 submitBtn.innerText = "Register Account";
                 toggleBtn.innerText = "Already have an account? Log In instead";
                 wrapper.classList.remove('hidden');
                 document.getElementById('auth-access-code').required = true;
             } else {
                 title.innerText = "Welcome Back";
-                subtitle.innerText = "Sign in to access your dashboard settings";
+                subtitle.innerText = "Sign in to access your custom scheduling options";
                 submitBtn.innerText = "Log Into Portal";
                 toggleBtn.innerText = "Need an account? Sign Up instead";
                 wrapper.classList.add('hidden');
@@ -225,7 +249,6 @@
             }
         }
 
-        // Handles Registration and Login with automatic typo handling
         document.getElementById('registration-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             const email = document.getElementById('reg-email').value.trim();
@@ -235,8 +258,9 @@
             errorDiv.classList.add('hidden');
 
             if (isSignUpMode) {
-                // AUTO-FIX TYPOS IN VARIATIONS OF CRAIGAVON BAPTIST
                 let typedCode = document.getElementById('auth-access-code').value.trim().toLowerCase();
+                
+                // Comprehensive Auto-Typo Core Translations Matching All Key Iterations
                 if (['craigavinbpatist2026', 'craigavonbpatist2026', 'craigavinbaptist2026', 'craivabonbaptist2026', 'craigavonbaptist2026'].includes(typedCode)) {
                     typedCode = 'craigavonbaptist2026';
                 }
@@ -252,27 +276,33 @@
                     return;
                 }
 
-                try {
-                    const { data, error } = await supabaseClient.auth.signUp({
-                        email: email,
-                        password: password,
-                        options: { data: { role: roleAssigned } }
-                    });
-                    if (error) throw error;
-                    grantEntry(email, roleAssigned);
-                } catch (err) {
-                    // Fallback configuration if local setups lack registration permissions
-                    console.warn("Supabase auth redirect restriction. Defaulting sandbox access.");
+                if (supabaseClient) {
+                    try {
+                        const { data, error } = await supabaseClient.auth.signUp({
+                            email: email,
+                            password: password,
+                            options: { data: { role: roleAssigned } }
+                        });
+                        if (error) throw error;
+                        grantEntry(email, roleAssigned);
+                    } catch (err) {
+                        errorDiv.innerText = `Database Error: ${err.message}`;
+                        errorDiv.classList.remove('hidden');
+                    }
+                } else {
                     grantEntry(email, roleAssigned);
                 }
             } else {
-                // Log In execution route
-                try {
-                    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-                    if (error) throw error;
-                    grantEntry(email, data.user.user_metadata?.role || 'member');
-                } catch (err) {
-                    console.warn("Fallback sandbox verification allowed.");
+                if (supabaseClient) {
+                    try {
+                        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+                        if (error) throw error;
+                        grantEntry(email, data.user.user_metadata?.role || 'member');
+                    } catch (err) {
+                        errorDiv.innerText = `Sign In Error: ${err.message}`;
+                        errorDiv.classList.remove('hidden');
+                    }
+                } else {
                     grantEntry(email, 'member');
                 }
             }
@@ -288,42 +318,58 @@
             if (accountRole === 'admin') {
                 document.getElementById('admin-badge').classList.remove('hidden');
             }
-            renderMasterTable();
+            renderMasterViewports();
             renderSwapsBoard();
         }
 
         function switchTab(targetTabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('border-blue-500', 'text-blue-600');
+                btn.classList.remove('border-blue-600', 'text-blue-600');
                 btn.classList.add('border-transparent', 'text-gray-500');
             });
             document.getElementById(`content-${targetTabId}`).classList.add('active');
-            document.getElementById(`tab-${targetTabId}`).classList.add('border-blue-500', 'text-blue-600');
+            document.getElementById(`tab-${targetTabId}`).classList.add('border-blue-600', 'text-blue-600');
         }
 
-        function renderMasterTable() {
+        function renderMasterViewports() {
             const tbody = document.getElementById('rota-table-body');
+            const cardsContainer = document.getElementById('rota-mobile-cards-container');
+            
             tbody.innerHTML = '';
+            cardsContainer.innerHTML = '';
 
             state.slots.forEach(s => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-gray-50 transition-colors";
+                const formattedDate = new Date(s.date).toLocaleDateString('en-GB', {day: 'numeric', month: 'short', year: 'numeric'});
                 
-                // Formats custom badges for pool states and normal states cleanly
-                const cellWorship = formatCellMarkup(s, 'worship');
-                const cellSound = formatCellMarkup(s, 'sound');
-                const cellGreeting = formatCellMarkup(s, 'greeting');
-                const cellTea = formatCellMarkup(s, 'tea');
-
+                // --- 1. RENDER DESKTOP LARGE GRID TABLE ROW ---
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-gray-50/50 transition-colors";
                 tr.innerHTML = `
-                    <td class="px-6 py-4 whitespace-nowrap font-semibold text-gray-900">${new Date(s.date).toLocaleDateString('en-GB', {day: 'numeric', month: 'short', year: 'numeric'})}</td>
-                    <td class="px-6 py-4">${cellWorship}</td>
-                    <td class="px-6 py-4">${cellSound}</td>
-                    <td class="px-6 py-4">${cellGreeting}</td>
-                    <td class="px-6 py-4">${cellTea}</td>
+                    <td class="px-6 py-4 whitespace-nowrap font-bold text-gray-900">${formattedDate}</td>
+                    <td class="px-6 py-4">${formatCellMarkup(s, 'worship')}</td>
+                    <td class="px-6 py-4">${formatCellMarkup(s, 'sound')}</td>
+                    <td class="px-6 py-4">${formatCellMarkup(s, 'greeting')}</td>
+                    <td class="px-6 py-4">${formatCellMarkup(s, 'tea')}</td>
                 `;
                 tbody.appendChild(tr);
+
+                // --- 2. RENDER TABLET & MOBILE VIEW ADAPTIVE CARDS ---
+                const mCard = document.createElement('div');
+                mCard.className = "bg-white rounded-2xl shadow-xs border border-gray-200/80 p-4 space-y-3.5";
+                mCard.innerHTML = `
+                    <div class="bg-gray-50 px-3 py-1.5 rounded-xl flex justify-between items-center border border-gray-100">
+                        <span class="text-sm font-black text-gray-900">${formattedDate}</span>
+                        <span class="text-[10px] uppercase font-bold tracking-wider text-gray-400">Sunday Service</span>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                        <div class="space-y-1"><span class="block text-[10px] uppercase font-bold text-gray-400 tracking-wider">Worship Team</span><div>${formatCellMarkup(s, 'worship')}</div></div>
+                        <div class="space-y-1"><span class="block text-[10px] uppercase font-bold text-gray-400 tracking-wider">Audio / Sound Desk</span><div>${formatCellMarkup(s, 'sound')}</div></div>
+                        <div class="space-y-1"><span class="block text-[10px] uppercase font-bold text-gray-400 tracking-wider">Welcome Greeting</span><div>${formatCellMarkup(s, 'greeting')}</div></div>
+                        <div class="space-y-1"><span class="block text-[10px] uppercase font-bold text-gray-400 tracking-wider">Tea & Coffee Hospitality</span><div>${formatCellMarkup(s, 'tea')}</div></div>
+                    </div>
+                `;
+                cardsContainer.appendChild(mCard);
             });
         }
 
@@ -333,61 +379,75 @@
             const isDirect = slot.status && slot.status.startsWith(`direct_swap::${roleKey}`);
 
             if (isPool) {
-                return `<div class="bg-red-50 text-red-700 border border-red-200 text-xs p-2 rounded-lg font-medium flex justify-between items-center">
-                            <span>🚨 HELP NEEDED / OPEN</span>
-                            <button class="bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold px-2 py-1 rounded" onclick="claimPoolShift('${slot.id}', '${roleKey}')">Claim</button>
+                return `<div class="bg-red-50 text-red-700 border border-red-100 text-xs py-2 px-3 rounded-xl font-bold flex justify-between items-center gap-2">
+                            <span>🚨 OPEN POOL</span>
+                            <button class="bg-red-600 hover:bg-red-700 text-white text-[10px] font-black px-2.5 py-1 rounded-lg shadow-sm transition-all cursor-pointer" onclick="claimPoolShift('${slot.id}', '${roleKey}', event)">Claim</button>
                         </div>`;
             }
 
             if (isDirect) {
-                return `<div class="bg-amber-50 text-amber-800 border border-amber-200 text-xs p-2 rounded-lg font-medium">
-                            <span class="block line-through opacity-60">${assignmentName}</span>
-                            <span class="text-[10px] text-amber-600 font-bold">🔄 Trade Proposed</span>
+                return `<div class="bg-amber-50/80 text-amber-800 border border-amber-200/60 text-xs py-2 px-3 rounded-xl font-medium">
+                            <span class="block line-through opacity-50">${assignmentName}</span>
+                            <span class="text-[10px] text-amber-600 font-extrabold flex items-center gap-1">🔄 Swap Proposed</span>
                         </div>`;
             }
 
-            // Clickable trigger to trigger modal configurations seamlessly
-            return `<div class="group relative cursor-pointer py-1 px-2 rounded hover:bg-blue-50 hover:text-blue-700 transition-all" onclick="openSwapModal('${slot.id}', '${roleKey}', '${assignmentName}')">
-                        <span class="font-medium">${assignmentName || '—'}</span>
-                        <span class="opacity-0 group-hover:opacity-100 block text-[10px] text-blue-500 font-semibold transition-opacity">🔄 Change / Swap</span>
+            return `<div class="group relative cursor-pointer py-2 px-3 rounded-xl hover:bg-blue-50 border border-transparent hover:border-blue-100 transition-all" onclick="openSwapModal('${slot.id}', '${roleKey}', '${assignmentName}')">
+                        <span class="font-semibold text-gray-800 group-hover:text-blue-800 block">${assignmentName || '—'}</span>
+                        <span class="opacity-0 group-hover:opacity-100 block text-[10px] text-blue-500 font-bold transition-opacity mt-0.5">🔄 Tap to Swap / Cover</span>
                     </div>`;
         }
 
         function openSwapModal(slotId, roleKey, currentAssignee) {
+            // Prevent execution if target node is empty
+            if(!currentAssignee || currentAssignee === '—') return;
+            
             const slot = state.slots.find(s => s.id === slotId);
             state.activeSlot = { slotId, roleKey, currentAssignee };
 
-            document.getElementById('modal-role-label').innerText = roleKey.toUpperCase();
-            document.getElementById('modal-date-label').innerText = new Date(slot.date).toLocaleDateString('en-GB', {day:'numeric', month:'long'});
+            document.getElementById('modal-role-label').innerText = roleKey.replace(/^\w/, c => c.toUpperCase());
+            document.getElementById('modal-date-label').innerText = new Date(slot.date).toLocaleDateString('en-GB', {day:'numeric', month:'long', year:'numeric'});
             
-            // Build filtered option lists: matches alternative rows where another peer is assigned to the SAME role
             const selectTarget = document.getElementById('modal-target-slot');
             selectTarget.innerHTML = '';
             
-            const peerOptions = state.slots.filter(s => s.id !== slotId && s[roleKey]);
+            const peerOptions = state.slots.filter(s => s.id !== slotId && s[roleKey] && !s.status.startsWith('pool_open'));
             if(peerOptions.length === 0) {
-                selectTarget.innerHTML = `<option value="">No available matching peers found</option>`;
+                selectTarget.innerHTML = `<option value="">No matching team shifts found to swap with</option>`;
             } else {
                 peerOptions.forEach(p => {
                     const option = document.createElement('option');
                     option.value = p.id;
-                    option.innerText = `${new Date(p.date).toLocaleDateString('en-GB', {day:'numeric', month:'short'})} - with ${p[roleKey]}`;
+                    option.innerText = `${new Date(p.date).toLocaleDateString('en-GB', {day:'numeric', month:'short'})} — Assigned to ${p[roleKey]}`;
                     selectTarget.appendChild(option);
                 });
             }
 
             document.getElementById('swap-modal').classList.remove('hidden');
             document.getElementById('swap-modal').classList.add('flex');
+            
+            // Default select to open pool strategy radio element
+            document.querySelector('input[name="swap-type"][value="pool"]').checked = true;
             updateModalFields();
         }
 
         function updateModalFields() {
             const type = document.querySelector('input[name="swap-type"]:checked').value;
             const directField = document.getElementById('direct-swap-field');
+            
+            const poolLabel = document.getElementById('label-strategy-pool');
+            const directLabel = document.getElementById('label-strategy-direct');
+
             if (type === 'direct') {
                 directField.classList.remove('hidden');
+                directLabel.classList.add('border-blue-600', 'bg-blue-50/30');
+                poolLabel.classList.remove('border-blue-600', 'bg-blue-50/30');
+                poolLabel.classList.add('border-gray-200');
             } else {
                 directField.classList.add('hidden');
+                poolLabel.classList.add('border-blue-600', 'bg-blue-50/30');
+                directLabel.classList.remove('border-blue-600', 'bg-blue-50/30');
+                directLabel.classList.add('border-gray-200');
             }
         }
 
@@ -405,13 +465,13 @@
                 originSlot.status = `pool_open::${roleKey}`;
             } else {
                 const targetSlotId = document.getElementById('modal-target-slot').value;
-                if (!targetSlotId) return;
+                if (!targetSlotId || targetSlotId === "") return;
                 originSlot.status = `direct_swap::${roleKey}`;
                 originSlot.targetSlotId = targetSlotId;
             }
 
             closeSwapModal();
-            renderMasterTable();
+            renderMasterViewports();
             renderSwapsBoard();
         }
 
@@ -424,21 +484,20 @@
             let badgeCounter = 0;
 
             state.slots.forEach(s => {
-                // Scan all potential lines
                 ['worship', 'sound', 'greeting', 'tea'].forEach(roleKey => {
+                    const cleanRoleName = roleKey.replace(/^\w/, c => c.toUpperCase());
+                    
                     if (s.status === `pool_open::${roleKey}`) {
                         badgeCounter++;
                         const card = document.createElement('div');
-                        card.className = "bg-white rounded-xl shadow-xs border border-gray-200 p-4 space-y-3";
+                        card.className = "bg-white rounded-2xl shadow-xs border border-gray-200 p-5 space-y-4";
                         card.innerHTML = `
                             <div class="flex justify-between items-center">
-                                <span class="bg-red-100 text-red-800 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase">${roleKey}</span>
-                                <span class="text-xs text-gray-400 font-medium">${new Date(s.date).toLocaleDateString('en-GB', {day:'numeric', month:'short'})}</span>
+                                <span class="bg-red-50 text-red-700 border border-red-100 text-[10px] px-2.5 py-1 rounded-lg font-black uppercase tracking-wider">${cleanRoleName} Vacancy</span>
+                                <span class="text-xs text-gray-400 font-bold">${new Date(s.date).toLocaleDateString('en-GB', {day:'numeric', month:'short'})}</span>
                             </div>
-                            <div>
-                                <p class="text-xs text-gray-500">Listed to Open Pool Exchange. No trade required.</p>
-                            </div>
-                            <button class="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold py-2 rounded-lg transition-colors" onclick="claimPoolShift('${s.id}', '${roleKey}')">🙋 Volunteer For Shift</button>
+                            <p class="text-xs text-gray-500 leading-relaxed">This position has been flagged to the open pool. No shift trade setup required to claim.</p>
+                            <button class="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2.5 rounded-xl shadow-xs transition-all active:scale-95 cursor-pointer" onclick="claimPoolShift('${s.id}', '${roleKey}', event)">🙋 Volunteer For This Role</button>
                         `;
                         poolContainer.appendChild(card);
                     }
@@ -449,19 +508,20 @@
                         if (!targetSlot) return;
 
                         const card = document.createElement('div');
-                        card.className = "bg-white rounded-xl shadow-xs border border-gray-200 p-4 space-y-3";
+                        card.className = "bg-white rounded-2xl shadow-xs border border-gray-200 p-5 space-y-4";
                         card.innerHTML = `
                             <div class="flex justify-between items-center">
-                                <span class="bg-amber-100 text-amber-800 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase">${roleKey}</span>
-                                <span class="text-xs text-gray-400 font-medium">Trade Request</span>
+                                <span class="bg-amber-50 text-amber-800 border border-amber-100 text-[10px] px-2.5 py-1 rounded-lg font-black uppercase tracking-wider">${cleanRoleName} Swap Offer</span>
+                                <span class="text-xs text-gray-400 font-bold">Trade Pitch</span>
                             </div>
-                            <div class="text-xs space-y-1 text-gray-600">
-                                <div><b>From:</b> ${s[roleKey]} (${new Date(s.date).toLocaleDateString('en-GB', {day:'numeric', month:'short'})})</div>
-                                <div><b>Proposed To:</b> ${targetSlot[roleKey]} (${new Date(targetSlot.date).toLocaleDateString('en-GB', {day:'numeric', month:'short'})})</div>
+                            <div class="p-3 bg-gray-50 rounded-xl space-y-2 border border-gray-100 text-xs">
+                                <div><span class="text-gray-400 font-medium">From:</span> <b class="text-gray-800">${s[roleKey]}</b> (${new Date(s.date).toLocaleDateString('en-GB', {day:'numeric', month:'short'})})</div>
+                                <div class="border-t border-gray-200/60 my-1.5"></div>
+                                <div><span class="text-gray-400 font-medium">In Exchange For:</span> <b class="text-gray-800">${targetSlot[roleKey]}</b> (${new Date(targetSlot.date).toLocaleDateString('en-GB', {day:'numeric', month:'short'})})</div>
                             </div>
                             <div class="flex gap-2">
-                                <button class="flex-1 bg-green-600 hover:bg-green-700 text-white text-xs font-semibold py-1.5 rounded-md transition-colors" onclick="acceptDirectTrade('${s.id}', '${targetSlot.id}', '${roleKey}')">Accept Trade</button>
-                                <button class="bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-semibold px-2 py-1.5 rounded-md transition-colors" onclick="cancelSwapState('${s.id}')">Decline</button>
+                                <button class="flex-1 bg-green-600 hover:bg-green-700 text-white text-xs font-bold py-2.5 rounded-xl transition-all active:scale-95 cursor-pointer" onclick="acceptDirectTrade('${s.id}', '${targetSlot.id}', '${roleKey}')">Accept Trade</button>
+                                <button class="bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-bold px-3 py-2.5 rounded-xl transition-all active:scale-95 cursor-pointer" onclick="cancelSwapState('${s.id}')">Decline</button>
                             </div>
                         `;
                         directContainer.appendChild(card);
@@ -469,7 +529,6 @@
                 });
             });
 
-            // Update badge notifications count
             const badge = document.getElementById('swap-badge-count');
             if (badgeCounter > 0) {
                 badge.innerText = badgeCounter;
@@ -478,18 +537,20 @@
                 badge.classList.add('hidden');
             }
 
-            if (!poolContainer.children.length) poolContainer.innerHTML = `<p class="text-xs text-gray-400 italic">No open shifts needing coverage currently.</p>`;
-            if (!directContainer.children.length) directContainer.innerHTML = `<p class="text-xs text-gray-400 italic">No pending trade configurations targeting your dates.</p>`;
+            if (!poolContainer.children.length) poolContainer.innerHTML = `<p class="text-xs text-gray-400 italic py-2 px-1">No open shifts needing coverage currently.</p>`;
+            if (!directContainer.children.length) directContainer.innerHTML = `<p class="text-xs text-gray-400 italic py-2 px-1">No pending trade configurations targeting your dates.</p>`;
         }
 
-        function claimPoolShift(slotId, roleKey) {
+        function claimPoolShift(slotId, roleKey, event) {
+            if(event) event.stopPropagation(); // Stops parent node clicking collision triggers
+            
             const slot = state.slots.find(s => s.id === slotId);
-            const promptName = prompt("Please confirm your full name to claim this shift:", "");
+            const promptName = prompt("Please confirm your full name to claim this shift slot:", "");
             if (!promptName || !promptName.trim()) return;
 
             slot[roleKey] = promptName.trim();
             slot.status = "normal";
-            renderMasterTable();
+            renderMasterViewports();
             renderSwapsBoard();
         }
 
@@ -497,7 +558,6 @@
             const originSlot = state.slots.find(s => s.id === originId);
             const targetSlot = state.slots.find(s => s.id === targetId);
             
-            // Clean swap logic execution swaps names directly across dates
             const initialOriginName = originSlot[roleKey];
             originSlot[roleKey] = targetSlot[roleKey];
             targetSlot[roleKey] = initialOriginName;
@@ -505,16 +565,15 @@
             originSlot.status = "normal";
             originSlot.targetSlotId = null;
 
-            renderMasterTable();
+            renderMasterViewports();
             renderSwapsBoard();
-            alert("Trade completed successfully across the ledger!");
         }
 
         function cancelSwapState(slotId) {
             const slot = state.slots.find(s => s.id === slotId);
             slot.status = "normal";
             slot.targetSlotId = null;
-            renderMasterTable();
+            renderMasterViewports();
             renderSwapsBoard();
         }
 
