@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Craigavon Baptist Church — Multi-Rota Terminal</title>
+    <!-- Tailwind CSS Engine CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Supabase Client Engine Library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         .view-content { display: none; }
@@ -23,6 +25,9 @@
 </head>
 <body class="bg-slate-100 font-sans antialiased text-slate-800">
 
+    <!-- ==========================================
+        SCREEN 1: AUTHENTICATION ENTRANCE TERMINAL
+    ========================================== -->
     <div id="auth-screen" class="min-h-screen flex items-center justify-center p-4 sm:p-6 bg-slate-900">
         <div class="w-full max-w-md bg-white rounded-3xl shadow-xl border border-slate-200/60 p-6 sm:p-8 space-y-6">
             <div class="text-center space-y-2">
@@ -60,10 +65,15 @@
         </div>
     </div>
 
+    <!-- ==========================================
+        SCREEN 2: CORE DASHBOARD APPLICATION APPARATUS
+    ========================================== -->
     <div id="app-screen" class="hidden min-h-screen flex flex-col md:flex-row">
         
+        <!-- SIDEBAR NAVIGATION PANEL -->
         <aside class="w-full md:w-64 bg-slate-900 text-slate-300 flex flex-col justify-between p-4 border-r border-slate-800 shrink-0">
             <div class="space-y-8">
+                <!-- App Identity Header -->
                 <div class="flex items-center gap-3 px-2">
                     <div class="w-10 h-10 bg-teal-600 rounded-xl flex items-center justify-center text-xl shadow-xs">
                         ⛪
@@ -74,6 +84,7 @@
                     </div>
                 </div>
 
+                <!-- Navigation Tabs Links -->
                 <nav class="space-y-1.5">
                     <button id="nav-master" onclick="changeSidebarRoute('master')" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold tracking-wide transition-all bg-slate-800 text-white cursor-pointer">
                         <span>📊</span> Master Grid
@@ -87,6 +98,7 @@
                 </nav>
             </div>
 
+            <!-- Profile Badge Footer Block -->
             <div class="border-t border-slate-800 pt-4 mt-6 space-y-3">
                 <div class="px-2">
                     <span class="text-[9px] font-black tracking-widest text-slate-500 uppercase block">Logged Session Profile</span>
@@ -101,8 +113,10 @@
             </div>
         </aside>
 
+        <!-- MAIN VIEW CONTENT PANELS SPACE -->
         <main class="flex-1 p-4 sm:p-8 overflow-y-auto max-w-7xl mx-auto w-full">
             
+            <!-- ROUTE A: MASTER OVERVIEW SCHEDULING INTERFACE -->
             <div id="view-master" class="view-content active space-y-6">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-gray-200/80 shadow-xs">
                     <div class="space-y-1">
@@ -116,15 +130,21 @@
                     </div>
                 </div>
 
+                <!-- Department Filtering Selector Row - ALL 9 PATHS DEFINED CLEANLY -->
                 <div class="flex flex-wrap items-center gap-2">
                     <button onclick="filterDepartment('all')" class="filter-chip active text-xs font-bold px-3 py-1.5 border border-slate-200 rounded-lg bg-white text-slate-600 hover:border-slate-400 cursor-pointer transition-all">Show All</button>
-                    <button onclick="filterDepartment('worship')" class="filter-chip text-xs font-bold px-3 py-1.5 border border-slate-200 rounded-lg bg-white text-slate-600 hover:border-slate-400 cursor-pointer transition-all">Music Team</button>
-                    <button onclick="filterDepartment('kids')" class="filter-chip text-xs font-bold px-3 py-1.5 border border-slate-200 rounded-lg bg-white text-slate-600 hover:border-slate-400 cursor-pointer transition-all">CB Sunday Kids</button>
-                    <button onclick="filterDepartment('tea')" class="filter-chip text-xs font-bold px-3 py-1.5 border border-slate-200 rounded-lg bg-white text-slate-600 hover:border-slate-400 cursor-pointer transition-all">Tea Rota</button>
-                    <button onclick="filterDepartment('sound')" class="filter-chip text-xs font-bold px-3 py-1.5 border border-slate-200 rounded-lg bg-white text-slate-600 hover:border-slate-400 cursor-pointer transition-all">Sound Rota</button>
-                    <button onclick="filterDepartment('hall')" class="filter-chip text-xs font-bold px-3 py-1.5 border border-slate-200 rounded-lg bg-white text-slate-600 hover:border-slate-400 cursor-pointer transition-all">Sports Hall Rota</button>
+                    <button onclick="filterDepartment('greeting_welcome')" class="filter-chip text-xs font-bold px-3 py-1.5 border border-slate-200 rounded-lg bg-white text-slate-600 hover:border-slate-400 cursor-pointer transition-all">Welcome</button>
+                    <button onclick="filterDepartment('worship')" class="filter-chip text-xs font-bold px-3 py-1.5 border border-slate-200 rounded-lg bg-white text-slate-600 hover:border-slate-400 cursor-pointer transition-all">Worship</button>
+                    <button onclick="filterDepartment('sound_computer')" class="filter-chip text-xs font-bold px-3 py-1.5 border border-slate-200 rounded-lg bg-white text-slate-600 hover:border-slate-400 cursor-pointer transition-all">Sound and Computer</button>
+                    <button onclick="filterDepartment('tea_coffee')" class="filter-chip text-xs font-bold px-3 py-1.5 border border-slate-200 rounded-lg bg-white text-slate-600 hover:border-slate-400 cursor-pointer transition-all">Tea and Coffee</button>
+                    <button onclick="filterDepartment('communion_handout')" class="filter-chip text-xs font-bold px-3 py-1.5 border border-slate-200 rounded-lg bg-white text-slate-600 hover:border-slate-400 cursor-pointer transition-all">Communion</button>
+                    <button onclick="filterDepartment('supervising_hall')" class="filter-chip text-xs font-bold px-3 py-1.5 border border-slate-200 rounded-lg bg-white text-slate-600 hover:border-slate-400 cursor-pointer transition-all">Hall Duty</button>
+                    <button onclick="filterDepartment('junior_ss')" class="filter-chip text-xs font-bold px-3 py-1.5 border border-slate-200 rounded-lg bg-white text-slate-600 hover:border-slate-400 cursor-pointer transition-all">Jr Sunday School</button>
+                    <button onclick="filterDepartment('senior_ss')" class="filter-chip text-xs font-bold px-3 py-1.5 border border-slate-200 rounded-lg bg-white text-slate-600 hover:border-slate-400 cursor-pointer transition-all">Sr Sunday School</button>
+                    <button onclick="filterDepartment('cleaning')" class="filter-chip text-xs font-bold px-3 py-1.5 border border-slate-200 rounded-lg bg-white text-slate-600 hover:border-slate-400 cursor-pointer transition-all">Cleaning</button>
                 </div>
 
+                <!-- Admin Global Controls Console -->
                 <div id="admin-tools-panel" class="hidden bg-purple-50/70 border border-purple-200 p-4 rounded-2xl flex flex-wrap items-center justify-between gap-4">
                     <div class="flex items-center gap-2">
                         <span class="text-lg">🛠️</span>
@@ -138,32 +158,40 @@
                     </button>
                 </div>
 
+                <!-- Target Data Output Cards Canvas Grid -->
                 <div id="master-cards-feed" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <div class="col-span-full py-8 text-center text-slate-400 font-semibold">Loading shift rows from database...</div>
                 </div>
             </div>
 
+            <!-- ROUTE B: PERSONALIZED USER MINISTRY ASSIGNMENTS -->
             <div id="view-personal" class="view-content space-y-6">
                 <div class="bg-white p-6 rounded-2xl border border-gray-200/80 shadow-xs space-y-1">
                     <h2 class="text-xl font-black text-slate-900 tracking-tight">My Ministry Schedule</h2>
                     <p class="text-xs font-medium text-slate-400">Isolated shifts mapping to your identity string parameters.</p>
                 </div>
                 <div id="personal-cards-feed" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    </div>
+                    <!-- Personal items drop space -->
+                </div>
             </div>
 
+            <!-- ROUTE C: OPEN COVERAGE DEVIATION SYSTEM HUB -->
             <div id="view-swaps" class="view-content space-y-6">
                 <div class="bg-white p-6 rounded-2xl border border-gray-200/80 shadow-xs space-y-1">
                     <h2 class="text-xl font-black text-slate-900 tracking-tight">Swaps Hub</h2>
                     <p class="text-xs font-medium text-slate-400">Claim open structural system vacancies or offer shift coverages instantly.</p>
                 </div>
                 <div id="pool-forum-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    </div>
+                    <!-- Open pool slots container -->
+                </div>
             </div>
 
         </main>
     </div>
 
+    <!-- ==========================================
+        GLOBAL OVERLAY: TRADING/SWAPPING DIALOG POPUP
+    ========================================== -->
     <div id="swap-action-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs items-center justify-center p-4 z-50">
         <div class="w-full max-w-md bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden flex flex-col animate-fadeIn">
             <div class="bg-slate-50 px-5 py-4 border-b border-gray-100 flex justify-between items-center">
@@ -203,7 +231,8 @@
                 <div id="modal-peer-select-wrapper" class="space-y-1">
                     <label class="text-[10px] font-black uppercase tracking-wider text-slate-400">Select Peer Assignment Target Date</label>
                     <select id="modal-peer-target-select" class="w-full text-xs font-bold bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-hidden focus:border-teal-500 transition-colors">
-                        </select>
+                        <!-- Filled dynamically -->
+                    </select>
                 </div>
             </div>
 
@@ -215,9 +244,12 @@
     </div>
 
 
+    <!-- ==========================================
+        3. CORE SCRIPT APPLICATION JAVASCRIPT ENGINE
+    ========================================== -->
     <script>
         // ==========================================
-        // 1. SUPABASE CONNECTION CONFIGURATION (LIVE MAPPED)
+        // 1. SUPABASE CONNECTION CONFIGURATION
         // ==========================================
         const SUPABASE_URL = "https://ojzwujpahfjmaeisnfez.supabase.co"; 
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qend1anBhaGZqbWFlaXNuZmV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTA5NDMsImV4cCI6MjA5NDU4Njk0M30.VvszGR6MbUnBhKsmsXBikkrjok2-F1bnyS4zOwDX5hg";       
@@ -226,7 +258,7 @@
 
         const SEED_KEYS = { member: 'craigavonbaptist2026', admin: 'cbcadmin2026!' };
 
-        // Runtime Global Management State Architecture
+        // Runtime Global Architecture - FEATURING ALL 9 REQUISITE ROLES
         let appState = {
             user: null,
             role: 'member',
@@ -236,9 +268,21 @@
             schedules: [] 
         };
 
+        // Fully declared array mapping out icons and labels matching your 9 specific fields
+        const CATEGORIES_TEMPLATE = [
+            { key: 'greeting_welcome', label: 'Welcome', icon: '🤝' },
+            { key: 'worship', label: 'Worship', icon: '🎵' },
+            { key: 'sound_computer', label: 'Sound and Computer', icon: '🎛️' },
+            { key: 'tea_coffee', label: 'Tea and Coffee', icon: '☕' },
+            { key: 'communion_handout', label: 'Communion', icon: '🍇' },
+            { key: 'supervising_hall', label: 'Hall Duty', icon: '🏀' },
+            { key: 'junior_ss', label: 'Jr Sunday School', icon: '📖' },
+            { key: 'senior_ss', label: 'Sr Sunday School', icon: '👶' },
+            { key: 'cleaning', label: 'Cleaning', icon: '🧹' }
+        ];
+
         let isSignUpMode = true;
 
-        // Helper to accurately parse structural "DD/MM/YYYY" string directly into native calendar Date instances
         function parseRotaDateString(dateStr) {
             const parts = dateStr.split('/');
             if (parts.length !== 3) return new Date(0);
@@ -246,43 +290,54 @@
         }
 
         // ==========================================
-        // 2. LIVE DATABASE DATABASE HOOKS (GET/PATCH)
+        // 2. LIVE DATABASE HOOKS (GET/PATCH)
         // ==========================================
         async function fetchLiveSchedules() {
             try {
-                const { data, error } = await supabaseClient
-                    .from('schedules')
-                    .select('*');
+                const { data: datesData, error: datesError } = await supabaseClient.from('service_dates').select('*');
+                const { data: slotsData, error: slotsError } = await supabaseClient.from('rota_slots').select('*');
                 
-                if (error) throw error;
+                if (datesError) throw datesError;
+                if (slotsError) throw slotsError;
                 
-                if (data && data.length > 0) {
-                    // Sort items rows cleanly by system architectural IDs strings
-                    appState.schedules = data.sort((a, b) => a.id.localeCompare(b.id));
+                const unifiedSchedules = datesData.map(d => {
+                    let rowObj = { id: d.id, date: d.date_string || 'Custom Date', pool: [] };
                     
-                    // Fire up asynchronous screen layout structural injections
-                    renderMasterFeed();
-                    renderPersonalFeed();
-                    renderSwapsForum();
-                }
+                    CATEGORIES_TEMPLATE.forEach(c => { rowObj[c.key] = "Not Assigned / Vacant"; });
+                    
+                    const matchedSlots = slotsData.filter(s => s.service_date_id === d.id);
+                    matchedSlots.forEach(slot => {
+                        if (slot.role_title && rowObj.hasOwnProperty(slot.role_title)) {
+                            rowObj[slot.role_title] = slot.assigned_name || "Not Assigned / Vacant";
+                            if (slot.is_in_pool) {
+                                rowObj.pool.push(slot.role_title);
+                            }
+                        }
+                    });
+                    
+                    return rowObj;
+                });
+
+                appState.schedules = unifiedSchedules.sort((a, b) => parseRotaDateString(a.date) - parseRotaDateString(b.date));
+                
+                renderMasterFeed();
+                renderPersonalFeed();
+                renderSwapsForum();
             } catch (err) {
                 console.error("Database initialization fault:", err.message);
             }
         }
 
-        async function pushLiveScheduleRowUpdate(rowId, targetRow) {
+        async function pushLiveScheduleRowUpdate(serviceDateId, catKey, assignedName, isInPool = false) {
             try {
                 const { error } = await supabaseClient
-                    .from('schedules')
+                    .from('rota_slots')
                     .update({
-                        worship: targetRow.worship,
-                        kids: targetRow.kids,
-                        tea: targetRow.tea,
-                        sound: targetRow.sound,
-                        hall: targetRow.hall,
-                        pool: targetRow.pool
+                        assigned_name: assignedName,
+                        is_in_pool: isInPool
                     })
-                    .eq('id', rowId);
+                    .eq('service_date_id', serviceDateId)
+                    .eq('role_title', catKey);
 
                 if (error) throw error;
                 return true;
@@ -329,11 +384,6 @@
 
             if (isSignUpMode) {
                 let typedCode = document.getElementById('auth-access-code').value.trim().toLowerCase();
-                
-                if (['craigavinbpatist2026', 'craigavonbpatist2026', 'craigavinbaptist2026', 'craivabonbaptist2026'].includes(typedCode)) {
-                    typedCode = 'craigavonbaptist2026';
-                }
-
                 let roleAssigned = null;
                 if (typedCode === SEED_KEYS.member) roleAssigned = 'member';
                 else if (typedCode === SEED_KEYS.admin) roleAssigned = 'admin';
@@ -409,7 +459,6 @@
             });
         }
 
-        // Departmental view modifications routing
         function filterDepartment(deptKey) {
             appState.activeTargetFilter = deptKey;
             document.querySelectorAll('.filter-chip').forEach(chip => {
@@ -453,7 +502,6 @@
                 return;
             }
 
-            // Real-time structural evaluation comparison anchor 
             const today = new Date();
             today.setHours(0, 0, 0, 0);
 
@@ -461,32 +509,24 @@
             let upcomingCount = 0;
 
             appState.schedules.forEach(item => {
-                const categories = [
-                    { key: 'worship', label: 'Music Team', icon: '🎵' },
-                    { key: 'kids', label: 'CB Sunday Kids', icon: '👶' },
-                    { key: 'tea', label: 'Tea Rota', icon: '☕' },
-                    { key: 'sound', label: 'Sound Desk and Computer', icon: '🎛️' },
-                    { key: 'hall', label: 'Sports Hall Rota', icon: '🏀' }
-                ];
-
-                let matchesFilter = appState.activeTargetFilter === 'all' || categories.some(c => c.key === appState.activeTargetFilter);
+                let matchesFilter = appState.activeTargetFilter === 'all' || CATEGORIES_TEMPLATE.some(c => c.key === appState.activeTargetFilter);
                 if (!matchesFilter) return;
 
-                // Dynamic comparison matrix parsing 
                 const cardDate = parseRotaDateString(item.date);
                 const isPastShift = cardDate < today;
 
                 let internalBlocksHtml = '';
+                let hasVisibleContent = false;
 
-                categories.forEach(cat => {
+                CATEGORIES_TEMPLATE.forEach(cat => {
                     if (appState.activeTargetFilter !== 'all' && appState.activeTargetFilter !== cat.key) return;
 
-                    const currentAssignee = item[cat.key];
+                    hasVisibleContent = true;
+                    const currentAssignee = item[cat.key] || "Not Assigned";
                     const isVacantPool = item.pool && item.pool.includes(cat.key);
                     
                     let interactionMarkup = '';
                     
-                    // Interaction controls are strictly stripped off historical assignments
                     if (!isPastShift) {
                         if (isVacantPool) {
                             interactionMarkup = `
@@ -509,11 +549,13 @@
                                 <span class="text-xs">${cat.icon}</span>
                                 <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">${cat.label}</span>
                             </div>
-                            <p class="text-xs sm:text-sm font-semibold ${isPastShift ? 'text-slate-500 line-through' : 'text-slate-800'} mt-0.5 leading-tight">${currentAssignee}</p>
+                            <div class="text-xs sm:text-sm font-semibold ${isPastShift ? 'text-slate-500 line-through' : 'text-slate-800'} mt-0.5 leading-tight whitespace-pre-line">${currentAssignee}</div>
                             ${interactionMarkup}
                         </div>
                     `;
                 });
+
+                if (!hasVisibleContent) return;
 
                 const fullCardHtml = `
                     <div class="${isPastShift ? 'bg-slate-50/70 border border-dashed border-gray-200 opacity-60' : 'bg-white border border-gray-200 shadow-xs'} rounded-2xl overflow-hidden flex flex-col">
@@ -541,7 +583,6 @@
                 feed.innerHTML = `<div class="col-span-full py-6 text-center text-xs font-semibold text-slate-400">No active upcoming shifts match current selected parameters.</div>`;
             }
 
-            // Append Collapsible Historical Container below the fold if past elements are populated
             if (pastSchedulesHtml !== '') {
                 const archiveDivider = document.createElement('div');
                 archiveDivider.className = "col-span-full mt-12 border-t border-gray-200 pt-6";
@@ -570,24 +611,15 @@
             if (!appState.user) return;
             const keyword = appState.user.split('@')[0].toLowerCase();
 
-            const categories = [
-                { key: 'worship', label: 'Music Team', icon: '🎵' },
-                { key: 'kids', label: 'CB Sunday Kids', icon: '👶' },
-                { key: 'tea', label: 'Tea Rota', icon: '☕' },
-                { key: 'sound', label: 'Sound Desk', icon: '🎛️' },
-                { key: 'hall', label: 'Sports Hall Rota', icon: '🏀' }
-            ];
-
             let count = 0;
             const today = new Date();
             today.setHours(0, 0, 0, 0);
 
             appState.schedules.forEach(item => {
-                // Historical filters are applied uniformly to personal view
                 if (parseRotaDateString(item.date) < today) return;
 
-                categories.forEach(cat => {
-                    const assignedText = item[cat.key];
+                CATEGORIES_TEMPLATE.forEach(cat => {
+                    const assignedText = item[cat.key] || "";
                     const isVacant = item.pool && item.pool.includes(cat.key);
                     if (assignedText.toLowerCase().includes(keyword) && !isVacant) {
                         count++;
@@ -600,7 +632,7 @@
                                 <span class="text-xl">${cat.icon}</span>
                                 <div>
                                     <h4 class="text-xs font-extrabold text-slate-400 uppercase tracking-wider leading-none">${cat.label}</h4>
-                                    <p class="text-sm font-black text-slate-800 mt-1">${assignedText}</p>
+                                    <div class="text-sm font-black text-slate-800 mt-1 whitespace-pre-line">${assignedText}</div>
                                 </div>
                             </div>
                             <button class="mt-2 w-full text-center bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2 rounded-xl border border-slate-200 transition-all cursor-pointer" onclick="initiatePersonalSwap('${item.id}', '${cat.key}', '${assignedText.replace(/'/g, "\\'")}')">
@@ -623,20 +655,19 @@
         function renderSwapsForum() {
             const grid = document.getElementById('pool-forum-grid');
             grid.innerHTML = '';
-
-            const catLabels = { worship: 'Music Team', kids: 'CB Sunday Kids', tea: 'Tea Rota', sound: 'Sound Desk', hall: 'Sports Hall Rota' };
-            const catIcons = { worship: '🎵', kids: '👶', tea: '☕', sound: '🎛️', hall: '🏀' };
             
             let poolCount = 0;
             const today = new Date();
             today.setHours(0, 0, 0, 0);
 
             appState.schedules.forEach(item => {
-                // Ignore expired vacant slots
                 if (parseRotaDateString(item.date) < today) return;
-
                 if (!item.pool) return;
+
                 item.pool.forEach(catKey => {
+                    const cat = CATEGORIES_TEMPLATE.find(c => c.key === catKey);
+                    if(!cat) return;
+
                     poolCount++;
                     const card = document.createElement('div');
                     card.className = "bg-red-50/60 border border-red-200/80 p-4 rounded-2xl shadow-xs flex flex-col justify-between gap-3";
@@ -645,8 +676,8 @@
                             <span class="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 bg-red-100 text-red-700 rounded-md inline-block">Unstaffed Duty Slot</span>
                             <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mt-1">${item.date}</h4>
                             <div class="flex items-center gap-2 mt-2">
-                                <span class="text-lg">${catIcons[catKey]}</span>
-                                <span class="text-sm font-extrabold text-slate-800">${catLabels[catKey]}</span>
+                                <span class="text-lg">${cat.icon}</span>
+                                <span class="text-sm font-extrabold text-slate-800">${cat.label}</span>
                             </div>
                         </div>
                         <button class="w-full text-center bg-red-600 hover:bg-red-700 text-white font-bold text-xs py-2 rounded-xl shadow-xs active:scale-98 transition-all cursor-pointer" onclick="claimOpenPoolSlot('${item.id}', '${catKey}')">
@@ -660,7 +691,7 @@
             if (poolCount === 0) {
                 grid.innerHTML = `
                     <div class="col-span-full bg-slate-50 border border-dashed border-slate-200 p-6 rounded-2xl text-center text-xs font-semibold text-slate-400">
-                        Excellent coverage! There are currently no open structural system drop vacancies.
+                        Excellent coverage! There are currently no open vacancies in the pool.
                     </div>`;
             }
         }
@@ -685,17 +716,16 @@
             document.getElementById('modal-origin-summary').innerText = `[${appState.schedules.find(s => s.id === rowId).date}] — Mode: ${catKey.toUpperCase()}`;
             document.getElementById('modal-identity-field').value = currentAssignee;
             
-            // Only suggest upcoming dates for potential trading targets
             const today = new Date();
             today.setHours(0, 0, 0, 0);
 
             targetSelect.innerHTML = '';
             appState.schedules.forEach(s => {
                 const targetDateObject = parseRotaDateString(s.date);
-                if(s.id !== rowId && s[catKey] !== "Leave Blank / Unassigned" && targetDateObject >= today) {
+                if(s.id !== rowId && targetDateObject >= today) {
                     const option = document.createElement('option');
                     option.value = `${s.id}|${catKey}`;
-                    option.innerText = `${s.date} — Current Holder: ${s[catKey]}`;
+                    option.innerText = `${s.date} — Current Holder: ${s[catKey] || 'Empty'}`;
                     targetSelect.appendChild(option);
                 }
             });
@@ -732,11 +762,7 @@
             let updateSuccess = false;
 
             if(strategy === 'pool') {
-                if(!targetRow.pool) targetRow.pool = [];
-                if(!targetRow.pool.includes(catKey)) {
-                    targetRow.pool.push(catKey);
-                }
-                updateSuccess = await pushLiveScheduleRowUpdate(rowId, targetRow);
+                updateSuccess = await pushLiveScheduleRowUpdate(rowId, catKey, targetRow[catKey], true);
                 if (updateSuccess) alert("Shift dropped successfully to public pool.");
             } else {
                 const selectVal = document.getElementById('modal-peer-target-select').value;
@@ -748,23 +774,18 @@
                 const [peerRowId, peerCatKey] = selectVal.split('|');
                 const peerRow = appState.schedules.find(s => s.id === peerRowId);
                 
-                // Swap strings 
-                const temp = targetRow[catKey];
-                targetRow[catKey] = peerRow[peerCatKey];
-                peerRow[peerCatKey] = temp;
+                const currentHolderValue = targetRow[catKey];
+                const peerHolderValue = peerRow[peerCatKey];
                 
-                // Push mutations dynamically to Supabase
-                const success1 = await pushLiveScheduleRowUpdate(rowId, targetRow);
-                const success2 = await pushLiveScheduleRowUpdate(peerRowId, peerRow);
+                const success1 = await pushLiveScheduleRowUpdate(rowId, catKey, peerHolderValue, false);
+                const success2 = await pushLiveScheduleRowUpdate(peerRowId, peerCatKey, currentHolderValue, false);
                 
                 updateSuccess = success1 && success2;
                 if (updateSuccess) alert("Direct peer swap saved securely!");
             }
 
             closeTradingModal();
-            renderMasterFeed();
-            renderPersonalFeed();
-            renderSwapsForum();
+            await fetchLiveSchedules();
         }
 
         async function claimOpenPoolSlot(rowId, catKey) {
@@ -775,20 +796,10 @@
             const nameSignature = appState.user.split('@')[0];
             const properName = nameSignature.charAt(0).toUpperCase() + nameSignature.slice(1);
             
-            const targetRow = appState.schedules.find(s => s.id === rowId);
-            if(targetRow) {
-                targetRow[catKey] = properName;
-                if (targetRow.pool) {
-                    targetRow.pool = targetRow.pool.filter(k => k !== catKey);
-                }
-                
-                const success = await pushLiveScheduleRowUpdate(rowId, targetRow);
-                if (success) {
-                    alert(`Coverage verified! Added ${properName} to the shift.`);
-                    renderMasterFeed();
-                    renderPersonalFeed();
-                    renderSwapsForum();
-                }
+            const success = await pushLiveScheduleRowUpdate(rowId, catKey, properName, false);
+            if (success) {
+                alert(`Coverage verified! Added ${properName} to the shift.`);
+                await fetchLiveSchedules();
             }
         }
     </script>
