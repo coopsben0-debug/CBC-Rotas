@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Craigavon Baptist Church — Multi-Rota Terminal</title>
+    <!-- Tailwind CSS Engine CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Supabase Client Engine Library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         .view-content { display: none; }
@@ -23,6 +25,9 @@
 </head>
 <body class="bg-slate-100 font-sans antialiased text-slate-800">
 
+    <!-- ==========================================
+        SCREEN 1: AUTHENTICATION ENTRANCE TERMINAL
+    ========================================== -->
     <div id="auth-screen" class="min-h-screen flex items-center justify-center p-4 sm:p-6 bg-slate-900">
         <div class="w-full max-w-md bg-white rounded-3xl shadow-xl border border-slate-200/60 p-6 sm:p-8 space-y-6">
             <div class="text-center space-y-2">
@@ -60,10 +65,15 @@
         </div>
     </div>
 
+    <!-- ==========================================
+        SCREEN 2: CORE DASHBOARD APPLICATION APPARATUS
+    ========================================== -->
     <div id="app-screen" class="hidden min-h-screen flex flex-col md:flex-row">
         
+        <!-- SIDEBAR NAVIGATION PANEL -->
         <aside class="w-full md:w-64 bg-slate-900 text-slate-300 flex flex-col justify-between p-4 border-r border-slate-800 shrink-0">
             <div class="space-y-8">
+                <!-- App Identity Header -->
                 <div class="flex items-center gap-3 px-2">
                     <div class="w-10 h-10 bg-teal-600 rounded-xl flex items-center justify-center text-xl shadow-xs">
                         ⛪
@@ -74,6 +84,7 @@
                     </div>
                 </div>
 
+                <!-- Navigation Tabs Links -->
                 <nav class="space-y-1.5">
                     <button id="nav-master" onclick="changeSidebarRoute('master')" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold tracking-wide transition-all bg-slate-800 text-white cursor-pointer">
                         <span>📊</span> Master Grid
@@ -87,6 +98,7 @@
                 </nav>
             </div>
 
+            <!-- Profile Badge Footer Block -->
             <div class="border-t border-slate-800 pt-4 mt-6 space-y-3">
                 <div class="px-2">
                     <span class="text-[9px] font-black tracking-widest text-slate-500 uppercase block">Logged Session Profile</span>
@@ -101,8 +113,10 @@
             </div>
         </aside>
 
+        <!-- MAIN VIEW CONTENT PANELS SPACE -->
         <main class="flex-1 p-4 sm:p-8 overflow-y-auto max-w-7xl mx-auto w-full">
             
+            <!-- ROUTE A: MASTER OVERVIEW SCHEDULING INTERFACE -->
             <div id="view-master" class="view-content active space-y-6">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-gray-200/80 shadow-xs">
                     <div class="space-y-1">
@@ -116,19 +130,20 @@
                     </div>
                 </div>
 
+                <!-- Department Filtering Selector Row -->
                 <div class="flex flex-wrap items-center gap-2">
                     <button onclick="filterDepartment('all')" class="filter-chip active text-xs font-bold px-3 py-1.5 border border-slate-200 rounded-lg bg-white text-slate-600 hover:border-slate-400 cursor-pointer transition-all">Show All</button>
-                    <button onclick="filterDepartment('Welcome')" class="filter-chip text-xs font-bold px-3 py-1.5 border border-slate-200 rounded-lg bg-white text-slate-600 hover:border-slate-400 cursor-pointer transition-all">Welcome</button>
-                    <button onclick="filterDepartment('Worship')" class="filter-chip text-xs font-bold px-3 py-1.5 border border-slate-200 rounded-lg bg-white text-slate-600 hover:border-slate-400 cursor-pointer transition-all">Worship</button>
-                    <button onclick="filterDepartment('Sound and Computer')" class="filter-chip text-xs font-bold px-3 py-1.5 border border-slate-200 rounded-lg bg-white text-slate-600 hover:border-slate-400 cursor-pointer transition-all">Sound and Computer</button>
-                    <button onclick="filterDepartment('Tea and Coffee')" class="filter-chip text-xs font-bold px-3 py-1.5 border border-slate-200 rounded-lg bg-white text-slate-600 hover:border-slate-400 cursor-pointer transition-all">Tea and Coffee</button>
-                    <button onclick="filterDepartment('Communion')" class="filter-chip text-xs font-bold px-3 py-1.5 border border-slate-200 rounded-lg bg-white text-slate-600 hover:border-slate-400 cursor-pointer transition-all">Communion</button>
-                    <button onclick="filterDepartment('Hall Duty')" class="filter-chip text-xs font-bold px-3 py-1.5 border border-slate-200 rounded-lg bg-white text-slate-600 hover:border-slate-400 cursor-pointer transition-all">Hall Duty</button>
-                    <button onclick="filterDepartment('Jr Sunday School')" class="filter-chip text-xs font-bold px-3 py-1.5 border border-slate-200 rounded-lg bg-white text-slate-600 hover:border-slate-400 cursor-pointer transition-all">Jr Sunday School</button>
-                    <button onclick="filterDepartment('Sr Sunday School')" class="filter-chip text-xs font-bold px-3 py-1.5 border border-slate-200 rounded-lg bg-white text-slate-600 hover:border-slate-400 cursor-pointer transition-all">Sr Sunday School</button>
-                    <button onclick="filterDepartment('Cleaning')" class="filter-chip text-xs font-bold px-3 py-1.5 border border-slate-200 rounded-lg bg-white text-slate-600 hover:border-slate-400 cursor-pointer transition-all">Cleaning</button>
+                    <button onclick="filterDepartment('Welcome')" class="filter-chip text-xs font-bold px-3 py-1.5 border border-slate-200 rounded-lg bg-white text-slate-600 hover:border-slate-400 cursor-pointer transition-all">Welcome & Building Prep</button>
+                    <button onclick="filterDepartment('Worship')" class="filter-chip text-xs font-bold px-3 py-1.5 border border-slate-200 rounded-lg bg-white text-slate-600 hover:border-slate-400 cursor-pointer transition-all">Worship Team</button>
+                    <button onclick="filterDepartment('Sound and Computer')" class="filter-chip text-xs font-bold px-3 py-1.5 border border-slate-200 rounded-lg bg-white text-slate-600 hover:border-slate-400 cursor-pointer transition-all">Sound & Computer</button>
+                    <button onclick="filterDepartment('Tea and Coffee')" class="filter-chip text-xs font-bold px-3 py-1.5 border border-slate-200 rounded-lg bg-white text-slate-600 hover:border-slate-400 cursor-pointer transition-all">Tea & Coffee Rota</button>
+                    <button onclick="filterDepartment('Hall Duty')" class="filter-chip text-xs font-bold px-3 py-1.5 border border-slate-200 rounded-lg bg-white text-slate-600 hover:border-slate-400 cursor-pointer transition-all">Sports Hall Duty</button>
+                    <button onclick="filterDepartment('Jr Sunday School')" class="filter-chip text-xs font-bold px-3 py-1.5 border border-slate-200 rounded-lg bg-white text-slate-600 hover:border-slate-400 cursor-pointer transition-all">Junior Sunday School</button>
+                    <button onclick="filterDepartment('Sr Sunday School')" class="filter-chip text-xs font-bold px-3 py-1.5 border border-slate-200 rounded-lg bg-white text-slate-600 hover:border-slate-400 cursor-pointer transition-all">CB Sunday Kids</button>
+                    <button onclick="filterDepartment('Cleaning')" class="filter-chip text-xs font-bold px-3 py-1.5 border border-slate-200 rounded-lg bg-white text-slate-600 hover:border-slate-400 cursor-pointer transition-all">Cleaning Team</button>
                 </div>
 
+                <!-- Admin Global Controls Console -->
                 <div id="admin-tools-panel" class="hidden bg-purple-50/70 border border-purple-200 p-4 rounded-2xl flex flex-wrap items-center justify-between gap-4">
                     <div class="flex items-center gap-2">
                         <span class="text-lg">🛠️</span>
@@ -142,32 +157,40 @@
                     </button>
                 </div>
 
+                <!-- Target Data Output Cards Canvas Grid -->
                 <div id="master-cards-feed" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <div class="col-span-full py-8 text-center text-slate-400 font-semibold">Loading shift rows from database...</div>
                 </div>
             </div>
 
+            <!-- ROUTE B: PERSONALIZED USER MINISTRY ASSIGNMENTS -->
             <div id="view-personal" class="view-content space-y-6">
                 <div class="bg-white p-6 rounded-2xl border border-gray-200/80 shadow-xs space-y-1">
                     <h2 class="text-xl font-black text-slate-900 tracking-tight">My Ministry Schedule</h2>
                     <p class="text-xs font-medium text-slate-400">Isolated shifts mapping to your identity string parameters.</p>
                 </div>
                 <div id="personal-cards-feed" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    </div>
+                    <!-- Personal items drop space -->
+                </div>
             </div>
 
+            <!-- ROUTE C: OPEN COVERAGE DEVIATION SYSTEM HUB -->
             <div id="view-swaps" class="view-content space-y-6">
                 <div class="bg-white p-6 rounded-2xl border border-gray-200/80 shadow-xs space-y-1">
                     <h2 class="text-xl font-black text-slate-900 tracking-tight">Swaps Hub</h2>
                     <p class="text-xs font-medium text-slate-400">Claim open structural system vacancies or offer shift coverages instantly.</p>
                 </div>
                 <div id="pool-forum-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    </div>
+                    <!-- Open pool slots container -->
+                </div>
             </div>
 
         </main>
     </div>
 
+    <!-- ==========================================
+        GLOBAL OVERLAY: TRADING/SWAPPING DIALOG POPUP
+    ========================================== -->
     <div id="swap-action-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs items-center justify-center p-4 z-50">
         <div class="w-full max-w-md bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden flex flex-col animate-fadeIn">
             <div class="bg-slate-50 px-5 py-4 border-b border-gray-100 flex justify-between items-center">
@@ -207,7 +230,8 @@
                 <div id="modal-peer-select-wrapper" class="space-y-1">
                     <label class="text-[10px] font-black uppercase tracking-wider text-slate-400">Select Peer Assignment Target Date</label>
                     <select id="modal-peer-target-select" class="w-full text-xs font-bold bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-hidden focus:border-teal-500 transition-colors">
-                        </select>
+                        <!-- Filled dynamically -->
+                    </select>
                 </div>
             </div>
 
@@ -219,6 +243,9 @@
     </div>
 
 
+    <!-- ==========================================
+        3. CORE SCRIPT APPLICATION JAVASCRIPT ENGINE
+    ========================================== -->
     <script>
         // ==========================================
         // 1. SUPABASE CONNECTION CONFIGURATION
@@ -240,25 +267,41 @@
         };
 
         const CATEGORIES_TEMPLATE = [
-            { key: 'Welcome', label: 'Welcome', icon: '🤝' },
-            { key: 'Worship', label: 'Worship', icon: '🎵' },
-            { key: 'Sound and Computer', label: 'Sound and Computer', icon: '🎛️' },
-            { key: 'Tea and Coffee', label: 'Tea and Coffee', icon: '☕' },
-            { key: 'Communion', label: 'Communion', icon: '🍇' },
-            { key: 'Hall Duty', label: 'Hall Duty', icon: '🏀' },
-            { key: 'Jr Sunday School', label: 'Jr Sunday School', icon: '📖' },
-            { key: 'Sr Sunday School', label: 'Sr Sunday School', icon: '👶' },
-            { key: 'Cleaning', label: 'Cleaning', icon: '🧹' }
+            { key: 'Welcome', label: 'Welcome, Table Prep & Open/Close Building', icon: '🤝' },
+            { key: 'Worship', label: 'Worship Team', icon: '🎵' },
+            { key: 'Sound and Computer', label: 'Sound & Computer', icon: '🎛️' },
+            { key: 'Tea and Coffee', label: 'Tea & Coffee Rota', icon: '☕' },
+            { key: 'Hall Duty', label: 'Sports Hall Duty', icon: '🏀' },
+            { key: 'Jr Sunday School', label: 'Junior Sunday School', icon: '📖' },
+            { key: 'Sr Sunday School', label: 'CB Sunday Kids (Senior)', icon: '👶' },
+            { key: 'Cleaning', label: 'Cleaning Team', icon: '🧹' }
         ];
+
+        // Lesson details & scripture references compiled directly from your sheets
+        const LESSON_METADATA = {
+            "2026-06-07": {
+                jrLesson: "Peter goes to Cornelius", jrVerse: "Acts 1v8 repeated",
+                srLesson: "SS Project Lesson 6: Pentecost", srVerse: "Psalm 46 v 10"
+            },
+            "2026-06-14": {
+                jrLesson: "Elijah prays to the true God", jrVerse: "Psalm 4v3 - '...the Lord will hear when I call to Him'",
+                srLesson: "Missionary Story TBC", srVerse: "Prize for all 3 verses"
+            },
+            "2026-06-21": {
+                jrLesson: "Jonah confesses his sin", jrVerse: "Psalm 55v17 - 'Evening and morning and at noon I will pray...'",
+                srLesson: "Missionary Story TBC", srVerse: ""
+            },
+            "2026-06-28": {
+                jrLesson: "Nehemiah prays in every situation", jrVerse: "Psalm 55v17 repeated",
+                srLesson: "End of Year Celebration", srVerse: ""
+            }
+        };
 
         let isSignUpMode = true;
 
-        // Flexible Date Parser to gracefully handle both YYYY-MM-DD and DD/MM/YYYY formats
         function parseRotaDateString(dateStr) {
             if (!dateStr) return new Date(0);
-            if (dateStr.includes('-')) {
-                return new Date(dateStr);
-            }
+            if (dateStr.includes('-')) return new Date(dateStr);
             const parts = dateStr.split('/');
             if (parts.length === 3) {
                 return new Date(parseInt(parts[2], 10), parseInt(parts[1], 10) - 1, parseInt(parts[0], 10));
@@ -266,7 +309,6 @@
             return new Date(dateStr);
         }
 
-        // Formats database date elements visually on display cards
         function formatDisplayDate(dateStr) {
             if (!dateStr) return '';
             if (dateStr.includes('-')) {
@@ -291,14 +333,18 @@
                     const rawDateValue = d.date || d.service_date || 'Custom Date';
                     let rowObj = { id: d.id, date: rawDateValue, pool: [] };
                     
-                    CATEGORIES_TEMPLATE.forEach(c => { rowObj[c.key] = "Not Assigned / Vacant"; });
+                    CATEGORIES_TEMPLATE.forEach(c => { rowObj[c.key] = "Vacant"; });
                     
                     const matchedSlots = slotsData.filter(s => s.service_date_id === d.id);
                     matchedSlots.forEach(slot => {
-                        if (slot.role_title && rowObj.hasOwnProperty(slot.role_title)) {
-                            rowObj[slot.role_title] = slot.member_name_text || "Not Assigned / Vacant";
+                        let mappedRole = slot.role_title;
+                        if (mappedRole === "Communion" || mappedRole === "Table Preparation") {
+                            mappedRole = "Welcome"; 
+                        }
+                        if (slot.role_title && rowObj.hasOwnProperty(mappedRole)) {
+                            rowObj[mappedRole] = slot.member_name_text || "Vacant";
                             if (slot.is_in_pool) {
-                                rowObj.pool.push(slot.role_title);
+                                rowObj.pool.push(mappedRole);
                             }
                         }
                     });
@@ -332,6 +378,22 @@
             } catch (err) {
                 alert("Database Update Error: " + err.message);
                 return false;
+            }
+        }
+
+        // Inline quick-saving feature directly updating database records from screen edits
+        async function saveInlineNameEdit(serviceDateId, catKey, elementId) {
+            const updatedText = document.getElementById(elementId).innerText.trim();
+            const parentSchedule = appState.schedules.find(s => s.id === serviceDateId);
+            
+            if (parentSchedule) {
+                parentSchedule[catKey] = updatedText;
+            }
+
+            const success = await pushLiveScheduleRowUpdate(serviceDateId, catKey, updatedText, false);
+            if(success) {
+                alert("Assignment saved directly to live schedule tables!");
+                await fetchLiveSchedules();
             }
         }
 
@@ -462,7 +524,7 @@
             appState.liveEditingEnabled = !appState.liveEditingEnabled;
             const btn = document.getElementById('live-edit-btn');
             if(appState.liveEditingEnabled) {
-                btn.innerHTML = "🔓 Live Editing Active";
+                btn.innerHTML = "🔓 Inline Highlight Mode Active";
                 btn.classList.remove('bg-slate-100', 'text-slate-700');
                 btn.classList.add('bg-amber-600', 'text-white', 'border-amber-700');
             } else {
@@ -479,7 +541,7 @@
         }
 
         // ==========================================
-        // 5. INTERFACE RENDERING LOGIC WITH ARCHIVING
+        // 5. INTERFACE RENDERING ENGINE
         // ==========================================
         function renderMasterFeed() {
             const feed = document.getElementById('master-cards-feed');
@@ -497,7 +559,7 @@
             let upcomingCount = 0;
 
             appState.schedules.forEach(item => {
-                let matchesFilter = appState.activeTargetFilter === 'all' || CATEGORIES_TEMPLATE.some(c => c.key === appState.activeTargetFilter);
+                let matchesFilter = appState.activeTargetFilter === 'all' || appState.activeTargetFilter === item.activeTargetFilter || CATEGORIES_TEMPLATE.some(c => c.key === appState.activeTargetFilter);
                 if (!matchesFilter) return;
 
                 const cardDate = parseRotaDateString(item.date);
@@ -510,9 +572,29 @@
                     if (appState.activeTargetFilter !== 'all' && appState.activeTargetFilter !== cat.key) return;
 
                     hasVisibleContent = true;
-                    const currentAssignee = item[cat.key] || "Not Assigned";
+                    let currentAssignee = item[cat.key] || "Vacant";
                     const isVacantPool = item.pool && item.pool.includes(cat.key);
                     
+                    // Format multiple singers/musicians into explicit structural labels
+                    if (cat.key === 'Worship' && currentAssignee.includes(',')) {
+                        const parts = currentAssignee.split(',');
+                        if (parts.length >= 2 && !currentAssignee.includes('(P)')) {
+                            currentAssignee = `${parts[0].trim()} (Piano), ${parts[1].trim()} (Singing / Lead)`;
+                        }
+                    }
+
+                    // Extract Sunday School lesson items
+                    let lessonRowAddition = '';
+                    const meta = LESSON_METADATA[item.date];
+                    if (meta) {
+                        if (cat.key === 'Jr Sunday School' && meta.jrLesson) {
+                            lessonRowAddition = `<div class="text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md mt-1 italic">📖 Lesson: ${meta.jrLesson} (${meta.jrVerse})</div>`;
+                        } else if (cat.key === 'Sr Sunday School' && meta.srLesson) {
+                            lessonRowAddition = `<div class="text-[11px] font-medium text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md mt-1 italic">🎨 Topic: ${meta.srLesson} ${meta.srVerse ? `— ${meta.srVerse}` : ''}</div>`;
+                        }
+                    }
+
+                    const elementUniqueId = `editable-${item.id}-${cat.key}`;
                     let interactionMarkup = '';
                     
                     if (!isPastShift) {
@@ -524,10 +606,14 @@
                                 </div>`;
                         } else if (appState.liveEditingEnabled) {
                             interactionMarkup = `
-                                <button class="mt-1.5 w-full text-left bg-slate-50 hover:bg-teal-50 border border-slate-200 hover:border-teal-300 text-slate-500 hover:text-teal-700 text-[11px] font-bold py-1 px-2 rounded-lg transition-all flex items-center justify-between" onclick="openTradingModal('${item.id}', '${cat.key}', '${currentAssignee.replace(/'/g, "\\'")}')">
-                                    <span>🔄 Request Trade / Swap</span>
-                                    <span>→</span>
-                                </button>`;
+                                <div class="mt-2 flex items-center gap-1">
+                                    <button onclick="saveInlineNameEdit('${item.id}', '${cat.key}', '${elementUniqueId}')" class="bg-teal-600 text-white text-[10px] font-black px-2 py-1 rounded-lg cursor-pointer hover:bg-teal-700 transition-all">
+                                        ✓ Save Change
+                                    </button>
+                                    <button onclick="openTradingModal('${item.id}', '${cat.key}', '${currentAssignee.replace(/'/g, "\\'")}')" class="bg-slate-200 text-slate-700 text-[10px] font-bold px-2 py-1 rounded-lg cursor-pointer hover:bg-slate-300 transition-all">
+                                        🔄 Trade Options
+                                    </button>
+                                </div>`;
                         }
                     }
 
@@ -535,9 +621,14 @@
                         <div class="border-l-3 ${isPastShift ? 'border-gray-300' : 'border-teal-500'} pl-3 py-0.5">
                             <div class="flex items-center gap-1.5">
                                 <span class="text-xs">${cat.icon}</span>
-                                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">${cat.label}</span>
+                                <span class="text-[11px] font-black uppercase tracking-wider text-slate-400">${cat.label}</span>
                             </div>
-                            <div class="text-xs sm:text-sm font-semibold ${isPastShift ? 'text-slate-500 line-through' : 'text-slate-800'} mt-0.5 leading-tight whitespace-pre-line">${currentAssignee}</div>
+                            <div id="${elementUniqueId}" 
+                                 contenteditable="${appState.liveEditingEnabled && !isPastShift}" 
+                                 class="text-xs sm:text-sm font-semibold ${isPastShift ? 'text-slate-500 line-through' : 'text-slate-800'} mt-0.5 leading-tight outline-hidden focus:bg-amber-50 focus:ring-1 focus:ring-amber-300 rounded px-1 transition-all">
+                                 ${currentAssignee}
+                            </div>
+                            ${lessonRowAddition}
                             ${interactionMarkup}
                         </div>
                     `;
@@ -577,7 +668,7 @@
                 const archiveDivider = document.createElement('div');
                 archiveDivider.className = "col-span-full mt-12 border-t border-gray-200 pt-6";
                 archiveDivider.innerHTML = `
-                    <details class="group cursor-pointer" open>
+                    <details class="group cursor-pointer">
                         <summary class="flex items-center justify-between text-sm font-bold text-slate-500 hover:text-slate-800 list-none transition-colors">
                             <div class="flex items-center gap-2">
                                 <span>📂</span>
