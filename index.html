@@ -1,4 +1,249 @@
-<script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Craigavon Baptist Church — Multi-Rota Terminal</title>
+    <!-- Tailwind CSS Engine CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Supabase Client Engine Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        .view-content { display: none; }
+        .view-content.active { display: block; }
+        .filter-chip.active {
+            background-color: #1e293b;
+            color: #ffffff;
+            border-color: #1e293b;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn { animation: fadeIn 0.2s ease-out forwards; }
+    </style>
+</head>
+<body class="bg-slate-100 font-sans antialiased text-slate-800">
+
+    <!-- ==========================================
+        SCREEN 1: AUTHENTICATION ENTRANCE TERMINAL
+    ========================================== -->
+    <div id="auth-screen" class="min-h-screen flex items-center justify-center p-4 sm:p-6 bg-slate-900">
+        <div class="w-full max-w-md bg-white rounded-3xl shadow-xl border border-slate-200/60 p-6 sm:p-8 space-y-6">
+            <div class="text-center space-y-2">
+                <div class="w-12 h-12 bg-teal-600 rounded-2xl flex items-center justify-center text-white text-2xl font-black mx-auto shadow-sm">
+                    ⛪
+                </div>
+                <h2 id="auth-title" class="text-2xl font-black text-slate-900 tracking-tight">Church Rota Portal</h2>
+                <p id="auth-subtitle" class="text-xs sm:text-sm font-semibold text-slate-400">Create an account to manage your upcoming team assignments</p>
+            </div>
+
+            <div id="auth-error" class="hidden bg-red-50 border border-red-200 text-red-700 text-xs font-bold p-3.5 rounded-xl"></div>
+
+            <form id="registration-form" class="space-y-4">
+                <div class="space-y-1">
+                    <label class="text-[11px] font-black uppercase tracking-wider text-slate-400">Email Address</label>
+                    <input id="reg-email" type="email" required placeholder="name@domain.com" class="w-full text-sm font-semibold bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 focus:outline-hidden focus:border-teal-500 focus:bg-white transition-all">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[11px] font-black uppercase tracking-wider text-slate-400">Secure Password</label>
+                    <input id="reg-password" type="password" required placeholder="••••••••" class="w-full text-sm font-semibold bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 focus:outline-hidden focus:border-teal-500 focus:bg-white transition-all">
+                </div>
+                <div id="access-code-wrapper" class="space-y-1">
+                    <label class="text-[11px] font-black uppercase tracking-wider text-slate-400">Verification Access Code</label>
+                    <input id="auth-access-code" type="text" required placeholder="Enter church token string" class="w-full text-sm font-semibold bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 focus:outline-hidden focus:border-teal-500 focus:bg-white transition-all">
+                </div>
+
+                <button id="auth-submit-btn" type="submit" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm py-3 rounded-xl shadow-xs transition-all cursor-pointer">
+                    Register Account
+                </button>
+            </form>
+
+            <button id="toggle-auth-mode-btn" onclick="toggleAuthMode()" class="w-full text-center text-xs font-bold text-slate-400 hover:text-teal-600 transition-colors cursor-pointer block mt-2">
+                Already have an account? Log In instead
+            </button>
+        </div>
+    </div>
+
+    <!-- ==========================================
+        SCREEN 2: CORE DASHBOARD APPLICATION APPARATUS
+    ========================================== -->
+    <div id="app-screen" class="hidden min-h-screen flex flex-col md:flex-row">
+        
+        <!-- SIDEBAR NAVIGATION PANEL -->
+        <aside class="w-full md:w-64 bg-slate-900 text-slate-300 flex flex-col justify-between p-4 border-r border-slate-800 shrink-0">
+            <div class="space-y-8">
+                <!-- App Identity Header -->
+                <div class="flex items-center gap-3 px-2">
+                    <div class="w-10 h-10 bg-teal-600 rounded-xl flex items-center justify-center text-xl shadow-xs">
+                        ⛪
+                    </div>
+                    <div>
+                        <h1 class="text-sm font-black text-white leading-none tracking-tight">Craigavon Baptist</h1>
+                        <span class="text-[10px] font-black uppercase tracking-widest text-slate-400 block mt-1">All-Ministry Terminal</span>
+                    </div>
+                </div>
+
+                <!-- Navigation Tabs Links -->
+                <nav class="space-y-1.5">
+                    <button id="nav-master" onclick="changeSidebarRoute('master')" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold tracking-wide transition-all bg-slate-800 text-white cursor-pointer">
+                        <span>📊</span> Master Grid
+                    </button>
+                    <button id="nav-personal" onclick="changeSidebarRoute('personal')" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold tracking-wide transition-all text-slate-400 hover:bg-slate-800/50 hover:text-white cursor-pointer">
+                        <span>👤</span> My Schedule
+                    </button>
+                    <button id="nav-swaps" onclick="changeSidebarRoute('swaps')" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold tracking-wide transition-all text-slate-400 hover:bg-slate-800/50 hover:text-white cursor-pointer">
+                        <span>🔄</span> Swaps Hub
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Profile Badge Footer Block -->
+            <div class="border-t border-slate-800 pt-4 mt-6 space-y-3">
+                <div class="px-2">
+                    <span class="text-[9px] font-black tracking-widest text-slate-500 uppercase block">Logged Session Profile</span>
+                    <p id="sidebar-user-label" class="text-xs font-bold text-slate-300 truncate mt-1">user@domain.com</p>
+                    <span id="admin-badge" class="hidden text-[9px] font-black tracking-wider uppercase px-2 py-0.5 bg-purple-900/50 border border-purple-700/50 text-purple-300 rounded-md mt-1.5 inline-block">
+                        Admin Operations
+                    </span>
+                </div>
+                <button onclick="handleUserLogOut()" class="w-full text-center bg-slate-800 hover:bg-red-950 hover:text-red-300 border border-slate-700 hover:border-red-900 text-slate-400 font-bold text-xs py-2 rounded-xl transition-all cursor-pointer">
+                    Log Out Terminal
+                </button>
+            </div>
+        </aside>
+
+        <!-- MAIN VIEW CONTENT PANELS SPACE -->
+        <main class="flex-1 p-4 sm:p-8 overflow-y-auto max-w-7xl mx-auto w-full">
+            
+            <!-- ROUTE A: MASTER OVERVIEW SCHEDULING INTERFACE -->
+            <div id="view-master" class="view-content active space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-gray-200/80 shadow-xs">
+                    <div class="space-y-1">
+                        <h2 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Master Ministry Schedules</h2>
+                        <p class="text-xs sm:text-sm font-medium text-slate-400">Live overview across all custom operational departments.</p>
+                    </div>
+                    <div>
+                        <button id="live-edit-btn" onclick="toggleLiveEditingState()" class="w-full sm:w-auto px-4 py-2 bg-slate-100 border border-slate-200 hover:bg-slate-200 rounded-xl text-xs font-black text-slate-700 tracking-wide transition-all shadow-xs cursor-pointer flex items-center justify-center gap-2">
+                            🔒 Enable Live Editing
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Department Filtering Selector Row -->
+                <div class="flex flex-wrap items-center gap-2">
+                    <button onclick="filterDepartment('all')" class="filter-chip active text-xs font-bold px-3 py-1.5 border border-slate-200 rounded-lg bg-white text-slate-600 hover:border-slate-400 cursor-pointer transition-all">Show All</button>
+                    <button onclick="filterDepartment('worship')" class="filter-chip text-xs font-bold px-3 py-1.5 border border-slate-200 rounded-lg bg-white text-slate-600 hover:border-slate-400 cursor-pointer transition-all">Music Team</button>
+                    <button onclick="filterDepartment('kids')" class="filter-chip text-xs font-bold px-3 py-1.5 border border-slate-200 rounded-lg bg-white text-slate-600 hover:border-slate-400 cursor-pointer transition-all">CB Sunday Kids</button>
+                    <button onclick="filterDepartment('tea')" class="filter-chip text-xs font-bold px-3 py-1.5 border border-slate-200 rounded-lg bg-white text-slate-600 hover:border-slate-400 cursor-pointer transition-all">Tea Rota</button>
+                    <button onclick="filterDepartment('sound')" class="filter-chip text-xs font-bold px-3 py-1.5 border border-slate-200 rounded-lg bg-white text-slate-600 hover:border-slate-400 cursor-pointer transition-all">Sound Rota</button>
+                    <button onclick="filterDepartment('hall')" class="filter-chip text-xs font-bold px-3 py-1.5 border border-slate-200 rounded-lg bg-white text-slate-600 hover:border-slate-400 cursor-pointer transition-all">Sports Hall Rota</button>
+                </div>
+
+                <!-- Admin Global Controls Console -->
+                <div id="admin-tools-panel" class="hidden bg-purple-50/70 border border-purple-200 p-4 rounded-2xl flex flex-wrap items-center justify-between gap-4">
+                    <div class="flex items-center gap-2">
+                        <span class="text-lg">🛠️</span>
+                        <div>
+                            <h4 class="text-xs font-extrabold text-purple-950 uppercase tracking-wider">Administrative Master Controls</h4>
+                            <p class="text-[11px] font-medium text-purple-700 leading-tight">Database schemas modifications can safely be initiated instantly.</p>
+                        </div>
+                    </div>
+                    <button onclick="triggerRegenerateSchedules()" class="bg-purple-700 hover:bg-purple-800 text-white font-bold text-xs px-3.5 py-1.5 rounded-xl cursor-pointer shadow-xs transition-colors">
+                        Re-Sync Table
+                    </button>
+                </div>
+
+                <!-- Target Data Output Cards Canvas Grid -->
+                <div id="master-cards-feed" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Cards loop injected via script engine execution -->
+                </div>
+            </div>
+
+            <!-- ROUTE B: PERSONALIZED USER MINISTRY ASSIGNMENTS -->
+            <div id="view-personal" class="view-content space-y-6">
+                <div class="bg-white p-6 rounded-2xl border border-gray-200/80 shadow-xs space-y-1">
+                    <h2 class="text-xl font-black text-slate-900 tracking-tight">My Ministry Schedule</h2>
+                    <p class="text-xs font-medium text-slate-400">Isolated shifts mapping to your identity string parameters.</p>
+                </div>
+                <div id="personal-cards-feed" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Personal items drop space -->
+                </div>
+            </div>
+
+            <!-- ROUTE C: OPEN COVERAGE DEVIATION SYSTEM HUB -->
+            <div id="view-swaps" class="view-content space-y-6">
+                <div class="bg-white p-6 rounded-2xl border border-gray-200/80 shadow-xs space-y-1">
+                    <h2 class="text-xl font-black text-slate-900 tracking-tight">Swaps Hub</h2>
+                    <p class="text-xs font-medium text-slate-400">Claim open structural system vacancies or offer shift coverages instantly.</p>
+                </div>
+                <div id="pool-forum-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Open pool slots container -->
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- ==========================================
+        GLOBAL OVERLAY: TRADING/SWAPPING DIALOG POPUP
+    ========================================== -->
+    <div id="swap-action-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs items-center justify-center p-4 z-50">
+        <div class="w-full max-w-md bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden flex flex-col animate-fadeIn">
+            <div class="bg-slate-50 px-5 py-4 border-b border-gray-100 flex justify-between items-center">
+                <div>
+                    <h3 class="text-sm font-black text-slate-900 tracking-tight">Modify Shift Assignment</h3>
+                    <p id="modal-origin-summary" class="text-[10px] font-bold text-slate-400 mt-0.5 uppercase tracking-wide"></p>
+                </div>
+                <button onclick="closeTradingModal()" class="text-slate-400 hover:text-slate-600 text-lg font-bold cursor-pointer">✕</button>
+            </div>
+            
+            <div class="p-5 space-y-4">
+                <div class="space-y-1">
+                    <label class="text-[10px] font-black uppercase tracking-wider text-slate-400">Current Assigned Personnel</label>
+                    <input id="modal-identity-field" type="text" readonly class="w-full text-xs font-bold bg-slate-100 text-slate-500 border border-slate-200 rounded-xl px-3 py-2 focus:outline-hidden">
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="text-[10px] font-black uppercase tracking-wider text-slate-400">Adjustment Operational Strategy</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="border border-gray-200 rounded-xl p-3 flex flex-col gap-1 cursor-pointer hover:bg-slate-50 transition-colors">
+                            <div class="flex items-center gap-2">
+                                <input type="radio" name="modal-strategy" value="direct" checked onchange="toggleModalFields()" class="accent-teal-600">
+                                <span class="text-xs font-extrabold text-slate-800">Direct Trade</span>
+                            </div>
+                            <span class="text-[10px] text-slate-400 font-medium pl-5 leading-tight">Swap with a peer on a different date</span>
+                        </label>
+                        <label class="border border-gray-200 rounded-xl p-3 flex flex-col gap-1 cursor-pointer hover:bg-slate-50 transition-colors">
+                            <div class="flex items-center gap-2">
+                                <input type="radio" name="modal-strategy" value="pool" onchange="toggleModalFields()" class="accent-teal-600">
+                                <span class="text-xs font-extrabold text-slate-800">Drop to Pool</span>
+                            </div>
+                            <span class="text-[10px] text-slate-400 font-medium pl-5 leading-tight">Vacate slot completely for open claim</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div id="modal-peer-select-wrapper" class="space-y-1">
+                    <label class="text-[10px] font-black uppercase tracking-wider text-slate-400">Select Peer Assignment Target Date</label>
+                    <select id="modal-peer-target-select" class="w-full text-xs font-bold bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-hidden focus:border-teal-500 transition-colors">
+                        <!-- Filled dynamically -->
+                    </select>
+                </div>
+            </div>
+
+            <div class="px-5 py-3.5 bg-slate-50 border-t border-gray-100 flex justify-end gap-2.5">
+                <button onclick="closeTradingModal()" class="px-3.5 py-1.5 border border-slate-200 hover:bg-slate-100 rounded-xl text-xs font-bold text-slate-600 transition-colors cursor-pointer">Cancel</button>
+                <button onclick="commitModalSwapRequest()" class="px-4 py-1.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-bold shadow-xs transition-colors cursor-pointer">Authorize Change</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ==========================================
+        7. CORE SCRIPT APPLICATION JAVASCRIPT ENGINE
+    ========================================== -->
+    <script>
         // ==========================================
         // 1. SUPABASE CONNECTION CONFIGURATION
         // ==========================================
@@ -12,7 +257,7 @@
 
         const SEED_KEYS = { member: 'craigavonbaptist2026', admin: 'cbcadmin2026!' };
 
-        // State now uses empty arrays that populate dynamically from your live database tables
+        // Runtime Global Management State Architecture
         let appState = {
             user: null,
             role: 'member',
@@ -23,6 +268,13 @@
         };
 
         let isSignUpMode = true;
+
+        // Helper to accurately parse structural "DD/MM/YYYY" string directly into native calendar Date instances
+        function parseRotaDateString(dateStr) {
+            const parts = dateStr.split('/');
+            if (parts.length !== 3) return new Date(0);
+            return new Date(parseInt(parts[2], 10), parseInt(parts[1], 10) - 1, parseInt(parts[0], 10));
+        }
 
         // ==========================================
         // 2. LIVE DATABASE DATABASE HOOKS (GET/PATCH)
@@ -40,21 +292,21 @@
                 if (error) throw error;
                 
                 if (data && data.length > 0) {
-                    // Sort rows by ID or Date string if necessary to keep order clean
+                    // Sort items rows cleanly by system architectural IDs strings
                     appState.schedules = data.sort((a, b) => a.id.localeCompare(b.id));
                     
-                    // Trigger UI re-renders with fresh database rows
+                    // Fire up asynchronous screen layout structural injections
                     renderMasterFeed();
                     renderPersonalFeed();
                     renderSwapsForum();
                 }
             } catch (err) {
-                console.error("Database connection failure:", err.message);
+                console.error("Database initialization fault:", err.message);
             }
         }
 
         async function pushLiveScheduleRowUpdate(rowId, targetRow) {
-            if (!supabaseClient) return true; // Fail silently if offline mode
+            if (!supabaseClient) return true; 
             try {
                 const { error } = await supabaseClient
                     .from('schedules')
@@ -170,7 +422,6 @@
                 document.getElementById('admin-tools-panel').classList.remove('hidden');
             }
 
-            // Sync database entries right as user gets access
             await fetchLiveSchedules();
         }
 
@@ -234,7 +485,7 @@
         }
 
         // ==========================================
-        // 5. INTERFACE RENDERING LOGIC
+        // 5. INTERFACE RENDERING LOGIC WITH ARCHIVING
         // ==========================================
         function renderMasterFeed() {
             const feed = document.getElementById('master-cards-feed');
@@ -244,6 +495,13 @@
                 feed.innerHTML = `<div class="col-span-full py-8 text-center text-slate-400 font-semibold">Loading shift rows from database...</div>`;
                 return;
             }
+
+            // Capture today's calendar runtime to sort out historical elements
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            let pastSchedulesHtml = '';
+            let upcomingCount = 0;
 
             appState.schedules.forEach(item => {
                 const categories = [
@@ -257,16 +515,9 @@
                 let matchesFilter = appState.activeTargetFilter === 'all' || categories.some(c => c.key === appState.activeTargetFilter);
                 if (!matchesFilter) return;
 
-                const card = document.createElement('div');
-                card.className = "bg-white rounded-2xl border border-gray-200 shadow-xs overflow-hidden flex flex-col";
-                
-                let headerHtml = `
-                    <div class="bg-slate-50 px-4 py-3 border-b border-gray-100 flex justify-between items-center">
-                        <span class="text-xs font-black text-slate-700 tracking-wide">${item.date}</span>
-                        <span class="text-[10px] bg-slate-200/70 text-slate-600 font-bold px-2 py-0.5 rounded-md">Sunday Service</span>
-                    </div>
-                    <div class="p-4 space-y-4 flex-1">
-                `;
+                // Compare rotation target date string to current database tracking instance
+                const cardDate = parseRotaDateString(item.date);
+                const isPastShift = cardDate < today;
 
                 let internalBlocksHtml = '';
 
@@ -277,35 +528,82 @@
                     const isVacantPool = item.pool && item.pool.includes(cat.key);
                     
                     let interactionMarkup = '';
-                    if (isVacantPool) {
-                        interactionMarkup = `
-                            <div class="mt-2 bg-red-50 border border-red-100 p-2 rounded-xl flex justify-between items-center text-xs font-bold text-red-700">
-                                <span>🚨 OPEN POOL VACANCY</span>
-                                <button class="bg-red-600 text-white text-[10px] px-2.5 py-1 rounded-lg cursor-pointer hover:bg-red-700 transition-all" onclick="claimOpenPoolSlot('${item.id}', '${cat.key}')">Claim</button>
-                            </div>`;
-                    } else if (appState.liveEditingEnabled) {
-                        interactionMarkup = `
-                            <button class="mt-1.5 w-full text-left bg-slate-50 hover:bg-teal-50 border border-slate-200 hover:border-teal-300 text-slate-500 hover:text-teal-700 text-[11px] font-bold py-1 px-2 rounded-lg transition-all flex items-center justify-between" onclick="openTradingModal('${item.id}', '${cat.key}', '${currentAssignee.replace(/'/g, "\\'")}')">
-                                <span>🔄 Request Trade / Swap</span>
-                                <span>→</span>
-                            </button>`;
+                    
+                    // Only attach dynamic interactive parameters if the rotation target is in the future
+                    if (!isPastShift) {
+                        if (isVacantPool) {
+                            interactionMarkup = `
+                                <div class="mt-2 bg-red-50 border border-red-100 p-2 rounded-xl flex justify-between items-center text-xs font-bold text-red-700">
+                                    <span>🚨 OPEN POOL VACANCY</span>
+                                    <button class="bg-red-600 text-white text-[10px] px-2.5 py-1 rounded-lg cursor-pointer hover:bg-red-700 transition-all" onclick="claimOpenPoolSlot('${item.id}', '${cat.key}')">Claim</button>
+                                </div>`;
+                        } else if (appState.liveEditingEnabled) {
+                            interactionMarkup = `
+                                <button class="mt-1.5 w-full text-left bg-slate-50 hover:bg-teal-50 border border-slate-200 hover:border-teal-300 text-slate-500 hover:text-teal-700 text-[11px] font-bold py-1 px-2 rounded-lg transition-all flex items-center justify-between" onclick="openTradingModal('${item.id}', '${cat.key}', '${currentAssignee.replace(/'/g, "\\'")}')">
+                                    <span>🔄 Request Trade / Swap</span>
+                                    <span>→</span>
+                                </button>`;
+                        }
                     }
 
                     internalBlocksHtml += `
-                        <div class="border-l-3 border-teal-500 pl-3 py-0.5">
+                        <div class="border-l-3 ${isPastShift ? 'border-gray-300' : 'border-teal-500'} pl-3 py-0.5">
                             <div class="flex items-center gap-1.5">
                                 <span class="text-xs">${cat.icon}</span>
                                 <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">${cat.label}</span>
                             </div>
-                            <p class="text-xs sm:text-sm font-semibold text-slate-800 mt-0.5 leading-tight">${currentAssignee}</p>
+                            <p class="text-xs sm:text-sm font-semibold ${isPastShift ? 'text-slate-500 line-through' : 'text-slate-800'} mt-0.5 leading-tight">${currentAssignee}</p>
                             ${interactionMarkup}
                         </div>
                     `;
                 });
 
-                card.innerHTML = headerHtml + internalBlocksHtml + '</div>';
-                feed.appendChild(card);
+                const fullCardHtml = `
+                    <div class="${isPastShift ? 'bg-slate-50/70 border border-dashed border-gray-200 opacity-60' : 'bg-white border border-gray-200 shadow-xs'} rounded-2xl overflow-hidden flex flex-col">
+                        <div class="${isPastShift ? 'bg-slate-200/50' : 'bg-slate-50'} px-4 py-3 border-b border-gray-100 flex justify-between items-center">
+                            <span class="text-xs font-black text-slate-700 tracking-wide">${item.date}</span>
+                            <span class="text-[10px] ${isPastShift ? 'bg-slate-300 text-slate-600' : 'bg-slate-200/70 text-slate-600'} font-bold px-2 py-0.5 rounded-md">${isPastShift ? 'Archived' : 'Sunday Service'}</span>
+                        </div>
+                        <div class="p-4 space-y-4 flex-1">
+                            ${internalBlocksHtml}
+                        </div>
+                    </div>
+                `;
+
+                if (isPastShift) {
+                    pastSchedulesHtml += fullCardHtml;
+                } else {
+                    upcomingCount++;
+                    const wrapper = document.createElement('div');
+                    wrapper.innerHTML = fullCardHtml;
+                    feed.appendChild(wrapper.firstElementChild);
+                }
             });
+
+            if (upcomingCount === 0) {
+                feed.innerHTML = `<div class="col-span-full py-6 text-center text-xs font-semibold text-slate-400">No active upcoming shifts match current selected parameters.</div>`;
+            }
+
+            // Append Collapsible Historical Container below the fold if past elements are populated
+            if (pastSchedulesHtml !== '') {
+                const archiveDivider = document.createElement('div');
+                archiveDivider.className = "col-span-full mt-12 border-t border-gray-200 pt-6";
+                archiveDivider.innerHTML = `
+                    <details class="group cursor-pointer">
+                        <summary class="flex items-center justify-between text-sm font-bold text-slate-500 hover:text-slate-800 list-none transition-colors">
+                            <div class="flex items-center gap-2">
+                                <span>📂</span>
+                                <span>Show Completed Past Schedules</span>
+                            </div>
+                            <span class="text-xs transition-transform duration-200 group-open:rotate-180">▼</span>
+                        </summary>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6 cursor-default animate-fadeIn">
+                            ${pastSchedulesHtml}
+                        </div>
+                    </details>
+                `;
+                feed.appendChild(archiveDivider);
+            }
         }
 
         function renderPersonalFeed() {
@@ -324,8 +622,13 @@
             ];
 
             let count = 0;
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
 
             appState.schedules.forEach(item => {
+                // Ensure personal view also respects historical archiving
+                if (parseRotaDateString(item.date) < today) return;
+
                 categories.forEach(cat => {
                     const assignedText = item[cat.key];
                     const isVacant = item.pool && item.pool.includes(cat.key);
@@ -368,8 +671,13 @@
             const catIcons = { worship: '🎵', kids: '👶', tea: '☕', sound: '🎛️', hall: '🏀' };
             
             let poolCount = 0;
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
 
             appState.schedules.forEach(item => {
+                // Ignore vacant pool items if their service date has passed
+                if (parseRotaDateString(item.date) < today) return;
+
                 if (!item.pool) return;
                 item.pool.forEach(catKey => {
                     poolCount++;
@@ -420,9 +728,14 @@
             document.getElementById('modal-origin-summary').innerText = `[${appState.schedules.find(s => s.id === rowId).date}] — Mode: ${catKey.toUpperCase()}`;
             document.getElementById('modal-identity-field').value = currentAssignee;
             
+            // Only suggest trade-matching dates that are in the future
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
             targetSelect.innerHTML = '';
             appState.schedules.forEach(s => {
-                if(s.id !== rowId && s[catKey] !== "Leave Blank / Unassigned") {
+                const targetDateObject = parseRotaDateString(s.date);
+                if(s.id !== rowId && s[catKey] !== "Leave Blank / Unassigned" && targetDateObject >= today) {
                     const option = document.createElement('option');
                     option.value = `${s.id}|${catKey}`;
                     option.innerText = `${s.date} — Current Holder: ${s[catKey]}`;
@@ -478,12 +791,12 @@
                 const [peerRowId, peerCatKey] = selectVal.split('|');
                 const peerRow = appState.schedules.find(s => s.id === peerRowId);
                 
-                // Swap strings 
+                // Swap assignments strings 
                 const temp = targetRow[catKey];
                 targetRow[catKey] = peerRow[peerCatKey];
                 peerRow[peerCatKey] = temp;
                 
-                // Update both affected rows in Supabase
+                // Push both modified structural parameters straight up to Supabase
                 const success1 = await pushLiveScheduleRowUpdate(rowId, targetRow);
                 const success2 = await pushLiveScheduleRowUpdate(peerRowId, peerRow);
                 
@@ -522,3 +835,5 @@
             }
         }
     </script>
+</body>
+</html>
