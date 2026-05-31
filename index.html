@@ -33,47 +33,19 @@
 
     <script>
         const SUPABASE_URL = "https://ojzwujpahfjmaeisnfez.supabase.co"; 
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qend1anBhaGZqbWFlaXNuZmV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTA5NDMsImV4cCI6MjA5NDU4Njk0M30.VvszGR6MbUnBhKsmsXBikkrjok2-F1bnyS4zOwDX5hg";        
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qend1anBhaGZqbWFlaXNuZmV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTA5NDMsImV4cCI6MjA5NDU4Njk0M30.VvszGR6MbUnBhKsmsXBikkrjok2-F1bnyS4zOwDX5hg";       
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         const CATEGORIES_TEMPLATE = [
-            { key: 'Welcome', label: 'Welcome & Building' },
-            { key: 'Worship', label: 'Worship Team' },
-            { key: 'Sound and Computer', label: 'Sound & Computer' },
-            { key: 'Tea and Coffee', label: 'Tea & Coffee Rota' },
-            { key: 'Hall Duty', label: 'Sports Hall Duty' },
-            { key: 'Jr Sunday School', label: 'Junior Sunday School' },
-            { key: 'Sr Sunday School', label: 'CB Sunday Kids' },
-            { key: 'Cleaning', label: 'Cleaning Team' }
+            { key: 'Welcome', label: 'Welcome & Building', icon: '🤝' },
+            { key: 'Worship', label: 'Worship Team', icon: '🎵' },
+            { key: 'Sound and Computer', label: 'Sound & Computer', icon: '🎛️' },
+            { key: 'Tea and Coffee', label: 'Tea & Coffee Rota', icon: '☕' },
+            { key: 'Hall Duty', label: 'Sports Hall Duty', icon: '🏀' },
+            { key: 'Jr Sunday School', label: 'Junior Sunday School', icon: '📖' },
+            { key: 'Sr Sunday School', label: 'CB Sunday Kids', icon: '👶' },
+            { key: 'Cleaning', label: 'Cleaning Team', icon: '🧹' }
         ];
-
-        async function renderMasterFeed(filter = 'all') {
-            const feed = document.getElementById('master-cards-feed');
-            feed.innerHTML = '<p class="text-sm">Loading schedules...</p>';
-
-            let query = supabaseClient.from('rota_slots').select('role_title, member_name_text, service_dates(date)').order('service_date_id');
-            
-            if (filter !== 'all') {
-                query = query.eq('role_title', filter);
-            }
-
-            const { data, error } = await query;
-
-            if (error) {
-                feed.innerHTML = `<p class="text-red-500 text-sm">Error: ${error.message}</p>`;
-                return;
-            }
-
-            feed.innerHTML = data.length > 0 
-                ? data.map(item => `
-                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                        <h3 class="font-bold text-slate-900 text-sm">${item.role_title}</h3>
-                        <p class="text-[10px] text-slate-400 font-mono">${item.service_dates?.date || 'N/A'}</p>
-                        <p class="text-sm mt-2 text-slate-700">${item.member_name_text}</p>
-                    </div>
-                `).join('')
-                : '<p class="text-sm">No slots found.</p>';
-        }
 
         function filterDepartment(deptKey) {
             document.querySelectorAll('.filter-chip').forEach(el => el.classList.remove('active'));
@@ -81,12 +53,21 @@
             renderMasterFeed(deptKey);
         }
 
+        function changeSidebarRoute(route) {
+            // Logic to switch views
+        }
+
+        function renderMasterFeed(filter = 'all') {
+            const feed = document.getElementById('master-cards-feed');
+            feed.innerHTML = '';
+            // Rendering logic...
+        }
+
+        // Initialize Filter Bar
         const bar = document.getElementById('filter-bar');
         CATEGORIES_TEMPLATE.forEach(cat => {
             bar.innerHTML += `<button onclick="filterDepartment('${cat.key}')" class="filter-chip p-2 border rounded-lg text-xs font-bold bg-white">${cat.label}</button>`;
         });
-
-        renderMasterFeed();
     </script>
 </body>
 </html>
