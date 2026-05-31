@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Craigavon Baptist Church — Multi-Rota Terminal</title>
-    <!-- Tailwind CSS Engine CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <!-- Supabase Client Engine Library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         .view-content { display: none; }
@@ -25,9 +23,6 @@
 </head>
 <body class="bg-slate-100 font-sans antialiased text-slate-800">
 
-    <!-- ==========================================
-        SCREEN 1: AUTHENTICATION ENTRANCE TERMINAL
-    ========================================== -->
     <div id="auth-screen" class="min-h-screen flex items-center justify-center p-4 sm:p-6 bg-slate-900">
         <div class="w-full max-w-md bg-white rounded-3xl shadow-xl border border-slate-200/60 p-6 sm:p-8 space-y-6">
             <div class="text-center space-y-2">
@@ -65,15 +60,10 @@
         </div>
     </div>
 
-    <!-- ==========================================
-        SCREEN 2: CORE DASHBOARD APPLICATION APPARATUS
-    ========================================== -->
     <div id="app-screen" class="hidden min-h-screen flex flex-col md:flex-row">
         
-        <!-- SIDEBAR NAVIGATION PANEL -->
         <aside class="w-full md:w-64 bg-slate-900 text-slate-300 flex flex-col justify-between p-4 border-r border-slate-800 shrink-0">
             <div class="space-y-8">
-                <!-- App Identity Header -->
                 <div class="flex items-center gap-3 px-2">
                     <div class="w-10 h-10 bg-teal-600 rounded-xl flex items-center justify-center text-xl shadow-xs">
                         ⛪
@@ -84,7 +74,6 @@
                     </div>
                 </div>
 
-                <!-- Navigation Tabs Links -->
                 <nav class="space-y-1.5">
                     <button id="nav-master" onclick="changeSidebarRoute('master')" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold tracking-wide transition-all bg-slate-800 text-white cursor-pointer">
                         <span>📊</span> Master Grid
@@ -98,7 +87,6 @@
                 </nav>
             </div>
 
-            <!-- Profile Badge Footer Block -->
             <div class="border-t border-slate-800 pt-4 mt-6 space-y-3">
                 <div class="px-2">
                     <span class="text-[9px] font-black tracking-widest text-slate-500 uppercase block">Logged Session Profile</span>
@@ -113,10 +101,8 @@
             </div>
         </aside>
 
-        <!-- MAIN VIEW CONTENT PANELS SPACE -->
         <main class="flex-1 p-4 sm:p-8 overflow-y-auto max-w-7xl mx-auto w-full">
             
-            <!-- ROUTE A: MASTER OVERVIEW SCHEDULING INTERFACE -->
             <div id="view-master" class="view-content active space-y-6">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-gray-200/80 shadow-xs">
                     <div class="space-y-1">
@@ -130,7 +116,6 @@
                     </div>
                 </div>
 
-                <!-- Department Filtering Selector Row -->
                 <div class="flex flex-wrap items-center gap-2">
                     <button onclick="filterDepartment('all')" class="filter-chip active text-xs font-bold px-3 py-1.5 border border-slate-200 rounded-lg bg-white text-slate-600 hover:border-slate-400 cursor-pointer transition-all">Show All</button>
                     <button onclick="filterDepartment('worship')" class="filter-chip text-xs font-bold px-3 py-1.5 border border-slate-200 rounded-lg bg-white text-slate-600 hover:border-slate-400 cursor-pointer transition-all">Music Team</button>
@@ -140,7 +125,6 @@
                     <button onclick="filterDepartment('hall')" class="filter-chip text-xs font-bold px-3 py-1.5 border border-slate-200 rounded-lg bg-white text-slate-600 hover:border-slate-400 cursor-pointer transition-all">Sports Hall Rota</button>
                 </div>
 
-                <!-- Admin Global Controls Console -->
                 <div id="admin-tools-panel" class="hidden bg-purple-50/70 border border-purple-200 p-4 rounded-2xl flex flex-wrap items-center justify-between gap-4">
                     <div class="flex items-center gap-2">
                         <span class="text-lg">🛠️</span>
@@ -154,40 +138,32 @@
                     </button>
                 </div>
 
-                <!-- Target Data Output Cards Canvas Grid -->
                 <div id="master-cards-feed" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Cards loop injected via script engine execution -->
+                    <div class="col-span-full py-8 text-center text-slate-400 font-semibold">Loading shift rows from database...</div>
                 </div>
             </div>
 
-            <!-- ROUTE B: PERSONALIZED USER MINISTRY ASSIGNMENTS -->
             <div id="view-personal" class="view-content space-y-6">
                 <div class="bg-white p-6 rounded-2xl border border-gray-200/80 shadow-xs space-y-1">
                     <h2 class="text-xl font-black text-slate-900 tracking-tight">My Ministry Schedule</h2>
                     <p class="text-xs font-medium text-slate-400">Isolated shifts mapping to your identity string parameters.</p>
                 </div>
                 <div id="personal-cards-feed" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Personal items drop space -->
-                </div>
+                    </div>
             </div>
 
-            <!-- ROUTE C: OPEN COVERAGE DEVIATION SYSTEM HUB -->
             <div id="view-swaps" class="view-content space-y-6">
                 <div class="bg-white p-6 rounded-2xl border border-gray-200/80 shadow-xs space-y-1">
                     <h2 class="text-xl font-black text-slate-900 tracking-tight">Swaps Hub</h2>
                     <p class="text-xs font-medium text-slate-400">Claim open structural system vacancies or offer shift coverages instantly.</p>
                 </div>
                 <div id="pool-forum-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Open pool slots container -->
-                </div>
+                    </div>
             </div>
 
         </main>
     </div>
 
-    <!-- ==========================================
-        GLOBAL OVERLAY: TRADING/SWAPPING DIALOG POPUP
-    ========================================== -->
     <div id="swap-action-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs items-center justify-center p-4 z-50">
         <div class="w-full max-w-md bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden flex flex-col animate-fadeIn">
             <div class="bg-slate-50 px-5 py-4 border-b border-gray-100 flex justify-between items-center">
@@ -227,8 +203,7 @@
                 <div id="modal-peer-select-wrapper" class="space-y-1">
                     <label class="text-[10px] font-black uppercase tracking-wider text-slate-400">Select Peer Assignment Target Date</label>
                     <select id="modal-peer-target-select" class="w-full text-xs font-bold bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 focus:outline-hidden focus:border-teal-500 transition-colors">
-                        <!-- Filled dynamically -->
-                    </select>
+                        </select>
                 </div>
             </div>
 
@@ -240,20 +215,14 @@
     </div>
 
 
-    <!-- ==========================================
-        7. CORE SCRIPT APPLICATION JAVASCRIPT ENGINE
-    ========================================== -->
     <script>
         // ==========================================
-        // 1. SUPABASE CONNECTION CONFIGURATION
+        // 1. SUPABASE CONNECTION CONFIGURATION (LIVE MAPPED)
         // ==========================================
-        const SUPABASE_URL = "https://your-supabase-project.supabase.co"; // Replace with your real Supabase Project URL
-        const SUPABASE_ANON_KEY = "your-anon-public-api-key-here";       // Replace with your real Project Anon API Key
+        const SUPABASE_URL = "https://ojzwujpahfjmaeisnfez.supabase.co"; 
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qend1anBhaGZqbWFlaXNuZmV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTA5NDMsImV4cCI6MjA5NDU4Njk0M30.VvszGR6MbUnBhKsmsXBikkrjok2-F1bnyS4zOwDX5hg";       
         
-        let supabaseClient = null;
-        if (SUPABASE_URL !== "https://your-supabase-project.supabase.co") {
-            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        }
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         const SEED_KEYS = { member: 'craigavonbaptist2026', admin: 'cbcadmin2026!' };
 
@@ -280,10 +249,6 @@
         // 2. LIVE DATABASE DATABASE HOOKS (GET/PATCH)
         // ==========================================
         async function fetchLiveSchedules() {
-            if (!supabaseClient) {
-                console.log("Supabase not fully configured yet. Operating in local-offline mock mode.");
-                return;
-            }
             try {
                 const { data, error } = await supabaseClient
                     .from('schedules')
@@ -306,7 +271,6 @@
         }
 
         async function pushLiveScheduleRowUpdate(rowId, targetRow) {
-            if (!supabaseClient) return true; 
             try {
                 const { error } = await supabaseClient
                     .from('schedules')
@@ -379,32 +343,24 @@
                     return;
                 }
 
-                if (supabaseClient) {
-                    try {
-                        const { data, error } = await supabaseClient.auth.signUp({
-                            email, password, options: { data: { role: roleAssigned } }
-                        });
-                        if (error) throw error;
-                        await executeEntrySequence(email, roleAssigned);
-                    } catch (err) {
-                        errorDiv.innerText = `Database Fault: ${err.message}`;
-                        errorDiv.classList.remove('hidden');
-                    }
-                } else {
+                try {
+                    const { data, error } = await supabaseClient.auth.signUp({
+                        email, password, options: { data: { role: roleAssigned } }
+                    });
+                    if (error) throw error;
                     await executeEntrySequence(email, roleAssigned);
+                } catch (err) {
+                    errorDiv.innerText = `Database Fault: ${err.message}`;
+                    errorDiv.classList.remove('hidden');
                 }
             } else {
-                if (supabaseClient) {
-                    try {
-                        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-                        if (error) throw error;
-                        await executeEntrySequence(email, data.user.user_metadata?.role || 'member');
-                    } catch (err) {
-                        errorDiv.innerText = `Sign In Fault: ${err.message}`;
-                        errorDiv.classList.remove('hidden');
-                    }
-                } else {
-                    await executeEntrySequence(email, email.includes('admin') ? 'admin' : 'member');
+                try {
+                    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+                    if (error) throw error;
+                    await executeEntrySequence(email, data.user.user_metadata?.role || 'member');
+                } catch (err) {
+                    errorDiv.innerText = `Sign In Fault: ${err.message}`;
+                    errorDiv.classList.remove('hidden');
                 }
             }
         });
@@ -453,6 +409,7 @@
             });
         }
 
+        // Departmental view modifications routing
         function filterDepartment(deptKey) {
             appState.activeTargetFilter = deptKey;
             document.querySelectorAll('.filter-chip').forEach(chip => {
@@ -496,7 +453,7 @@
                 return;
             }
 
-            // Capture today's calendar runtime to sort out historical elements
+            // Real-time structural evaluation comparison anchor 
             const today = new Date();
             today.setHours(0, 0, 0, 0);
 
@@ -515,7 +472,7 @@
                 let matchesFilter = appState.activeTargetFilter === 'all' || categories.some(c => c.key === appState.activeTargetFilter);
                 if (!matchesFilter) return;
 
-                // Compare rotation target date string to current database tracking instance
+                // Dynamic comparison matrix parsing 
                 const cardDate = parseRotaDateString(item.date);
                 const isPastShift = cardDate < today;
 
@@ -529,7 +486,7 @@
                     
                     let interactionMarkup = '';
                     
-                    // Only attach dynamic interactive parameters if the rotation target is in the future
+                    // Interaction controls are strictly stripped off historical assignments
                     if (!isPastShift) {
                         if (isVacantPool) {
                             interactionMarkup = `
@@ -626,7 +583,7 @@
             today.setHours(0, 0, 0, 0);
 
             appState.schedules.forEach(item => {
-                // Ensure personal view also respects historical archiving
+                // Historical filters are applied uniformly to personal view
                 if (parseRotaDateString(item.date) < today) return;
 
                 categories.forEach(cat => {
@@ -675,7 +632,7 @@
             today.setHours(0, 0, 0, 0);
 
             appState.schedules.forEach(item => {
-                // Ignore vacant pool items if their service date has passed
+                // Ignore expired vacant slots
                 if (parseRotaDateString(item.date) < today) return;
 
                 if (!item.pool) return;
@@ -728,7 +685,7 @@
             document.getElementById('modal-origin-summary').innerText = `[${appState.schedules.find(s => s.id === rowId).date}] — Mode: ${catKey.toUpperCase()}`;
             document.getElementById('modal-identity-field').value = currentAssignee;
             
-            // Only suggest trade-matching dates that are in the future
+            // Only suggest upcoming dates for potential trading targets
             const today = new Date();
             today.setHours(0, 0, 0, 0);
 
@@ -791,12 +748,12 @@
                 const [peerRowId, peerCatKey] = selectVal.split('|');
                 const peerRow = appState.schedules.find(s => s.id === peerRowId);
                 
-                // Swap assignments strings 
+                // Swap strings 
                 const temp = targetRow[catKey];
                 targetRow[catKey] = peerRow[peerCatKey];
                 peerRow[peerCatKey] = temp;
                 
-                // Push both modified structural parameters straight up to Supabase
+                // Push mutations dynamically to Supabase
                 const success1 = await pushLiveScheduleRowUpdate(rowId, targetRow);
                 const success2 = await pushLiveScheduleRowUpdate(peerRowId, peerRow);
                 
