@@ -1,37 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <title>Rota Terminal</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-    <div id="debug" style="font-family: sans-serif; font-size: 20px; padding: 20px;">
-        Starting...
+    <div id="debug" style="font-family: sans-serif; padding: 20px;">
+        Connecting...
     </div>
 
     <script>
-        window.onload = async () => {
+        // Wait for the window to load fully
+        window.addEventListener('load', async () => {
             const display = document.getElementById('debug');
+            
+            // Check if supabase library loaded
+            if (typeof supabase === 'undefined') {
+                display.innerText = "Error: Supabase library failed to load.";
+                return;
+            }
+
             const SUPABASE_URL = "https://ojzwujpahfjmaeisnfez.supabase.co";
             const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qend1anBhaGZqbWFlaXNuZmV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTA5NDMsImV4cCI6MjA5NDU4Njk0M30.VvszGR6MbUnBhKsmsXBikkrjok2-F1bnyS4zOwDX5hg";
 
             try {
-                const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                display.innerText = "Attempting to fetch data...";
+                const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                display.innerText = "Fetching data...";
                 
-                const { data, error } = await supabase.from('rota_slots').select('*');
+                const { data, error } = await client.from('rota_slots').select('*');
                 
                 if (error) {
-                    display.innerText = "Error: " + error.message;
-                } else if (!data || data.length === 0) {
-                    display.innerText = "Connected, but no data found in 'rota_slots'.";
+                    display.innerText = "Database Error: " + error.message;
                 } else {
-                    display.innerText = "Success! Found " + data.length + " rows.";
-                    console.log(data); // View this in your browser console
+                    display.innerText = "Success! Found " + data.length + " entries.";
+                    console.log("Your data:", data);
                 }
             } catch (err) {
-                display.innerText = "Fatal: " + err.message;
+                display.innerText = "System Error: " + err.message;
             }
-        };
+        });
     </script>
 </body>
 </html>
