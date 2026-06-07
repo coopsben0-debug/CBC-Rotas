@@ -487,7 +487,11 @@
             data.forEach(slot => {
                 let currentName = slot.rota_name;
                 
-                // Normalization cleanup rules for layout groups
+                /* --- OPTIONAL DATA NORMALIZATION BLOCK ---
+                  If your new database configuration directly stores final clean names 
+                  (like "Welcome Team", "Music Team", etc.), you can safely leave this block as is 
+                  or remove it entirely. It acts as an override helper for legacy layouts.
+                */
                 if (currentName === "Welcome & Preparation" || currentName === "Welcome and Preparation") {
                     if (slot.role.toLowerCase().includes("communion") || slot.role.toLowerCase().includes("table")) {
                         currentName = "Communion & Table Preparation";
@@ -679,18 +683,6 @@
                 singleDateHtmlBlock += `</div>`;
                 contentArea.innerHTML += singleDateHtmlBlock;
             });
-        }
-
-        // --- MODAL CONFIGURATION DRIVER ---
-        function openEditModal(id, currentNames, needsCover, story, verse, notes) {
-            document.getElementById('edit-slot-id').value = id;
-            document.getElementById('edit-names').value = currentNames;
-            document.getElementById('edit-cover-checkbox').checked = needsCover;
-            document.getElementById('edit-story').value = story;
-            document.getElementById('edit-verse').value = verse;
-            document.getElementById('edit-notes').value = notes;
-
-            document.getElementById('edit-modal').style.display = 'flex';
         }
 
         // --- MODAL CONFIGURATION DRIVER ---
