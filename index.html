@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CBC Rota Terminal</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <title>Craigavon Baptist Rota</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="bg-slate-50 text-slate-900 pb-10">
@@ -17,15 +17,16 @@
     </main>
 
     <script>
+        // Supabase configuration
         const SUPABASE_URL = "https://ojzwujpahfjmaeisnfez.supabase.co";
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qend1anBhaGZqbWFlaXNuZmV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTA5NDMsImV4cCI6MjA5NDU4Njk0M30.VvszGR6MbUnBhKsmsXBikkrjok2-F1bnyS4zOwDX5hg";
         const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         async function fetchRota() {
-            // Get today's date in YYYY-MM-DD
             const today = new Date().toISOString().split('T')[0];
             
             // Querying the primary rota_slots table joined with service_dates
+            // Ensure you have established a Foreign Key relationship between these tables in Supabase
             const { data, error } = await supabase
                 .from('rota_slots')
                 .select('role_title, member_name_text, service_dates(date)')
@@ -42,7 +43,7 @@
                 return;
             }
 
-            // Group data by date
+            // Group data by date to keep roles together under one Sunday card
             const grouped = data.reduce((acc, slot) => {
                 const date = slot.service_dates?.date || 'Unknown Date';
                 if (!acc[date]) acc[date] = [];
@@ -50,7 +51,7 @@
                 return acc;
             }, {});
 
-            // Render cards grouped by Sunday
+            // Render the cards
             const container = document.getElementById('rota-container');
             container.innerHTML = Object.keys(grouped).map(date => `
                 <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
