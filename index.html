@@ -2,40 +2,70 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Craigavon Baptist Rota</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="bg-slate-50 p-4">
-    <div id="rota-container" class="max-w-md mx-auto">Loading...</div>
+<body class="bg-slate-50 text-slate-900 pb-10">
+    <nav class="bg-slate-900 text-white p-4 shadow-md sticky top-0">
+        <h1 class="font-black text-lg">Craigavon Baptist Rota</h1>
+    </nav>
+
+    <main id="rota-container" class="max-w-xl mx-auto p-4 space-y-4">
+        <p class="text-center text-slate-500 py-10" id="status-message">Loading schedule...</p>
+    </main>
+
     <script>
-        const supabase = supabase.createClient(
-            "https://ojzwujpahfjmaeisnfez.supabase.co", 
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qend1anBhaGZqbWFlaXNuZmV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTA5NDMsImV4cCI6MjA5NDU4Njk0M30.VvszGR6MbUnBhKsmsXBikkrjok2-F1bnyS4zOwDX5hg"
-        );
+        // REPLACE THIS KEY WITH YOUR NEWLY GENERATED SUPABASE ANON KEY
+        const SUPABASE_URL = "https://ojzwujpahfjmaeisnfez.supabase.co";
+        const SUPABASE_ANON_KEY = "PASTE_YOUR_NEW_GENERATED_KEY_HERE";
+
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         async function fetchRota() {
-            const { data, error } = await supabase
-                .from('rota_slots')
-                .select('role_title, member_name_text, member_email, service_dates(date)');
-            
-            if (error) { 
-                document.getElementById('rota-container').innerHTML = `<p class="text-red-500">Error: ${error.message}</p>`; 
-                console.error(error);
-                return; 
+            try {
+                const { data, error } = await supabase
+                    .from('rota_slots')
+                    .select('role_title, member_name_text, member_email, service_dates(date)');
+
+                if (error) throw error;
+
+                if (!data || data.length === 0) {
+                    document.getElementById('status-message').innerText = "No slots found.";
+                    return;
+                }
+
+                const grouped = data.reduce((acc, slot) => {
+                    const date = slot.service_dates?.date;
+                    if (!date) return acc;
+                    if (!acc[date]) acc[date] = [];
+                    acc[date].push(slot);
+                    return acc;
+                }, {});
+
+                document.getElementById('rota-container').innerHTML = Object.keys(grouped).sort().map(date => `
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+                        <h2 class="font-black text-lg mb-4 text-blue-700 border-b pb-2">
+                            ${new Date(date).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}
+                        </h2>
+                        <div class="space-y-3">
+                            ${grouped[date].map(s => `
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <p class="text-[9px] font-black uppercase text-slate-400 tracking-wider">${s.role_title}</p>
+                                        <p class="font-semibold text-slate-800 text-sm">${s.member_name_text}</p>
+                                        <a href="mailto:${s.member_email}" class="text-[10px] text-blue-500 underline">${s.member_email || ''}</a>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                document.getElementById('rota-container').innerHTML = `<p class="text-red-500 p-4">Error: ${err.message}</p>`;
+                console.error("Supabase Connection Error:", err);
             }
-            
-            if (!data || data.length === 0) { 
-                document.getElementById('rota-container').innerText = "No data found."; 
-                return; 
-            }
-            
-            document.getElementById('rota-container').innerHTML = data.map(s => `
-                <div class="bg-white p-4 border rounded shadow-sm mb-2">
-                    <p class="font-bold text-blue-700">${s.service_dates?.date || 'No Date'}</p>
-                    <p class="font-semibold text-sm">${s.role_title}: ${s.member_name_text}</p>
-                    <a href="mailto:${s.member_email}" class="text-xs text-slate-500 underline">${s.member_email}</a>
-                </div>
-            `).join('');
         }
         fetchRota();
     </script>
