@@ -459,7 +459,7 @@
             }
         }
 
-        // --- FETCH ENGINE WITH 1:1 DATE MATCHING ---
+        // --- FETCH ENGINE WITH FIXED SCHEMA MAPPINGS ---
         async function fetchUpcomingRotas() {
             const contentArea = document.getElementById('content-area');
             contentArea.innerHTML = "<p style='text-align:center;'>Loading rota registers...</p>";
@@ -470,7 +470,6 @@
             const dd = String(localDate.getDate()).padStart(2, '0');
             const todayBoundaryStr = `${yyyy}-${mm}-${dd}`;
 
-            // TARGET FIXED: Now points to 'rotas' and filters/orders by 'date' column
             const { data, error } = await db
                 .from('rotas')
                 .select('*')
@@ -488,7 +487,7 @@
                 let currentName = slot.rota_name;
                 
                 if (currentName === "Welcome & Preparation" || currentName === "Welcome and Preparation") {
-                    if (slot.role && slot.role.toLowerCase().includes("communion") || slot.role.toLowerCase().includes("table")) {
+                    if (slot.role && (slot.role.toLowerCase().includes("communion") || slot.role.toLowerCase().includes("table"))) {
                         currentName = "Communion & Table Preparation";
                     } else {
                         currentName = "Welcome Team";
@@ -497,7 +496,7 @@
 
                 cleanedRecords.push({
                     ...slot,
-                    slot_date: slot.date, // SCHEMA MAPPING FIX: Safely aliases 'date' column to UI's internal reference
+                    slot_date: slot.date, 
                     rota_name: currentName,
                     tracking_id: slot.id
                 });
@@ -520,8 +519,9 @@
                 return;
             }
 
+            // SCHEMA FIX: Look inside assigned_person column
             const matchedSlots = globalRotaData.filter(slot => 
-                slot.assigned_names && slot.assigned_names.toLowerCase().includes(searchName)
+                slot.assigned_person && slot.assigned_person.toLowerCase().includes(searchName)
             );
 
             container.innerHTML = "";
@@ -539,7 +539,7 @@
                     weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'
                 });
 
-                let contextLine = slot.notes || slot.details || '';
+                let contextLine = slot.notes || slot.details || slot.focus_context || '';
                 if (slot.story) contextLine = `Story: ${slot.story}`;
 
                 const item = document.createElement('div');
@@ -588,7 +588,7 @@
         // --- GRID RENDER GENERATION ENGINE ---
         function renderFilteredView(view) {
             const contentArea = document.getElementById('content-area');
-            contentArea.innerHTML = '';
+            contentArea.innerHTML = ''; // Fixed: Clears layout immediately to prevent duplication bugs
 
             let filtered = globalRotaData;
             if (view !== "Main") {
@@ -650,14 +650,15 @@
                                     <strong>📖 Story:</strong> ${slot.story || 'TBD'}<br>
                                     <strong>🎯 Verse:</strong> ${slot.memory_verse || 'TBD'}
                                 </div>`;
-                        } else if (slot.notes || slot.details) {
-                            coreDetailsDisplay = `<div class="details-box"><strong>📌 Note:</strong> ${slot.notes || slot.details}</div>`;
+                        } else if (slot.focus_context || slot.notes || slot.details) {
+                            coreDetailsDisplay = `<div class="details-box"><strong>📌 Note:</strong> ${slot.focus_context || slot.notes || slot.details}</div>`;
                         }
 
+                        // SCHEMA FIX: slot.assigned_names changed to slot.assigned_person
                         singleDateHtmlBlock += `
                             <tr class="${rowStatusClass}">
                                 <td><strong>${slot.role}</strong></td>
-                                <td>${slot.assigned_names || '<em style="color:var(--cb-alert);">Vacant Input</em>'}</td>
+                                <td>${slot.assigned_person || '<em style="color:var(--cb-alert);">Vacant Input</em>'}</td>
                                 <td>${coreDetailsDisplay}</td>
                                 <td style="text-align: right;">
                                     ${slot.needs_cover ? '<span class="alert-badge">Needs Cover</span><br>' : ''}
@@ -682,12 +683,13 @@
             const slot = globalRotaData.find(item => item.id === id);
             if (!slot) return;
 
+            // SCHEMA FIX: Reads from slot.assigned_person
             document.getElementById('edit-slot-id').value = slot.id;
-            document.getElementById('edit-names').value = slot.assigned_names || '';
+            document.getElementById('edit-names').value = slot.assigned_person || '';
             document.getElementById('edit-cover-checkbox').checked = slot.needs_cover || false;
             document.getElementById('edit-story').value = slot.story || '';
             document.getElementById('edit-verse').value = slot.memory_verse || '';
-            document.getElementById('edit-notes').value = slot.notes || slot.details || '';
+            document.getElementById('edit-notes').value = slot.focus_context || slot.notes || slot.details || '';
 
             const isSundaySchool = slot.rota_name.toLowerCase().includes("sunday school") || slot.rota_name.toLowerCase().includes("sunday kids");
             document.getElementById('modal-story-group').style.display = isSundaySchool ? 'block' : 'none';
@@ -713,14 +715,15 @@
                 return;
             }
 
-            // TARGET FIXED: Pointed mutation target to 'rotas'
+            // SCHEMA FIX: Mutates assigned_person and updates focus_context field cleanly
             const { error } = await db
                 .from('rotas')
                 .update({ 
-                    assigned_names: updatedNames.trim(),
+                    assigned_person: updatedNames.trim(),
                     needs_cover: updatedCover,
                     story: updatedStory.trim(),
                     memory_verse: updatedVerse.trim(),
+                    focus_context: updatedNotes.trim(),
                     notes: updatedNotes.trim(),
                     details: updatedNotes.trim()
                 })
