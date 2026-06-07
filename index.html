@@ -308,6 +308,9 @@
         .modal-content h3 {
             margin-top: 0;
             color: var(--cb-dark-blue);
+            border-bottom: 2px solid var(--cb-gray);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
         }
 
         .form-group {
@@ -319,6 +322,7 @@
             margin-bottom: 5px;
             font-weight: bold;
             font-size: 14px;
+            color: #444;
         }
 
         .form-group input[type="text"], .form-group textarea {
@@ -328,6 +332,13 @@
             border-radius: 4px;
             box-sizing: border-box;
             font-family: inherit;
+            font-size: 14px;
+        }
+
+        .form-group input[type="text"]:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--cb-light-blue);
+            box-shadow: 0 0 4px rgba(0, 80, 158, 0.2);
         }
 
         .modal-actions {
@@ -335,10 +346,12 @@
             justify-content: flex-end;
             gap: 10px;
             margin-top: 20px;
+            border-top: 1px solid var(--cb-gray);
+            padding-top: 15px;
         }
 
         .save-btn {
-            background-color: var(--cb-success);
+            background-color: var(--cb-dark-blue);
             color: white;
             border: none;
             padding: 10px 20px;
@@ -347,13 +360,23 @@
             font-weight: bold;
         }
 
+        .save-btn:hover {
+            background-color: var(--cb-light-blue);
+        }
+
         .cancel-btn {
-            background-color: #ccc;
+            background-color: #e0e0e0;
             color: #333;
             border: none;
             padding: 10px 20px;
             border-radius: 4px;
-            }
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .cancel-btn:hover {
+            background-color: #d4d4d4;
+        }
     </style>
 </head>
 <body>
@@ -399,11 +422,11 @@
 
     <div id="edit-modal">
         <div class="modal-content">
-            <h3 id="modal-title">Edit Assignment / Update Details</h3>
+            <h3 id="modal-title">Edit Assignment Details</h3>
             <input type="hidden" id="edit-slot-id">
             
             <div class="form-group">
-                <label for="edit-names">Assigned Person(s):</label>
+                <label id="modal-role-label" for="edit-names">Assigned Person(s):</label>
                 <input type="text" id="edit-names" placeholder="e.g. Niall & Hazel">
             </div>
 
@@ -418,8 +441,8 @@
             </div>
 
             <div class="form-group" id="modal-notes-group">
-                <label for="edit-notes">General Notes / Focus Details:</label>
-                <textarea id="edit-notes" rows="2" placeholder="Special requirements or notice details..."></textarea>
+                <label for="edit-notes">Focus Context / Lesson Details:</label>
+                <textarea id="edit-notes" rows="3" placeholder="Special requirements, notes, or focus details..."></textarea>
             </div>
 
             <div class="form-group" style="margin-top: 20px;">
@@ -518,7 +541,7 @@
                 return;
             }
 
-            // FIXED SCHEMA MATCH: Look inside assigned_persons column
+            // LOOKS INSIDE CORRECT PLURAL COLUMN: assigned_persons
             const matchedSlots = globalRotaData.filter(slot => 
                 slot.assigned_persons && slot.assigned_persons.toLowerCase().includes(searchName)
             );
@@ -538,7 +561,7 @@
                     weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'
                 });
 
-                let contextLine = slot.notes || slot.details || slot.focus_context || '';
+                let contextLine = slot.focus_context || slot.notes || slot.details || '';
                 if (slot.story) contextLine = `Story: ${slot.story}`;
 
                 const item = document.createElement('div');
@@ -646,14 +669,14 @@
                         if (checkLowerTitle.includes("sunday school") || checkLowerTitle.includes("sunday kids")) {
                             coreDetailsDisplay = `
                                 <div class="details-box">
-                                    <strong>📖 Story:</strong> ${slot.story || 'TBD'}<br>
-                                    <strong>🎯 Verse:</strong> ${slot.memory_verse || 'TBD'}
+                                    <strong>📖 Story:</strong> ${slot.story || '—'}<br>
+                                    <strong>🎯 Verse:</strong> ${slot.memory_verse || '—'}
                                 </div>`;
                         } else if (slot.focus_context || slot.notes || slot.details) {
                             coreDetailsDisplay = `<div class="details-box"><strong>📌 Note:</strong> ${slot.focus_context || slot.notes || slot.details}</div>`;
                         }
 
-                        // FIXED SCHEMA MAPPING: Changed slot.assigned_person to slot.assigned_persons
+                        // FIXED SCHEMA MAPPING: Renders from slot.assigned_persons
                         singleDateHtmlBlock += `
                             <tr class="${rowStatusClass}">
                                 <td><strong>${slot.role}</strong></td>
@@ -677,12 +700,12 @@
             });
         }
 
-        // --- MODAL CONFIGURATION DRIVER ---
+        // --- EDIT MODAL CONTROLLER SYSTEM ---
         function openEditModal(id) {
             const slot = globalRotaData.find(item => item.id === id);
             if (!slot) return;
 
-            // FIXED SCHEMA MAPPING: Reads from slot.assigned_persons
+            // Target correct row parameters
             document.getElementById('edit-slot-id').value = slot.id;
             document.getElementById('edit-names').value = slot.assigned_persons || '';
             document.getElementById('edit-cover-checkbox').checked = slot.needs_cover || false;
@@ -690,10 +713,16 @@
             document.getElementById('edit-verse').value = slot.memory_verse || '';
             document.getElementById('edit-notes').value = slot.focus_context || slot.notes || slot.details || '';
 
+            // Update title labels contextually
+            document.getElementById('modal-title').innerText = `Edit: ${slot.rota_name}`;
+            document.getElementById('modal-role-label').innerText = `Assigned to Role [ ${slot.role} ] :`;
+
+            // Conditionally show extra input rows if it's Sunday School or Kids tracks
             const isSundaySchool = slot.rota_name.toLowerCase().includes("sunday school") || slot.rota_name.toLowerCase().includes("sunday kids");
             document.getElementById('modal-story-group').style.display = isSundaySchool ? 'block' : 'none';
             document.getElementById('modal-verse-group').style.display = isSundaySchool ? 'block' : 'none';
 
+            // Open Modal Popup smoothly
             document.getElementById('edit-modal').style.display = 'flex';
         }
 
@@ -701,6 +730,7 @@
             document.getElementById('edit-modal').style.display = 'none';
         }
 
+        // --- SAVE OPERATION: SEND DIRECT UPDATE MUTATION TO SUPABASE ---
         async function saveSlotChanges() {
             const id = document.getElementById('edit-slot-id').value;
             const updatedNames = document.getElementById('edit-names').value;
@@ -710,11 +740,11 @@
             const updatedNotes = document.getElementById('edit-notes').value;
 
             if (!updatedNames.trim()) {
-                alert("Please enter assignment names or state 'Vacant'.");
+                alert("Please enter assignment names or state 'Vacant Input'.");
                 return;
             }
 
-            // FIXED SCHEMA MAPPING: Targets assigned_persons column directly
+            // TARGET CLIENT INSTANCE (db) & MULTI-FIELD SCHEMA RECORD MAPPING
             const { error } = await db
                 .from('rotas')
                 .update({ 
@@ -732,8 +762,11 @@
                 alert("Failed to modify slot assignment details: " + error.message);
             } else {
                 closeModal();
+                
+                // Refresh data layer automatically without reloading the browser tab
                 await fetchUpcomingRotas();
                 
+                // Keep personal results updated if search finder is open
                 if(document.getElementById('personal-name-input').value.trim()) {
                     findPersonalSchedule();
                 }
