@@ -12,7 +12,6 @@
         async function runDiagnostic() {
             const display = document.getElementById('debug');
             try {
-                // Testing a basic select from the table
                 const { data, error } = await supabase.from('rota_slots').select('*');
                 if (error) {
                     display.innerText = "CONNECTION ERROR: " + error.message;
