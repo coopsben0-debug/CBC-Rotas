@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Craigavon Baptist Church | Rota</title>
+    <title>Craigavon Baptist Church | Rota System</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
@@ -13,6 +13,7 @@
             --cb-gray: #F4F6F8;
             --cb-text: #333333;
             --cb-alert: #D32F2F;
+            --cb-success: #2E7D32;
         }
 
         body {
@@ -23,7 +24,7 @@
             padding: 0;
         }
 
-        /* --- Login Screen --- */
+        /* --- Login Gateway --- */
         #login-screen {
             display: flex;
             flex-direction: column;
@@ -32,46 +33,58 @@
             height: 100vh;
             background-color: var(--cb-dark-blue);
             color: var(--cb-white);
+            padding: 20px;
+            box-sizing: border-box;
         }
 
-        #login-screen h1 {
-            margin-bottom: 20px;
+        .login-box {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 8px;
+            text-align: center;
+            backdrop-filter: blur(5px);
+            width: 100%;
+            max-width: 400px;
         }
 
         #keycode-input {
+            width: 80%;
             padding: 12px;
-            font-size: 16px;
+            font-size: 18px;
             border: none;
             border-radius: 4px;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             text-align: center;
+            letter-spacing: 2px;
         }
 
         #login-btn {
-            padding: 12px 24px;
+            padding: 12px 30px;
             font-size: 16px;
-            background-color: var(--cb-light-blue);
-            color: var(--cb-white);
+            background-color: var(--cb-white);
+            color: var(--cb-dark-blue);
             border: none;
             border-radius: 4px;
             cursor: pointer;
             font-weight: bold;
+            text-transform: uppercase;
         }
 
         #login-btn:hover {
-            background-color: #003d7a;
+            background-color: var(--cb-gray);
         }
 
         #login-error {
             color: #ffb3b3;
-            margin-top: 10px;
+            margin-top: 15px;
             display: none;
+            font-weight: bold;
         }
 
-        /* --- Main App Screen --- */
+        /* --- Main App Interface --- */
         #app-screen {
             display: none;
-            max-width: 1000px;
+            max-width: 1100px;
             margin: 0 auto;
             padding: 20px;
         }
@@ -81,6 +94,9 @@
             padding: 20px 0;
             border-bottom: 3px solid var(--cb-dark-blue);
             margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         header h1 {
@@ -92,8 +108,8 @@
         .tabs {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 20px;
+            gap: 8px;
+            margin-bottom: 25px;
             justify-content: center;
         }
 
@@ -101,8 +117,8 @@
             background-color: var(--cb-white);
             color: var(--cb-dark-blue);
             border: 2px solid var(--cb-dark-blue);
-            padding: 10px 15px;
-            border-radius: 5px;
+            padding: 10px 16px;
+            border-radius: 4px;
             cursor: pointer;
             font-weight: bold;
             transition: all 0.2s;
@@ -113,13 +129,13 @@
             color: var(--cb-white);
         }
 
-        /* --- Rota Tables --- */
+        /* --- Rota Sections --- */
         .rota-section {
             background: var(--cb-white);
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
         }
 
         .rota-date-header {
@@ -132,12 +148,11 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 15px;
         }
 
         th, td {
             text-align: left;
-            padding: 12px;
+            padding: 14px;
             border-bottom: 1px solid var(--cb-gray);
         }
 
@@ -146,205 +161,340 @@
             color: var(--cb-dark-blue);
         }
 
-        .needs-cover {
+        .needs-cover-row {
             background-color: #ffe6e6;
-            color: var(--cb-alert);
-            font-weight: bold;
         }
 
-        .cover-btn {
+        /* --- Action Buttons --- */
+        .action-btn {
             background-color: var(--cb-white);
-            color: var(--cb-alert);
-            border: 1px solid var(--cb-alert);
+            color: var(--cb-light-blue);
+            border: 1px solid var(--cb-light-blue);
             padding: 6px 12px;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 14px;
+            font-weight: bold;
         }
 
-        .cover-btn:hover {
-            background-color: var(--cb-alert);
+        .action-btn:hover {
+            background-color: var(--cb-light-blue);
             color: var(--cb-white);
         }
 
-        .status-badge {
-            display: inline-block;
+        .alert-badge {
+            background-color: var(--cb-alert);
+            color: white;
             padding: 4px 8px;
             border-radius: 4px;
             font-size: 12px;
-            background-color: var(--cb-alert);
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 5px;
+        }
+
+        /* --- Quick Edit Overlay Panel --- */
+        #edit-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+
+        .modal-content h3 {
+            margin-top: 0;
+            color: var(--cb-dark-blue);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-group input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .save-btn {
+            background-color: var(--cb-success);
             color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .cancel-btn {
+            background-color: #ccc;
+            color: #333;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
 
     <div id="login-screen">
-        <h1>Craigavon Baptist Rota</h1>
-        <p>Please enter the church access code</p>
-        <input type="password" id="keycode-input" placeholder="Enter Code">
-        <button id="login-btn" onclick="checkCode()">Enter</button>
-        <p id="login-error">Incorrect code. Please try again.</p>
+        <div class="login-box">
+            <h2 style="margin-top:0;">Craigavon Baptist Church</h2>
+            <p>Enter the connection key code to access the rotas:</p>
+            <input type="password" id="keycode-input" placeholder="••••">
+            <br>
+            <button id="login-btn" onclick="checkCode()">Access System</button>
+            <p id="login-error">Incorrect key code. Please try again.</p>
+        </div>
     </div>
 
     <div id="app-screen">
         <header>
-            <h1>Upcoming Rotas</h1>
+            <h1>Church Rota Hub</h1>
+            <span style="color: var(--cb-light-blue); font-weight: bold;">Live Schedule</span>
         </header>
 
-        <div class="tabs" id="tabs-container">
-            <button class="tab-btn active" onclick="loadView('Main')">All Roles (Main)</button>
-            <button class="tab-btn" onclick="loadView('CB Sunday Kids')">CB Sunday Kids</button>
-            <button class="tab-btn" onclick="loadView('Junior Sunday School')">Junior SS</button>
-            <button class="tab-btn" onclick="loadView('Sports Hall')">Sports Hall</button>
-            <button class="tab-btn" onclick="loadView('Tea Rota')">Tea Rota</button>
-            <button class="tab-btn" onclick="loadView('Cleaning')">Cleaning</button>
-            <button class="tab-btn" onclick="loadView('Welcome & Table')">Welcome & Table</button>
-        </div>
+        <div class="tabs" id="tabs-container"></div>
 
-        <div id="content-area">
+        <div id="content-area"></div>
+    </div>
+
+    <div id="edit-modal">
+        <div class="modal-content">
+            <h3 id="modal-title">Edit Assignment / Request Swap</h3>
+            <input type="hidden" id="edit-slot-id">
+            
+            <div class="form-group">
+                <label for="edit-names">Assigned Person(s):</label>
+                <input type="text" id="edit-names" placeholder="e.g. Niall & Hazel">
             </div>
+
+            <div class="form-group" style="margin-top: 20px;">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <input type="checkbox" id="edit-cover-checkbox" style="transform: scale(1.2);">
+                    <span style="color: var(--cb-alert); font-weight: bold;">Flag this slot as "Needs Cover"</span>
+                </label>
+                <small style="color: #666; display: block; margin-left: 22px; margin-top: 4px;">
+                    This highlights the row in red on the main page so anyone can see you need a swap.
+                </small>
+            </div>
+
+            <div class="modal-actions">
+                <button class="cancel-btn" onclick="closeModal()">Cancel</button>
+                <button class="save-btn" onclick="saveSlotChanges()">Save Changes</button>
+            </div>
+        </div>
     </div>
 
     <script>
-        // --- 1. SETUP & AUTH ---
+        // --- CONFIGURATION ---
         const SUPABASE_URL = "https://ojzwujpahfjmaeisnfez.supabase.co";
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qend1anBhaGZqbWFlaXNuZmV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTA5NDMsImV4cCI6MjA5NDU4Njk0M30.VvszGR6MbUnBhKsmsXBikkrjok2-F1bnyS4zOwDX5hg";
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        // Fixed the variable name collision bug here (using 'db' instead of 'supabase')
+        const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // Set your secret church code here
+        // Your custom church key code
         const CHURCH_CODE = "1234"; 
 
-        let allRotaData = [];
+        let globalRotaData = [];
+        let currentActiveTab = "Main";
 
+        // Listen for "Enter" key on password screen
+        document.getElementById('keycode-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') checkCode();
+        });
+
+        // --- AUTHENTICATION GATEWAY ---
         function checkCode() {
-            const input = document.getElementById('keycode-input').value;
-            if (input === CHURCH_CODE) {
+            const val = document.getElementById('keycode-input').value;
+            if (val === CHURCH_CODE) {
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('app-screen').style.display = 'block';
-                fetchData(); // Load data once logged in
+                fetchUpcomingRotas();
             } else {
                 document.getElementById('login-error').style.display = 'block';
             }
         }
 
-        // --- 2. FETCH DATA ---
-        async function fetchData() {
+        // --- FETCH DATA FROM DATABASE ---
+        async function fetchUpcomingRotas() {
             const contentArea = document.getElementById('content-area');
-            contentArea.innerHTML = "<p>Loading upcoming rotas...</p>";
+            contentArea.innerHTML = "<p style='text-align:center;'>Loading current schedules...</p>";
 
-            // Get today's date in YYYY-MM-DD format to filter out past Sundays
-            const today = new Date().toISOString().split('T')[0];
+            // Automatically filters out previous Sundays (gets dates starting from today)
+            const todayStr = new Date().toISOString().split('T')[0];
 
-            const { data, error } = await supabase
+            const { data, error } = await db
                 .from('rota_slots')
                 .select('*')
-                .gte('slot_date', today) // Only get dates >= today
+                .gte('slot_date', todayStr)
                 .order('slot_date', { ascending: true });
 
             if (error) {
-                contentArea.innerHTML = `<p style="color:red;">Error loading data: ${error.message}</p>`;
+                contentArea.innerHTML = `<p style="color:var(--cb-alert); text-align:center;">Database Error: ${error.message}</p>`;
                 return;
             }
 
-            allRotaData = data;
-            loadView('Main'); // Default view
+            globalRotaData = data;
+            
+            buildDynamicTabs();
+            renderFilteredView(currentActiveTab);
         }
 
-        // --- 3. RENDER VIEWS ---
-        function loadView(viewName) {
-            // Update active tab styling
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active');
-                if (btn.innerText.includes(viewName) || (viewName === 'Main' && btn.innerText.includes('All Roles'))) {
-                    btn.classList.add('active');
-                }
+        // --- BUILD DYNAMIC TABS BASED ON ALL 9 ROTAS ---
+        function buildDynamicTabs() {
+            const tabsContainer = document.getElementById('tabs-container');
+            
+            // Get unique rota names currently saved in your database
+            const uniqueRotas = [...new Set(globalRotaData.map(item => item.rota_name))].sort();
+            
+            let tabsHtml = `<button class="tab-btn ${currentActiveTab === 'Main' ? 'active' : ''}" onclick="switchTab('Main')">All Roles (Main)</button>`;
+            
+            uniqueRotas.forEach(name => {
+                const activeClass = currentActiveTab === name ? 'active' : '';
+                tabsHtml += `<button class="tab-btn ${activeClass}" onclick="switchTab('${name}')">${name}</button>`;
             });
 
+            tabsContainer.innerHTML = tabsHtml;
+        }
+
+        function switchTab(tabName) {
+            currentActiveTab = tabName;
+            buildDynamicTabs();
+            renderFilteredView(tabName);
+        }
+
+        // --- RENDER SELECTED VIEW ---
+        function renderFilteredView(view) {
             const contentArea = document.getElementById('content-area');
             contentArea.innerHTML = '';
 
-            let filteredData = allRotaData;
-            if (viewName !== 'Main') {
-                filteredData = allRotaData.filter(slot => slot.rota_name === viewName);
+            let filtered = globalRotaData;
+            if (view !== "Main") {
+                filtered = globalRotaData.filter(slot => slot.rota_name === view);
             }
 
-            if (filteredData.length === 0) {
-                contentArea.innerHTML = `<p>No upcoming assignments found for ${viewName}.</p>`;
+            if (filtered.length === 0) {
+                contentArea.innerHTML = `<p style="text-align:center; padding: 40px; color: #666;">No upcoming entries scheduled for "${view}".</p>`;
                 return;
             }
 
-            // Group data by Date
-            const groupedByDate = filteredData.reduce((acc, slot) => {
-                if (!acc[slot.slot_date]) acc[slot.slot_date] = [];
-                acc[slot.slot_date].push(slot);
+            // Group the filter results by Sunday date
+            const grouped = filtered.reduce((acc, row) => {
+                if (!acc[row.slot_date]) acc[row.slot_date] = [];
+                acc[row.slot_date].push(row);
                 return acc;
             }, {});
 
-            // Build HTML for each Date
-            for (const [dateString, slots] of Object.entries(groupedByDate)) {
-                // Format date nicely (e.g., Sunday, 7 June 2026)
-                const dateObj = new Date(dateString);
-                const niceDate = dateObj.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+            // Generate structural lists for each distinct date group
+            for (const [rawDate, slots] of Object.entries(grouped)) {
+                const parsedDate = new Date(rawDate);
+                const structuredDate = parsedDate.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
-                let sectionHtml = `
-                    <div class="rota-section">
-                        <h2 class="rota-date-header">${niceDate}</h2>
-                        <table>
-                            <thead>
-                                <tr>
-                                    ${viewName === 'Main' ? '<th>Rota</th>' : ''}
-                                    <th>Role</th>
-                                    <th>Assigned To</th>
-                                    <th>Status / Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                `;
-
+                let tableRowsHtml = '';
                 slots.forEach(slot => {
-                    const rowClass = slot.needs_cover ? 'needs-cover' : '';
-                    const actionHtml = slot.needs_cover 
-                        ? `<span class="status-badge">Needs Cover!</span>` 
-                        : `<button class="cover-btn" onclick="requestCover('${slot.id}')">Request Swap/Cover</button>`;
-
-                    sectionHtml += `
-                        <tr class="${rowClass}">
-                            ${viewName === 'Main' ? `<td><strong>${slot.rota_name}</strong></td>` : ''}
+                    const rowStatusClass = slot.needs_cover ? 'needs-cover-row' : '';
+                    
+                    tableRowsHtml += `
+                        <tr class="${rowStatusClass}">
+                            ${view === 'Main' ? `<td><strong>${slot.rota_name}</strong></td>` : ''}
                             <td>${slot.role}</td>
                             <td>${slot.assigned_names}</td>
-                            <td>${actionHtml}</td>
+                            <td>
+                                ${slot.needs_cover ? '<span class="alert-badge">Needs Cover</span><br>' : ''}
+                                <button class="action-btn" onclick="openEditModal('${slot.id}', '${slot.assigned_names.replace(/'/g, "\\'")}', ${slot.needs_cover})">
+                                    Edit / Swap
+                                </button>
+                            </td>
                         </tr>
                     `;
                 });
 
-                sectionHtml += `</tbody></table></div>`;
-                contentArea.innerHTML += sectionHtml;
+                contentArea.innerHTML += `
+                    <div class="rota-section">
+                        <h2 class="rota-date-header">${structuredDate}</h2>
+                        <table>
+                            <thead>
+                                <tr>
+                                    ${view === 'Main' ? '<th style="width:25%">Rota</th>' : ''}
+                                    <th>Role / Detail</th>
+                                    <th>Assigned Person(s)</th>
+                                    <th style="width:20%">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${tableRowsHtml}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
             }
         }
 
-        // --- 4. REQUEST COVER LOGIC ---
-        async function requestCover(slotId) {
-            if (!confirm("Are you sure you want to request cover for this slot? This will flag it in red for everyone to see.")) return;
+        // --- FORM MODAL ACTIONS ---
+        function openEditModal(id, currentNames, needsCover) {
+            document.getElementById('edit-slot-id').value = id;
+            document.getElementById('edit-names').value = currentNames;
+            document.getElementById('edit-cover-checkbox').checked = needsCover;
+            document.getElementById('edit-modal').style.display = 'flex';
+        }
 
-            // Update the row in Supabase
-            const { error } = await supabase
+        function closeModal() {
+            document.getElementById('edit-modal').style.display = 'none';
+        }
+
+        async function saveSlotChanges() {
+            const id = document.getElementById('edit-slot-id').value;
+            const updatedNames = document.getElementById('edit-names').value;
+            const updatedCover = document.getElementById('edit-cover-checkbox').checked;
+
+            if (!updatedNames.trim()) {
+                alert("Please enter an assigned name or specify 'Vacant'.");
+                return;
+            }
+
+            // Write updates directly back to Supabase
+            const { error } = await db
                 .from('rota_slots')
-                .update({ needs_cover: true })
-                .eq('id', slotId);
+                .update({ 
+                    assigned_names: updatedNames,
+                    needs_cover: updatedCover 
+                })
+                .eq('id', id);
 
             if (error) {
-                alert("Error requesting cover: " + error.message);
+                alert("Failed to save changes: " + error.message);
             } else {
-                // Update local data and refresh view to show it immediately
-                const slotIndex = allRotaData.findIndex(s => s.id === slotId);
-                if (slotIndex !== -1) {
-                    allRotaData[slotIndex].needs_cover = true;
-                    // Find out which tab we are currently on to reload it correctly
-                    const activeTab = document.querySelector('.tab-btn.active').innerText;
-                    const viewToLoad = activeTab.includes('All Roles') ? 'Main' : activeTab;
-                    loadView(viewToLoad);
-                }
+                closeModal();
+                fetchUpcomingRotas(); // Instantly refreshes view across the page
             }
         }
     </script>
