@@ -4,23 +4,28 @@
     <div id="debug">Testing connection...</div>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        const supabase = supabase.createClient(
-            "https://ojzwujpahfjmaeisnfez.supabase.co", 
-            "YOUR_NEWLY_GENERATED_ANON_KEY"
-        );
+        // Use your Supabase URL
+        const SUPABASE_URL = "https://ojzwujpahfjmaeisnfez.supabase.co";
+        // REPLACE THIS WITH YOUR NEWLY REGENERATED KEY
+        const SUPABASE_ANON_KEY = "YOUR_NEWLY_GENERATED_ANON_KEY";
+
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         async function runDiagnostic() {
             const display = document.getElementById('debug');
+            console.log("Starting connection test...");
             try {
-                // 1. Check if we can reach the table at all
                 const { data, error } = await supabase.from('rota_slots').select('*');
                 if (error) {
                     display.innerText = "CONNECTION ERROR: " + error.message;
+                    console.error("Supabase Error Details:", error);
                 } else {
-                    display.innerText = "CONNECTION SUCCESS: Table reached. Found " + data.length + " rows.";
+                    display.innerText = "SUCCESS! Found " + data.length + " rows.";
+                    console.log("Data returned:", data);
                 }
             } catch (err) {
                 display.innerText = "CRITICAL FAILURE: " + err.message;
+                console.error("Critical Failure:", err);
             }
         }
         runDiagnostic();
