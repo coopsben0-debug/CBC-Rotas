@@ -3,45 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upcoming Rota</title>
-    <style>
-        :root { --bg: #0d1117; --text: #c9d1d9; --accent: #58a6ff; }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); padding: 2rem; display: flex; justify-content: center; }
-        .container { max-width: 600px; width: 100%; }
-        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-        th, td { text-align: left; padding: 0.75rem; border-bottom: 1px solid #30363d; }
-        th { color: var(--accent); }
-    </style>
+    <title>CBC Rota Terminal</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body>
-    <main class="container">
-        <h1>Upcoming Sundays</h1>
-        <table>
-            <thead><tr><th>Date</th><th>Team Members</th></tr></thead>
-            <tbody id="rota-body"></tbody>
-        </table>
+<body class="bg-slate-50 text-slate-900 pb-10">
+    <nav class="bg-slate-900 text-white p-4 sticky top-0 z-10 shadow-md">
+        <h1 class="font-black text-lg">Craigavon Baptist Rota</h1>
+    </nav>
+
+    <main id="rota-container" class="max-w-xl mx-auto p-4 space-y-4">
+        <p class="text-center text-slate-500 py-10">Loading upcoming schedule...</p>
     </main>
 
     <script>
-        const rota = [
-            { date: "2026-06-14", team: "Tosin, Niall" },
-            { date: "2026-06-21", team: "John, Ruth" },
-            { date: "2026-06-28", team: "Andrew P" },
-            { date: "2026-07-05", team: "Leanne, Colin" },
-            { date: "2026-07-12", team: "Niall, Tosin" },
-            { date: "2026-07-19", team: "Philip" },
-            { date: "2026-07-26", team: "Colin, Henry" }
-        ];
+        const supabase = supabase.createClient("https://ojzwujpahfjmaeisnfez.supabase.co", "YOUR_ANON_KEY_HERE");
 
-        const today = new Date().setHours(0,0,0,0);
-        const body = document.getElementById('rota-body');
+        async function fetchRota() {
+            const today = new Date().toISOString().split('T')[0];
+            
+            // Fetch all slots joining the dates table
+            const { data, error } = await supabase
+                .from('rota_slots')
+                .select('role_title, member_name_text, service_dates(date)')
+                .gte('service_dates.date', today)
+                .order('date', { foreignTable: 'service_dates', ascending: true });
 
-        // 1. Sort, 2. Filter, 3. Render
-        rota.sort((a, b) => new Date(a.date) - new Date(b.date))
-            .filter(item => new Date(item.date).getTime() >= today)
-            .forEach(item => {
-                body.innerHTML += `<tr><td>${item.date}</td><td>${item.team}</td></tr>`;
-            });
+            if (error) { document.getElementById('rota-container').innerHTML = "Error loading rota."; return; }
+
+            // Group data by date
+            const grouped = data.reduce((acc, slot) => {
+                const date = slot.service_dates.date;
+                if (!acc[date]) acc[date] = [];
+                acc[date].push(slot);
+                return acc;
+            }, {});
+
+            // Render cards
+            const container = document.getElementById('rota-container');
+            container.innerHTML = Object.keys(grouped).map(date => `
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+                    <h2 class="font-black text-xl mb-3 text-blue-600">${new Date(date).toDateString()}</h2>
+                    <div class="space-y-3">
+                        ${grouped[date].map(s => `
+                            <div class="flex justify-between items-center border-b pb-2">
+                                <div>
+                                    <p class="text-xs font-bold uppercase text-slate-400">${s.role_title}</p>
+                                    <p class="font-medium">${s.member_name_text}</p>
+                                </div>
+                                <a href="mailto:rota@cbc.church?subject=Swap Request for ${s.role_title} on ${date}" 
+                                   class="text-xs bg-slate-100 px-3 py-1 rounded-full font-bold">Swap</a>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        fetchRota();
     </script>
 </body>
 </html>
