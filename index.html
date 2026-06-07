@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <body>
-    <div id="debug">Testing connection...</div>
+    <div id="debug" style="font-family: sans-serif; padding: 20px;">Testing connection...</div>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         const SUPABASE_URL = "https://ojzwujpahfjmaeisnfez.supabase.co";
@@ -9,20 +9,25 @@
 
         const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        async function runDiagnostic() {
+        async function test() {
             const display = document.getElementById('debug');
             try {
+                // Attempt to fetch data
                 const { data, error } = await supabase.from('rota_slots').select('*');
+                
                 if (error) {
-                    display.innerText = "CONNECTION ERROR: " + error.message;
+                    display.innerText = "ERROR: " + error.message;
+                    console.error("Supabase Error:", error);
                 } else {
-                    display.innerText = "SUCCESS! Found " + data.length + " rows in rota_slots.";
+                    display.innerText = "SUCCESS! Found " + data.length + " rows.";
+                    console.log("Data:", data);
                 }
             } catch (err) {
                 display.innerText = "CRITICAL FAILURE: " + err.message;
+                console.error("Failure:", err);
             }
         }
-        runDiagnostic();
+        test();
     </script>
 </body>
 </html>
