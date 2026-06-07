@@ -17,42 +17,53 @@
     </main>
 
     <script>
-        const supabase = supabase.createClient("https://ojzwujpahfjmaeisnfez.supabase.co", "YOUR_ANON_KEY_HERE");
+        const SUPABASE_URL = "https://ojzwujpahfjmaeisnfez.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qend1anBhaGZqbWFlaXNuZmV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTA5NDMsImV4cCI6MjA5NDU4Njk0M30.VvszGR6MbUnBhKsmsXBikkrjok2-F1bnyS4zOwDX5hg";
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         async function fetchRota() {
+            // Get today's date in YYYY-MM-DD
             const today = new Date().toISOString().split('T')[0];
             
-            // Fetch all slots joining the dates table
+            // Querying the primary rota_slots table joined with service_dates
             const { data, error } = await supabase
                 .from('rota_slots')
                 .select('role_title, member_name_text, service_dates(date)')
                 .gte('service_dates.date', today)
                 .order('date', { foreignTable: 'service_dates', ascending: true });
 
-            if (error) { document.getElementById('rota-container').innerHTML = "Error loading rota."; return; }
+            if (error) {
+                document.getElementById('rota-container').innerHTML = `<p class="text-red-500 p-4">Error loading data: ${error.message}</p>`;
+                return;
+            }
+
+            if (!data || data.length === 0) {
+                document.getElementById('rota-container').innerHTML = "<p class='text-center p-4'>No upcoming slots found.</p>";
+                return;
+            }
 
             // Group data by date
             const grouped = data.reduce((acc, slot) => {
-                const date = slot.service_dates.date;
+                const date = slot.service_dates?.date || 'Unknown Date';
                 if (!acc[date]) acc[date] = [];
                 acc[date].push(slot);
                 return acc;
             }, {});
 
-            // Render cards
+            // Render cards grouped by Sunday
             const container = document.getElementById('rota-container');
             container.innerHTML = Object.keys(grouped).map(date => `
                 <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-                    <h2 class="font-black text-xl mb-3 text-blue-600">${new Date(date).toDateString()}</h2>
-                    <div class="space-y-3">
+                    <h2 class="font-black text-lg mb-4 text-blue-700 border-b pb-2">${new Date(date).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}</h2>
+                    <div class="space-y-4">
                         ${grouped[date].map(s => `
-                            <div class="flex justify-between items-center border-b pb-2">
+                            <div class="flex justify-between items-start">
                                 <div>
-                                    <p class="text-xs font-bold uppercase text-slate-400">${s.role_title}</p>
-                                    <p class="font-medium">${s.member_name_text}</p>
+                                    <p class="text-[10px] font-black uppercase text-slate-400 tracking-wider">${s.role_title}</p>
+                                    <p class="font-semibold text-slate-800">${s.member_name_text}</p>
                                 </div>
-                                <a href="mailto:rota@cbc.church?subject=Swap Request for ${s.role_title} on ${date}" 
-                                   class="text-xs bg-slate-100 px-3 py-1 rounded-full font-bold">Swap</a>
+                                <a href="mailto:?subject=Rota Swap: ${s.role_title} (${date})" 
+                                   class="text-[10px] bg-slate-100 hover:bg-slate-200 px-3 py-1 rounded-full font-bold transition">Swap</a>
                             </div>
                         `).join('')}
                     </div>
