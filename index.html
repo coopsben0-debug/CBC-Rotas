@@ -1,34 +1,352 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Craigavon Baptist Church | Rota</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --cb-dark-blue: #002D62;
+            --cb-light-blue: #00509E;
+            --cb-white: #FFFFFF;
+            --cb-gray: #F4F6F8;
+            --cb-text: #333333;
+            --cb-alert: #D32F2F;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--cb-gray);
+            color: var(--cb-text);
+            margin: 0;
+            padding: 0;
+        }
+
+        /* --- Login Screen --- */
+        #login-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: var(--cb-dark-blue);
+            color: var(--cb-white);
+        }
+
+        #login-screen h1 {
+            margin-bottom: 20px;
+        }
+
+        #keycode-input {
+            padding: 12px;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        #login-btn {
+            padding: 12px 24px;
+            font-size: 16px;
+            background-color: var(--cb-light-blue);
+            color: var(--cb-white);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        #login-btn:hover {
+            background-color: #003d7a;
+        }
+
+        #login-error {
+            color: #ffb3b3;
+            margin-top: 10px;
+            display: none;
+        }
+
+        /* --- Main App Screen --- */
+        #app-screen {
+            display: none;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 3px solid var(--cb-dark-blue);
+            margin-bottom: 20px;
+        }
+
+        header h1 {
+            color: var(--cb-dark-blue);
+            margin: 0;
+        }
+
+        /* --- Navigation Tabs --- */
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+
+        .tab-btn {
+            background-color: var(--cb-white);
+            color: var(--cb-dark-blue);
+            border: 2px solid var(--cb-dark-blue);
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active, .tab-btn:hover {
+            background-color: var(--cb-dark-blue);
+            color: var(--cb-white);
+        }
+
+        /* --- Rota Tables --- */
+        .rota-section {
+            background: var(--cb-white);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        .rota-date-header {
+            color: var(--cb-light-blue);
+            border-bottom: 2px solid var(--cb-gray);
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid var(--cb-gray);
+        }
+
+        th {
+            background-color: var(--cb-gray);
+            color: var(--cb-dark-blue);
+        }
+
+        .needs-cover {
+            background-color: #ffe6e6;
+            color: var(--cb-alert);
+            font-weight: bold;
+        }
+
+        .cover-btn {
+            background-color: var(--cb-white);
+            color: var(--cb-alert);
+            border: 1px solid var(--cb-alert);
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .cover-btn:hover {
+            background-color: var(--cb-alert);
+            color: var(--cb-white);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            background-color: var(--cb-alert);
+            color: white;
+        }
+    </style>
 </head>
 <body>
-    <div id="debug" style="font-family: sans-serif; padding: 20px;">Testing connection...</div>
-    
+
+    <div id="login-screen">
+        <h1>Craigavon Baptist Rota</h1>
+        <p>Please enter the church access code</p>
+        <input type="password" id="keycode-input" placeholder="Enter Code">
+        <button id="login-btn" onclick="checkCode()">Enter</button>
+        <p id="login-error">Incorrect code. Please try again.</p>
+    </div>
+
+    <div id="app-screen">
+        <header>
+            <h1>Upcoming Rotas</h1>
+        </header>
+
+        <div class="tabs" id="tabs-container">
+            <button class="tab-btn active" onclick="loadView('Main')">All Roles (Main)</button>
+            <button class="tab-btn" onclick="loadView('CB Sunday Kids')">CB Sunday Kids</button>
+            <button class="tab-btn" onclick="loadView('Junior Sunday School')">Junior SS</button>
+            <button class="tab-btn" onclick="loadView('Sports Hall')">Sports Hall</button>
+            <button class="tab-btn" onclick="loadView('Tea Rota')">Tea Rota</button>
+            <button class="tab-btn" onclick="loadView('Cleaning')">Cleaning</button>
+            <button class="tab-btn" onclick="loadView('Welcome & Table')">Welcome & Table</button>
+        </div>
+
+        <div id="content-area">
+            </div>
+    </div>
+
     <script>
+        // --- 1. SETUP & AUTH ---
         const SUPABASE_URL = "https://ojzwujpahfjmaeisnfez.supabase.co";
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qend1anBhaGZqbWFlaXNuZmV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTA5NDMsImV4cCI6MjA5NDU4Njk0M30.VvszGR6MbUnBhKsmsXBikkrjok2-F1bnyS4zOwDX5hg";
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        async function testConnection() {
-            const display = document.getElementById('debug');
-            try {
-                // Initialize client
-                const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                
-                // Attempt to fetch from your table
-                const { data, error } = await supabase.from('rota_slots').select('*');
-                
-                if (error) {
-                    display.innerText = "DATABASE ERROR: " + error.message;
-                } else {
-                    display.innerText = "SUCCESS! Found " + data.length + " rows.";
-                }
-            } catch (err) {
-                display.innerText = "CRITICAL ERROR: " + err.message;
+        // Set your secret church code here
+        const CHURCH_CODE = "1234"; 
+
+        let allRotaData = [];
+
+        function checkCode() {
+            const input = document.getElementById('keycode-input').value;
+            if (input === CHURCH_CODE) {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('app-screen').style.display = 'block';
+                fetchData(); // Load data once logged in
+            } else {
+                document.getElementById('login-error').style.display = 'block';
             }
         }
-        testConnection();
+
+        // --- 2. FETCH DATA ---
+        async function fetchData() {
+            const contentArea = document.getElementById('content-area');
+            contentArea.innerHTML = "<p>Loading upcoming rotas...</p>";
+
+            // Get today's date in YYYY-MM-DD format to filter out past Sundays
+            const today = new Date().toISOString().split('T')[0];
+
+            const { data, error } = await supabase
+                .from('rota_slots')
+                .select('*')
+                .gte('slot_date', today) // Only get dates >= today
+                .order('slot_date', { ascending: true });
+
+            if (error) {
+                contentArea.innerHTML = `<p style="color:red;">Error loading data: ${error.message}</p>`;
+                return;
+            }
+
+            allRotaData = data;
+            loadView('Main'); // Default view
+        }
+
+        // --- 3. RENDER VIEWS ---
+        function loadView(viewName) {
+            // Update active tab styling
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.innerText.includes(viewName) || (viewName === 'Main' && btn.innerText.includes('All Roles'))) {
+                    btn.classList.add('active');
+                }
+            });
+
+            const contentArea = document.getElementById('content-area');
+            contentArea.innerHTML = '';
+
+            let filteredData = allRotaData;
+            if (viewName !== 'Main') {
+                filteredData = allRotaData.filter(slot => slot.rota_name === viewName);
+            }
+
+            if (filteredData.length === 0) {
+                contentArea.innerHTML = `<p>No upcoming assignments found for ${viewName}.</p>`;
+                return;
+            }
+
+            // Group data by Date
+            const groupedByDate = filteredData.reduce((acc, slot) => {
+                if (!acc[slot.slot_date]) acc[slot.slot_date] = [];
+                acc[slot.slot_date].push(slot);
+                return acc;
+            }, {});
+
+            // Build HTML for each Date
+            for (const [dateString, slots] of Object.entries(groupedByDate)) {
+                // Format date nicely (e.g., Sunday, 7 June 2026)
+                const dateObj = new Date(dateString);
+                const niceDate = dateObj.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+                let sectionHtml = `
+                    <div class="rota-section">
+                        <h2 class="rota-date-header">${niceDate}</h2>
+                        <table>
+                            <thead>
+                                <tr>
+                                    ${viewName === 'Main' ? '<th>Rota</th>' : ''}
+                                    <th>Role</th>
+                                    <th>Assigned To</th>
+                                    <th>Status / Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+
+                slots.forEach(slot => {
+                    const rowClass = slot.needs_cover ? 'needs-cover' : '';
+                    const actionHtml = slot.needs_cover 
+                        ? `<span class="status-badge">Needs Cover!</span>` 
+                        : `<button class="cover-btn" onclick="requestCover('${slot.id}')">Request Swap/Cover</button>`;
+
+                    sectionHtml += `
+                        <tr class="${rowClass}">
+                            ${viewName === 'Main' ? `<td><strong>${slot.rota_name}</strong></td>` : ''}
+                            <td>${slot.role}</td>
+                            <td>${slot.assigned_names}</td>
+                            <td>${actionHtml}</td>
+                        </tr>
+                    `;
+                });
+
+                sectionHtml += `</tbody></table></div>`;
+                contentArea.innerHTML += sectionHtml;
+            }
+        }
+
+        // --- 4. REQUEST COVER LOGIC ---
+        async function requestCover(slotId) {
+            if (!confirm("Are you sure you want to request cover for this slot? This will flag it in red for everyone to see.")) return;
+
+            // Update the row in Supabase
+            const { error } = await supabase
+                .from('rota_slots')
+                .update({ needs_cover: true })
+                .eq('id', slotId);
+
+            if (error) {
+                alert("Error requesting cover: " + error.message);
+            } else {
+                // Update local data and refresh view to show it immediately
+                const slotIndex = allRotaData.findIndex(s => s.id === slotId);
+                if (slotIndex !== -1) {
+                    allRotaData[slotIndex].needs_cover = true;
+                    // Find out which tab we are currently on to reload it correctly
+                    const activeTab = document.querySelector('.tab-btn.active').innerText;
+                    const viewToLoad = activeTab.includes('All Roles') ? 'Main' : activeTab;
+                    loadView(viewToLoad);
+                }
+            }
+        }
     </script>
 </body>
 </html>
