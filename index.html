@@ -81,7 +81,7 @@
             font-weight: bold;
         }
 
-        /* --- Main App Interface --- */
+        /* --- Main Layout --- */
         #app-screen {
             display: none;
             max-width: 1100px;
@@ -93,7 +93,7 @@
             text-align: center;
             padding: 20px 0;
             border-bottom: 3px solid var(--cb-dark-blue);
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -104,7 +104,69 @@
             margin: 0;
         }
 
-        /* --- Navigation Tabs --- */
+        /* --- Personal Rota Finder Component --- */
+        .finder-section {
+            background: var(--cb-white);
+            padding: 22px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            margin-bottom: 30px;
+            border-left: 5px solid var(--cb-light-blue);
+        }
+
+        .finder-section h3 {
+            margin-top: 0;
+            margin-bottom: 6px;
+            color: var(--cb-dark-blue);
+        }
+
+        .finder-input-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .finder-input {
+            flex: 1;
+            padding: 12px;
+            font-size: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .finder-btn {
+            background-color: var(--cb-light-blue);
+            color: var(--cb-white);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .finder-btn:hover {
+            background-color: var(--cb-dark-blue);
+        }
+
+        #personal-results-area {
+            display: none;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px dashed var(--cb-gray);
+        }
+
+        .personal-card {
+            background-color: var(--cb-gray);
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid var(--cb-dark-blue);
+        }
+
+        /* --- Dynamic Category Navigation Tabs --- */
         .tabs {
             display: flex;
             flex-wrap: wrap;
@@ -129,7 +191,7 @@
             color: var(--cb-white);
         }
 
-        /* --- Rota Sections --- */
+        /* --- Schedule Tables Structure --- */
         .rota-section {
             background: var(--cb-white);
             padding: 20px;
@@ -165,7 +227,7 @@
             background-color: #ffe6e6;
         }
 
-        /* --- Action Buttons --- */
+        /* --- Operational Badges & Callouts --- */
         .action-btn {
             background-color: var(--cb-white);
             color: var(--cb-light-blue);
@@ -192,7 +254,7 @@
             margin-bottom: 5px;
         }
 
-        /* --- Quick Edit Overlay Panel --- */
+        /* --- Universal Edit Overlay Modal --- */
         #edit-modal {
             display: none;
             position: fixed;
@@ -267,7 +329,7 @@
     <div id="login-screen">
         <div class="login-box">
             <h2 style="margin-top:0;">Craigavon Baptist Church</h2>
-            <p>Enter the connection key code to access the rotas:</p>
+            <p>Enter connection key code to access layouts:</p>
             <input type="password" id="keycode-input" placeholder="••••">
             <br>
             <button id="login-btn" onclick="checkCode()">Access System</button>
@@ -278,8 +340,25 @@
     <div id="app-screen">
         <header>
             <h1>Church Rota Hub</h1>
-            <span style="color: var(--cb-light-blue); font-weight: bold;">Live Schedule</span>
+            <span style="color: var(--cb-light-blue); font-weight: bold;">Live Schedule Dashboard</span>
         </header>
+
+        <div class="finder-section">
+            <h3>🔍 My Personal Rota Finder</h3>
+            <p style="margin: 0; font-size: 14px; color: #666;">Type your name to locate your custom upcoming duties and manage direct updates.</p>
+            <div class="finder-input-row">
+                <input type="text" id="personal-name-input" placeholder="Enter your name (e.g. Ben or Glynis)" class="finder-input">
+                <button class="finder-btn" onclick="findPersonalSchedule()">Show My Rota</button>
+            </div>
+
+            <div id="personal-results-area">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <h4 style="margin: 0; color: var(--cb-light-blue); text-transform: uppercase; font-size: 13px; letter-spacing: 1px;">Your Active Schedules</h4>
+                    <button onclick="clearPersonalSearch()" style="background: none; border: none; color: var(--cb-alert); cursor: pointer; font-weight: bold; text-decoration: underline;">Clear Finder</button>
+                </div>
+                <div id="personal-cards-container"></div>
+            </div>
+        </div>
 
         <div class="tabs" id="tabs-container"></div>
 
@@ -288,7 +367,7 @@
 
     <div id="edit-modal">
         <div class="modal-content">
-            <h3 id="modal-title">Edit Assignment / Request Swap</h3>
+            <h3 id="modal-title">Edit Assignment / Update Swap</h3>
             <input type="hidden" id="edit-slot-id">
             
             <div class="form-group">
@@ -302,7 +381,7 @@
                     <span style="color: var(--cb-alert); font-weight: bold;">Flag this slot as "Needs Cover"</span>
                 </label>
                 <small style="color: #666; display: block; margin-left: 22px; margin-top: 4px;">
-                    This highlights the row in red on the main page so anyone can see you need a swap.
+                    This highlights the row red across the schedule layout for visibility.
                 </small>
             </div>
 
@@ -314,25 +393,22 @@
     </div>
 
     <script>
-        // --- CONFIGURATION ---
+        // --- CORE DATABASE ENDPOINTS CONFIGURATION ---
         const SUPABASE_URL = "https://ojzwujpahfjmaeisnfez.supabase.co";
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qend1anBhaGZqbWFlaXNuZmV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTA5NDMsImV4cCI6MjA5NDU4Njk0M30.VvszGR6MbUnBhKsmsXBikkrjok2-F1bnyS4zOwDX5hg";
         
-        // Fixed the variable name collision bug here (using 'db' instead of 'supabase')
+        // Correct initialization instance tracking to fix collision error
         const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        // Your custom church key code
         const CHURCH_CODE = "1234"; 
 
         let globalRotaData = [];
         let currentActiveTab = "Main";
 
-        // Listen for "Enter" key on password screen
         document.getElementById('keycode-input').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') checkCode();
         });
 
-        // --- AUTHENTICATION GATEWAY ---
+        // --- GATEWAY VALIDATION SECURITY ---
         function checkCode() {
             const val = document.getElementById('keycode-input').value;
             if (val === CHURCH_CODE) {
@@ -344,22 +420,19 @@
             }
         }
 
-        // --- FETCH DATA FROM DATABASE ---
+        // --- ENGINE DATA EXTRACTION ---
         async function fetchUpcomingRotas() {
             const contentArea = document.getElementById('content-area');
-            contentArea.innerHTML = "<p style='text-align:center;'>Loading current schedules...</p>";
+            contentArea.innerHTML = "<p style='text-align:center;'>Loading rota registers...</p>";
 
-            // Automatically filters out previous Sundays (gets dates starting from today)
-            const todayStr = new Date().toISOString().split('T')[0];
-
+            // Pulls everything from your uploaded table to support historical and structural listings
             const { data, error } = await db
                 .from('rota_slots')
                 .select('*')
-                .gte('slot_date', todayStr)
                 .order('slot_date', { ascending: true });
 
             if (error) {
-                contentArea.innerHTML = `<p style="color:var(--cb-alert); text-align:center;">Database Error: ${error.message}</p>`;
+                contentArea.innerHTML = `<p style="color:var(--cb-alert); text-align:center;">Database Sync Failure: ${error.message}</p>`;
                 return;
             }
 
@@ -369,11 +442,59 @@
             renderFilteredView(currentActiveTab);
         }
 
-        // --- BUILD DYNAMIC TABS BASED ON ALL 9 ROTAS ---
+        // --- PERSONALIZED SCHEDULE SEARCH LOGIC ---
+        function findPersonalSchedule() {
+            const searchName = document.getElementById('personal-name-input').value.trim().toLowerCase();
+            const container = document.getElementById('personal-cards-container');
+            const resultsArea = document.getElementById('personal-results-area');
+            
+            if (!searchName) {
+                alert("Please enter a name to filter entries.");
+                return;
+            }
+
+            // Direct check containing substring matches across fields
+            const matchedSlots = globalRotaData.filter(slot => 
+                slot.assigned_names.toLowerCase().includes(searchName)
+            );
+
+            container.innerHTML = "";
+            resultsArea.style.display = "block";
+
+            if (matchedSlots.length === 0) {
+                container.innerHTML = `<p style="font-size: 14px; color: #777; font-style: italic; text-align: center; margin: 10px 0;">No scheduled assignments located matching "${searchName}".</p>`;
+                return;
+            }
+
+            matchedSlots.forEach(slot => {
+                const parsedDate = new Date(slot.slot_date).toLocaleDateString('en-GB', {
+                    weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'
+                });
+
+                const item = document.createElement('div');
+                item.className = "personal-card";
+                item.innerHTML = `
+                    <div>
+                        <span class="alert-badge" style="background-color: var(--cb-light-blue); margin-bottom: 4px;">${slot.rota_name}</span>
+                        <div style="font-weight: bold; color: var(--cb-text);">${parsedDate} — <span style="font-weight: 500; color: #555;">${slot.role}</span></div>
+                        <div style="font-size: 13px; color: #666; margin-top: 2px;">Assigned: <strong>${slot.assigned_names}</strong></div>
+                    </div>
+                    <button class="action-btn" onclick="openEditModal('${slot.id}', '${slot.assigned_names.replace(/'/g, "\\'")}', ${slot.needs_cover})">
+                        🔄 Swap Duty
+                    </button>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function clearPersonalSearch() {
+            document.getElementById('personal-name-input').value = "";
+            document.getElementById('personal-results-area').style.display = "none";
+        }
+
+        // --- AUTOMATED BUTTON TRACK CATEGORIES FORMATION ---
         function buildDynamicTabs() {
             const tabsContainer = document.getElementById('tabs-container');
-            
-            // Get unique rota names currently saved in your database
             const uniqueRotas = [...new Set(globalRotaData.map(item => item.rota_name))].sort();
             
             let tabsHtml = `<button class="tab-btn ${currentActiveTab === 'Main' ? 'active' : ''}" onclick="switchTab('Main')">All Roles (Main)</button>`;
@@ -392,7 +513,7 @@
             renderFilteredView(tabName);
         }
 
-        // --- RENDER SELECTED VIEW ---
+        // --- DASHBOARD UI GENERATION ---
         function renderFilteredView(view) {
             const contentArea = document.getElementById('content-area');
             contentArea.innerHTML = '';
@@ -403,18 +524,17 @@
             }
 
             if (filtered.length === 0) {
-                contentArea.innerHTML = `<p style="text-align:center; padding: 40px; color: #666;">No upcoming entries scheduled for "${view}".</p>`;
+                contentArea.innerHTML = `<p style="text-align:center; padding: 40px; color: #666;">No structured roster records found under "${view}".</p>`;
                 return;
             }
 
-            // Group the filter results by Sunday date
+            // Process data grouping array sorted by dates
             const grouped = filtered.reduce((acc, row) => {
                 if (!acc[row.slot_date]) acc[row.slot_date] = [];
                 acc[row.slot_date].push(row);
                 return acc;
             }, {});
 
-            // Generate structural lists for each distinct date group
             for (const [rawDate, slots] of Object.entries(grouped)) {
                 const parsedDate = new Date(rawDate);
                 const structuredDate = parsedDate.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
@@ -444,8 +564,8 @@
                         <table>
                             <thead>
                                 <tr>
-                                    ${view === 'Main' ? '<th style="width:25%">Rota</th>' : ''}
-                                    <th>Role / Detail</th>
+                                    ${view === 'Main' ? '<th style="width:25%">Rota Group</th>' : ''}
+                                    <th>Role / Session Detail</th>
                                     <th>Assigned Person(s)</th>
                                     <th style="width:20%">Actions</th>
                                 </tr>
@@ -459,7 +579,7 @@
             }
         }
 
-        // --- FORM MODAL ACTIONS ---
+        // --- OVERLAY INTERACTIVE MODAL ACTIONS ---
         function openEditModal(id, currentNames, needsCover) {
             document.getElementById('edit-slot-id').value = id;
             document.getElementById('edit-names').value = currentNames;
@@ -477,24 +597,28 @@
             const updatedCover = document.getElementById('edit-cover-checkbox').checked;
 
             if (!updatedNames.trim()) {
-                alert("Please enter an assigned name or specify 'Vacant'.");
+                alert("Please enter a custom assignment name or state 'Vacant'.");
                 return;
             }
 
-            // Write updates directly back to Supabase
             const { error } = await db
                 .from('rota_slots')
                 .update({ 
-                    assigned_names: updatedNames,
+                    assigned_names: updatedNames.trim(),
                     needs_cover: updatedCover 
                 })
                 .eq('id', id);
 
             if (error) {
-                alert("Failed to save changes: " + error.message);
+                alert("Failed to modify slot assignment details: " + error.message);
             } else {
                 closeModal();
-                fetchUpcomingRotas(); // Instantly refreshes view across the page
+                await fetchUpcomingRotas(); // Pull records to ensure real-time UI mapping
+                
+                // Keep personal results screen active if a user is currently looking at their row context
+                if(document.getElementById('personal-name-input').value.trim()) {
+                    findPersonalSchedule();
+                }
             }
         }
     </script>
