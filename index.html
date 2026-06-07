@@ -353,8 +353,7 @@
             border: none;
             padding: 10px 20px;
             border-radius: 4px;
-            cursor: pointer;
-        }
+            }
     </style>
 </head>
 <body>
@@ -519,9 +518,9 @@
                 return;
             }
 
-            // SCHEMA FIX: Look inside assigned_person column
+            // FIXED SCHEMA MATCH: Look inside assigned_persons column
             const matchedSlots = globalRotaData.filter(slot => 
-                slot.assigned_person && slot.assigned_person.toLowerCase().includes(searchName)
+                slot.assigned_persons && slot.assigned_persons.toLowerCase().includes(searchName)
             );
 
             container.innerHTML = "";
@@ -588,7 +587,7 @@
         // --- GRID RENDER GENERATION ENGINE ---
         function renderFilteredView(view) {
             const contentArea = document.getElementById('content-area');
-            contentArea.innerHTML = ''; // Fixed: Clears layout immediately to prevent duplication bugs
+            contentArea.innerHTML = ''; 
 
             let filtered = globalRotaData;
             if (view !== "Main") {
@@ -654,11 +653,11 @@
                             coreDetailsDisplay = `<div class="details-box"><strong>📌 Note:</strong> ${slot.focus_context || slot.notes || slot.details}</div>`;
                         }
 
-                        // SCHEMA FIX: slot.assigned_names changed to slot.assigned_person
+                        // FIXED SCHEMA MAPPING: Changed slot.assigned_person to slot.assigned_persons
                         singleDateHtmlBlock += `
                             <tr class="${rowStatusClass}">
                                 <td><strong>${slot.role}</strong></td>
-                                <td>${slot.assigned_person || '<em style="color:var(--cb-alert);">Vacant Input</em>'}</td>
+                                <td>${slot.assigned_persons || '<em style="color:var(--cb-alert);">Vacant Input</em>'}</td>
                                 <td>${coreDetailsDisplay}</td>
                                 <td style="text-align: right;">
                                     ${slot.needs_cover ? '<span class="alert-badge">Needs Cover</span><br>' : ''}
@@ -683,9 +682,9 @@
             const slot = globalRotaData.find(item => item.id === id);
             if (!slot) return;
 
-            // SCHEMA FIX: Reads from slot.assigned_person
+            // FIXED SCHEMA MAPPING: Reads from slot.assigned_persons
             document.getElementById('edit-slot-id').value = slot.id;
-            document.getElementById('edit-names').value = slot.assigned_person || '';
+            document.getElementById('edit-names').value = slot.assigned_persons || '';
             document.getElementById('edit-cover-checkbox').checked = slot.needs_cover || false;
             document.getElementById('edit-story').value = slot.story || '';
             document.getElementById('edit-verse').value = slot.memory_verse || '';
@@ -715,11 +714,11 @@
                 return;
             }
 
-            // SCHEMA FIX: Mutates assigned_person and updates focus_context field cleanly
+            // FIXED SCHEMA MAPPING: Targets assigned_persons column directly
             const { error } = await db
                 .from('rotas')
                 .update({ 
-                    assigned_person: updatedNames.trim(),
+                    assigned_persons: updatedNames.trim(),
                     needs_cover: updatedCover,
                     story: updatedStory.trim(),
                     memory_verse: updatedVerse.trim(),
