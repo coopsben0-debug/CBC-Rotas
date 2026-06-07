@@ -8,13 +8,26 @@
 <body class="bg-slate-50 p-4">
     <div id="rota-container" class="max-w-md mx-auto">Loading...</div>
     <script>
-        const supabase = supabase.createClient("https://ojzwujpahfjmaeisnfez.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qend1anBhaGZqbWFlaXNuZmV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTA5NDMsImV4cCI6MjA5NDU4Njk0M30.VvszGR6MbUnBhKsmsXBikkrjok2-F1bnyS4zOwDX5hg");
+        const supabase = supabase.createClient(
+            "https://ojzwujpahfjmaeisnfez.supabase.co", 
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qend1anBhaGZqbWFlaXNuZmV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTA5NDMsImV4cCI6MjA5NDU4Njk0M30.VvszGR6MbUnBhKsmsXBikkrjok2-F1bnyS4zOwDX5hg"
+        );
 
         async function fetchRota() {
-            const { data, error } = await supabase.from('rota_slots').select('role_title, member_name_text, member_email, service_dates(date)');
+            const { data, error } = await supabase
+                .from('rota_slots')
+                .select('role_title, member_name_text, member_email, service_dates(date)');
             
-            if (error) { document.getElementById('rota-container').innerText = "Error: " + error.message; return; }
-            if (!data || data.length === 0) { document.getElementById('rota-container').innerText = "No data found."; return; }
+            if (error) { 
+                document.getElementById('rota-container').innerHTML = `<p class="text-red-500">Error: ${error.message}</p>`; 
+                console.error(error);
+                return; 
+            }
+            
+            if (!data || data.length === 0) { 
+                document.getElementById('rota-container').innerText = "No data found."; 
+                return; 
+            }
             
             document.getElementById('rota-container').innerHTML = data.map(s => `
                 <div class="bg-white p-4 border rounded shadow-sm mb-2">
