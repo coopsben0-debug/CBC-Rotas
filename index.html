@@ -14,6 +14,7 @@
             --cb-text: #333333;
             --cb-alert: #D32F2F;
             --cb-success: #2E7D32;
+            --cb-accent: #EBF3FC;
         }
 
         body {
@@ -84,7 +85,7 @@
         /* --- Main Layout --- */
         #app-screen {
             display: none;
-            max-width: 1100px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
         }
@@ -197,34 +198,61 @@
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-            margin-bottom: 25px;
+            margin-bottom: 35px;
         }
 
         .rota-date-header {
             color: var(--cb-light-blue);
-            border-bottom: 2px solid var(--cb-gray);
+            border-bottom: 2px solid var(--cb-dark-blue);
             padding-bottom: 10px;
             margin-top: 0;
+            font-size: 22px;
+        }
+
+        .rota-group-title {
+            background-color: var(--cb-accent);
+            color: var(--cb-dark-blue);
+            font-weight: bold;
+            padding: 8px 12px;
+            margin-top: 15px;
+            margin-bottom: 5px;
+            border-radius: 4px;
+            font-size: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
+            margin-bottom: 15px;
         }
 
         th, td {
             text-align: left;
-            padding: 14px;
-            border-bottom: 1px solid var(--cb-gray);
+            padding: 12px 14px;
+            border-bottom: 1px solid #e0e0e0;
+            vertical-align: top;
         }
 
         th {
-            background-color: var(--cb-gray);
+            background-color: #f8f9fa;
             color: var(--cb-dark-blue);
+            font-weight: 600;
         }
 
         .needs-cover-row {
-            background-color: #ffe6e6;
+            background-color: #ffe6e6 !important;
+        }
+
+        .details-box {
+            font-size: 13px;
+            color: #555;
+            line-height: 1.4;
+        }
+        
+        .details-box strong {
+            color: var(--cb-dark-blue);
         }
 
         /* --- Operational Badges & Callouts --- */
@@ -236,6 +264,7 @@
             border-radius: 4px;
             cursor: pointer;
             font-weight: bold;
+            white-space: nowrap;
         }
 
         .action-btn:hover {
@@ -248,10 +277,21 @@
             color: white;
             padding: 4px 8px;
             border-radius: 4px;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: bold;
             display: inline-block;
             margin-bottom: 5px;
+        }
+
+        .monthly-badge {
+            background-color: #6A1B9A;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-left: 5px;
         }
 
         /* --- Universal Edit Overlay Modal --- */
@@ -270,8 +310,10 @@
             padding: 25px;
             border-radius: 8px;
             width: 100%;
-            max-width: 450px;
+            max-width: 500px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
         .modal-content h3 {
@@ -287,14 +329,16 @@
             display: block;
             margin-bottom: 5px;
             font-weight: bold;
+            font-size: 14px;
         }
 
-        .form-group input[type="text"] {
+        .form-group input[type="text"], .form-group textarea {
             width: 100%;
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 4px;
             box-sizing: border-box;
+            font-family: inherit;
         }
 
         .modal-actions {
@@ -367,7 +411,7 @@
 
     <div id="edit-modal">
         <div class="modal-content">
-            <h3 id="modal-title">Edit Assignment / Update Swap</h3>
+            <h3 id="modal-title">Edit Assignment / Update Details</h3>
             <input type="hidden" id="edit-slot-id">
             
             <div class="form-group">
@@ -375,14 +419,26 @@
                 <input type="text" id="edit-names" placeholder="e.g. Niall & Hazel">
             </div>
 
+            <div class="form-group" id="modal-story-group">
+                <label for="edit-story">Lesson Story / Topic:</label>
+                <input type="text" id="edit-story" placeholder="e.g. Noah's Ark">
+            </div>
+
+            <div class="form-group" id="modal-verse-group">
+                <label for="edit-verse">Memory Verse:</label>
+                <input type="text" id="edit-verse" placeholder="e.g. Genesis 6:9">
+            </div>
+
+            <div class="form-group" id="modal-notes-group">
+                <label for="edit-notes">General Notes / Focus Details:</label>
+                <textarea id="edit-notes" rows="2" placeholder="Special requirements or notice details..."></textarea>
+            </div>
+
             <div class="form-group" style="margin-top: 20px;">
                 <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
                     <input type="checkbox" id="edit-cover-checkbox" style="transform: scale(1.2);">
                     <span style="color: var(--cb-alert); font-weight: bold;">Flag this slot as "Needs Cover"</span>
                 </label>
-                <small style="color: #666; display: block; margin-left: 22px; margin-top: 4px;">
-                    This highlights the row red across the schedule layout for visibility.
-                </small>
             </div>
 
             <div class="modal-actions">
@@ -397,18 +453,17 @@
         const SUPABASE_URL = "https://ojzwujpahfjmaeisnfez.supabase.co";
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qend1anBhaGZqbWFlaXNuZmV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTA5NDMsImV4cCI6MjA5NDU4Njk0M30.VvszGR6MbUnBhKsmsXBikkrjok2-F1bnyS4zOwDX5hg";
         
-        // Correct initialization instance tracking to fix collision error
         const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         const CHURCH_CODE = "1234"; 
 
         let globalRotaData = [];
         let currentActiveTab = "Main";
 
-        document.getElementById('keycode-input').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') checkCode();
-        });
+        // Fix to handle clean split separation targets explicitly
+        const MAPPED_SECTIONS = {
+            "Welcome & Preparation": ["Welcome Team", "Communion & Table Preparation"]
+        };
 
-        // --- GATEWAY VALIDATION SECURITY ---
         function checkCode() {
             const val = document.getElementById('keycode-input').value;
             if (val === CHURCH_CODE) {
@@ -420,19 +475,18 @@
             }
         }
 
-        // --- ENGINE DATA EXTRACTION ---
+        // --- FETCH ENGINE WITH WEEKLY MONTHLY PROJECTION ---
         async function fetchUpcomingRotas() {
             const contentArea = document.getElementById('content-area');
             contentArea.innerHTML = "<p style='text-align:center;'>Loading rota registers...</p>";
 
-            // Compute local today's timestamp target boundary string (YYYY-MM-DD format)
             const localDate = new Date();
             const yyyy = localDate.getFullYear();
             const mm = String(localDate.getMonth() + 1).padStart(2, '0');
             const dd = String(localDate.getDate()).padStart(2, '0');
             const todayBoundaryStr = `${yyyy}-${mm}-${dd}`;
 
-            // Pull entries scheduled today or onward from the database
+            // Fetch current and forward records
             const { data, error } = await db
                 .from('rota_slots')
                 .select('*')
@@ -444,22 +498,72 @@
                 return;
             }
 
-            // Client-side composite key map deduplication to handle exact copy rows cleanly
-            const seen = new Set();
-            const uniqueRecords = data.filter(slot => {
-                const compositeKey = `${slot.slot_date}_${slot.rota_name}_${slot.role}_${slot.assigned_names}`;
-                if (seen.has(compositeKey)) return false;
-                seen.add(compositeKey);
-                return true;
+            // Extract all unique dates to form projection calendar map weeks
+            const uniqueWeeks = [...new Set(data.map(d => d.slot_date))].sort();
+
+            let expandedRecords = [];
+
+            data.forEach(slot => {
+                let currentName = slot.rota_name;
+                
+                // Dynamic clean-up transformation rules to handle welcome/preparation separation splits cleanly
+                if (currentName === "Welcome & Preparation" || currentName === "Welcome and Preparation") {
+                    if (slot.role.toLowerCase().includes("communion") || slot.role.toLowerCase().includes("table")) {
+                        currentName = "Communion & Table Preparation";
+                    } else {
+                        currentName = "Welcome Team";
+                    }
+                }
+
+                const checkNameLower = currentName.toLowerCase();
+                const isMonthlyProjected = checkNameLower.includes("tea") || checkNameLower.includes("communion") || checkNameLower.includes("preparation");
+
+                if (isMonthlyProjected) {
+                    const slotDateObj = new Date(slot.slot_date);
+                    const targetYear = slotDateObj.getFullYear();
+                    const targetMonth = slotDateObj.getMonth();
+
+                    // Project assignment across every active unique calendar week discovered matching this month
+                    uniqueWeeks.forEach(weekStr => {
+                        const wObj = new Date(weekStr);
+                        if (wObj.getFullYear() === targetYear && wObj.getMonth() === targetMonth) {
+                            expandedRecords.push({
+                                ...slot,
+                                rota_name: currentName,
+                                slot_date: weekStr,
+                                is_monthly_instance: true,
+                                tracking_id: `${slot.id}_proj_${weekStr}`
+                            });
+                        }
+                    });
+                } else {
+                    expandedRecords.push({
+                        ...slot,
+                        rota_name: currentName,
+                        tracking_id: slot.id
+                    });
+                }
             });
 
-            globalRotaData = uniqueRecords;
+            // Clean composite duplication filter layers
+            const deduplicateMap = new Set();
+            const finalCleanSet = [];
+
+            expandedRecords.forEach(row => {
+                const uniqKey = `${row.slot_date}_${row.rota_name}_${row.role}_${row.assigned_names}`;
+                if (!deduplicateMap.has(uniqKey)) {
+                    deduplicateMap.add(uniqKey);
+                    finalCleanSet.push(row);
+                }
+            });
+
+            globalRotaData = finalCleanSet;
             
             buildDynamicTabs();
             renderFilteredView(currentActiveTab);
         }
 
-        // --- PERSONALIZED SCHEDULE SEARCH LOGIC ---
+        // --- FINDER SEARCH DRIVER ---
         function findPersonalSchedule() {
             const searchName = document.getElementById('personal-name-input').value.trim().toLowerCase();
             const container = document.getElementById('personal-cards-container');
@@ -470,7 +574,6 @@
                 return;
             }
 
-            // Direct check containing substring matches across fields
             const matchedSlots = globalRotaData.filter(slot => 
                 slot.assigned_names.toLowerCase().includes(searchName)
             );
@@ -483,21 +586,29 @@
                 return;
             }
 
+            // Sort search results chronologically
+            matchedSlots.sort((a, b) => new Date(a.slot_date) - new Date(b.slot_date));
+
             matchedSlots.forEach(slot => {
                 const parsedDate = new Date(slot.slot_date).toLocaleDateString('en-GB', {
                     weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'
                 });
 
+                let contextLine = slot.notes || slot.details || '';
+                if (slot.story) contextLine = `Story: ${slot.story}`;
+
                 const item = document.createElement('div');
                 item.className = "personal-card";
                 item.innerHTML = `
                     <div>
-                        <span class="alert-badge" style="background-color: var(--cb-light-blue); margin-bottom: 4px;">${slot.rota_name}</span>
+                        <span class="alert-badge" style="background-color: var(--cb-light-blue); margin-bottom: 4px;">
+                            ${slot.rota_name} ${slot.is_monthly_instance ? '<span class="monthly-badge">Monthly</span>' : ''}
+                        </span>
                         <div style="font-weight: bold; color: var(--cb-text);">${parsedDate} — <span style="font-weight: 500; color: #555;">${slot.role}</span></div>
-                        <div style="font-size: 13px; color: #666; margin-top: 2px;">Assigned: <strong>${slot.assigned_names}</strong></div>
+                        <div style="font-size: 13px; color: #666; margin-top: 2px;">Focus: <strong>${contextLine || 'Standard Duty'}</strong></div>
                     </div>
-                    <button class="action-btn" onclick="openEditModal('${slot.id}', '${slot.assigned_names.replace(/'/g, "\\'")}', ${slot.needs_cover})">
-                        🔄 Swap Duty
+                    <button class="action-btn" onclick="openEditModal('${slot.id}', '${slot.assigned_names.replace(/'/g, "\\'")}', ${slot.needs_cover}, '${(slot.story || '').replace(/'/g, "\\'")}', '${(slot.memory_verse || '').replace(/'/g, "\\'")}', '${(slot.notes || slot.details || '').replace(/'/g, "\\'")}')">
+                        🔄 Update
                     </button>
                 `;
                 container.appendChild(item);
@@ -509,12 +620,11 @@
             document.getElementById('personal-results-area').style.display = "none";
         }
 
-        // --- AUTOMATED BUTTON TRACK CATEGORIES FORMATION ---
         function buildDynamicTabs() {
             const tabsContainer = document.getElementById('tabs-container');
             const uniqueRotas = [...new Set(globalRotaData.map(item => item.rota_name))].sort();
             
-            let tabsHtml = `<button class="tab-btn ${currentActiveTab === 'Main' ? 'active' : ''}" onclick="switchTab('Main')">All Roles (Main)</button>`;
+            let tabsHtml = `<button class="tab-btn ${currentActiveTab === 'Main' ? 'active' : ''}" onclick="switchTab('Main')">All Layouts (Main)</button>`;
             
             uniqueRotas.forEach(name => {
                 const activeClass = currentActiveTab === name ? 'active' : '';
@@ -530,7 +640,7 @@
             renderFilteredView(tabName);
         }
 
-        // --- DASHBOARD UI GENERATION ---
+        // --- GRID RENDER GENERATION ENGINE ---
         function renderFilteredView(view) {
             const contentArea = document.getElementById('content-area');
             contentArea.innerHTML = '';
@@ -545,66 +655,97 @@
                 return;
             }
 
-            // Process data grouping array sorted by dates
-            const grouped = filtered.reduce((acc, row) => {
+            // Group dates hierarchically
+            const groupedByDate = filtered.reduce((acc, row) => {
                 if (!acc[row.slot_date]) acc[row.slot_date] = [];
                 acc[row.slot_date].push(row);
                 return acc;
             }, {});
 
-            // Explicitly sort date object keys to guarantee fixed chronological layout sequence order
-            const sortedDates = Object.keys(grouped).sort((a, b) => new Date(a) - new Date(b));
+            const sortedDates = Object.keys(groupedByDate).sort((a, b) => new Date(a) - new Date(b));
 
             sortedDates.forEach(rawDate => {
-                const slots = grouped[rawDate];
+                const slotsForDate = groupedByDate[rawDate];
                 const parsedDate = new Date(rawDate);
                 const structuredDate = parsedDate.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
-                let tableRowsHtml = '';
-                slots.forEach(slot => {
-                    const rowStatusClass = slot.needs_cover ? 'needs-cover-row' : '';
-                    
-                    tableRowsHtml += `
-                        <tr class="${rowStatusClass}">
-                            ${view === 'Main' ? `<td><strong>${slot.rota_name}</strong></td>` : ''}
-                            <td>${slot.role}</td>
-                            <td>${slot.assigned_names}</td>
-                            <td>
-                                ${slot.needs_cover ? '<span class="alert-badge">Needs Cover</span><br>' : ''}
-                                <button class="action-btn" onclick="openEditModal('${slot.id}', '${slot.assigned_names.replace(/'/g, "\\'")}', ${slot.needs_cover})">
-                                    Edit / Swap
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                });
+                // Group entries by team section row divisions inside the dashboard panel view seamlessly
+                const sectionsMap = slotsForDate.reduce((acc, slot) => {
+                    if (!acc[slot.rota_name]) acc[slot.rota_name] = [];
+                    acc[slot.rota_name].push(slot);
+                    return acc;
+                }, {});
 
-                contentArea.innerHTML += `
-                    <div class="rota-section">
-                        <h2 class="rota-date-header">${structuredDate}</h2>
+                let singleDateHtmlBlock = `<div class="rota-section"><h2 class="rota-date-header">${structuredDate}</h2>`;
+
+                for (const [sectionTitle, rows] of Object.entries(sectionsMap)) {
+                    singleDateHtmlBlock += `
+                        <div class="rota-group-title">
+                            ${sectionTitle} ${rows[0].is_monthly_instance ? '<span class="monthly-badge">Monthly Cycle Repeat</span>' : ''}
+                        </div>
                         <table>
                             <thead>
                                 <tr>
-                                    ${view === 'Main' ? '<th style="width:25%">Rota Group</th>' : ''}
-                                    <th>Role / Session Detail</th>
-                                    <th>Assigned Person(s)</th>
-                                    <th style="width:20%">Actions</th>
+                                    <th style="width: 25%;">Role / Assignment Track</th>
+                                    <th style="width: 30%;">Assigned Person(s)</th>
+                                    <th>Focus Context / Lesson Details</th>
+                                    <th style="width: 15%; text-align: right;">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                ${tableRowsHtml}
-                            </tbody>
-                        </table>
-                    </div>
-                `;
+                    `;
+
+                    rows.forEach(slot => {
+                        const rowStatusClass = slot.needs_cover ? 'needs-cover-row' : '';
+                        
+                        // Parse clear curriculum lines explicitly or supply contextual detail tags
+                        let coreDetailsDisplay = "—";
+                        const isSundaySchool = sectionTitle.toLowerCase().includes("sunday school");
+                        
+                        if (isSundaySchool) {
+                            coreDetailsDisplay = `
+                                <div class="details-box">
+                                    <strong>📖 Story:</strong> ${slot.story || 'TBD'}<br>
+                                    <strong>🎯 Verse:</strong> ${slot.memory_verse || 'TBD'}
+                                </div>`;
+                        } else if (slot.notes || slot.details) {
+                            coreDetailsDisplay = `<div class="details-box"><strong>📌 Note:</strong> ${slot.notes || slot.details}</div>`;
+                        } else if (slot.is_monthly_instance) {
+                            coreDetailsDisplay = `<div class="details-box" style="color: #6A1B9A;">Standard monthly service layout projection</div>`;
+                        }
+
+                        singleDateHtmlBlock += `
+                            <tr class="${rowStatusClass}">
+                                <td><strong>${slot.role}</strong></td>
+                                <td>${slot.assigned_names || '<em style="color:var(--cb-alert);">Vacant Input</em>'}</td>
+                                <td>${coreDetailsDisplay}</td>
+                                <td style="text-align: right;">
+                                    ${slot.needs_cover ? '<span class="alert-badge">Needs Cover</span><br>' : ''}
+                                    <button class="action-btn" onclick="openEditModal('${slot.id}', '${slot.assigned_names.replace(/'/g, "\\'")}', ${slot.needs_cover}, '${(slot.story || '').replace(/'/g, "\\'")}', '${(slot.memory_verse || '').replace(/'/g, "\\'")}', '${(slot.notes || slot.details || '').replace(/'/g, "\\'")}')">
+                                        Edit Details
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+
+                    singleDateHtmlBlock += `</tbody></table>`;
+                }
+
+                singleDateHtmlBlock += `</div>`;
+                contentArea.innerHTML += singleDateHtmlBlock;
             });
         }
 
-        // --- OVERLAY INTERACTIVE MODAL ACTIONS ---
-        function openEditModal(id, currentNames, needsCover) {
+        // --- MODAL CONFIGURATION DRIVER ---
+        function openEditModal(id, currentNames, needsCover, story, verse, notes) {
             document.getElementById('edit-slot-id').value = id;
             document.getElementById('edit-names').value = currentNames;
             document.getElementById('edit-cover-checkbox').checked = needsCover;
+            document.getElementById('edit-story').value = story;
+            document.getElementById('edit-verse').value = verse;
+            document.getElementById('edit-notes').value = notes;
+
             document.getElementById('edit-modal').style.display = 'flex';
         }
 
@@ -616,9 +757,12 @@
             const id = document.getElementById('edit-slot-id').value;
             const updatedNames = document.getElementById('edit-names').value;
             const updatedCover = document.getElementById('edit-cover-checkbox').checked;
+            const updatedStory = document.getElementById('edit-story').value;
+            const updatedVerse = document.getElementById('edit-verse').value;
+            const updatedNotes = document.getElementById('edit-notes').value;
 
             if (!updatedNames.trim()) {
-                alert("Please enter a custom assignment name or state 'Vacant'.");
+                alert("Please enter assignment names or state 'Vacant'.");
                 return;
             }
 
@@ -626,7 +770,11 @@
                 .from('rota_slots')
                 .update({ 
                     assigned_names: updatedNames.trim(),
-                    needs_cover: updatedCover 
+                    needs_cover: updatedCover,
+                    story: updatedStory.trim(),
+                    memory_verse: updatedVerse.trim(),
+                    notes: updatedNotes.trim(),
+                    details: updatedNotes.trim() // Sync fields across tables securely
                 })
                 .eq('id', id);
 
@@ -634,9 +782,8 @@
                 alert("Failed to modify slot assignment details: " + error.message);
             } else {
                 closeModal();
-                await fetchUpcomingRotas(); // Pull records to ensure real-time UI mapping
+                await fetchUpcomingRotas();
                 
-                // Keep personal results screen active if a user is currently looking at their row context
                 if(document.getElementById('personal-name-input').value.trim()) {
                     findPersonalSchedule();
                 }
