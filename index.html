@@ -391,7 +391,7 @@
             <h3>🔍 My Personal Rota Finder</h3>
             <p style="margin: 0; font-size: 14px; color: #666;">Type your name to locate your custom upcoming duties and manage direct updates.</p>
             <div class="finder-input-row">
-                <input type="text" id="personal-name-input" placeholder="Enter your name (e.g. Ben or Glynis)" class="finder-input">
+                <input type="text" id="personal-name-input" placeholder="Enter your name (e.g. Ben, Niall, or Kathryn)" class="finder-input">
                 <button class="finder-btn" onclick="findPersonalSchedule()">Show My Rota</button>
             </div>
 
@@ -459,11 +459,6 @@
         let globalRotaData = [];
         let currentActiveTab = "Main";
 
-        // Fix to handle clean split separation targets explicitly
-        const MAPPED_SECTIONS = {
-            "Welcome & Preparation": ["Welcome Team", "Communion & Table Preparation"]
-        };
-
         function checkCode() {
             const val = document.getElementById('keycode-input').value;
             if (val === CHURCH_CODE) {
@@ -506,7 +501,7 @@
             data.forEach(slot => {
                 let currentName = slot.rota_name;
                 
-                // Dynamic clean-up transformation rules to handle welcome/preparation separation splits cleanly
+                // Normalization cleanup rules for layout groups
                 if (currentName === "Welcome & Preparation" || currentName === "Welcome and Preparation") {
                     if (slot.role.toLowerCase().includes("communion") || slot.role.toLowerCase().includes("table")) {
                         currentName = "Communion & Table Preparation";
@@ -516,7 +511,11 @@
                 }
 
                 const checkNameLower = currentName.toLowerCase();
-                const isMonthlyProjected = checkNameLower.includes("tea") || checkNameLower.includes("communion") || checkNameLower.includes("preparation");
+                // Expanded monthly cycle triggers to auto-project Cleaning Rota weeks alongside Tea and Communion
+                const isMonthlyProjected = checkNameLower.includes("tea") || 
+                                           checkNameLower.includes("communion") || 
+                                           checkNameLower.includes("preparation") ||
+                                           checkNameLower.includes("cleaning");
 
                 if (isMonthlyProjected) {
                     const slotDateObj = new Date(slot.slot_date);
@@ -669,7 +668,7 @@
                 const parsedDate = new Date(rawDate);
                 const structuredDate = parsedDate.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
-                // Group entries by team section row divisions inside the dashboard panel view seamlessly
+                // Group entries by team section inside the dashboard view
                 const sectionsMap = slotsForDate.reduce((acc, slot) => {
                     if (!acc[slot.rota_name]) acc[slot.rota_name] = [];
                     acc[slot.rota_name].push(slot);
@@ -698,11 +697,10 @@
                     rows.forEach(slot => {
                         const rowStatusClass = slot.needs_cover ? 'needs-cover-row' : '';
                         
-                        // Parse clear curriculum lines explicitly or supply contextual detail tags
                         let coreDetailsDisplay = "—";
-                        const isSundaySchool = sectionTitle.toLowerCase().includes("sunday school");
+                        const checkLowerTitle = sectionTitle.toLowerCase();
                         
-                        if (isSundaySchool) {
+                        if (checkLowerTitle.includes("sunday school")) {
                             coreDetailsDisplay = `
                                 <div class="details-box">
                                     <strong>📖 Story:</strong> ${slot.story || 'TBD'}<br>
@@ -774,7 +772,7 @@
                     story: updatedStory.trim(),
                     memory_verse: updatedVerse.trim(),
                     notes: updatedNotes.trim(),
-                    details: updatedNotes.trim() // Sync fields across tables securely
+                    details: updatedNotes.trim() // Sync fields across historical layouts securely
                 })
                 .eq('id', id);
 
