@@ -425,10 +425,18 @@
             const contentArea = document.getElementById('content-area');
             contentArea.innerHTML = "<p style='text-align:center;'>Loading rota registers...</p>";
 
-            // Pulls everything from your uploaded table to support historical and structural listings
+            // Compute local today's timestamp target boundary string (YYYY-MM-DD format)
+            const localDate = new Date();
+            const yyyy = localDate.getFullYear();
+            const mm = String(localDate.getMonth() + 1).padStart(2, '0');
+            const dd = String(localDate.getDate()).padStart(2, '0');
+            const todayBoundaryStr = `${yyyy}-${mm}-${dd}`;
+
+            // Pull entries scheduled today or onward from the database
             const { data, error } = await db
                 .from('rota_slots')
                 .select('*')
+                .gte('slot_date', todayBoundaryStr)
                 .order('slot_date', { ascending: true });
 
             if (error) {
@@ -436,7 +444,16 @@
                 return;
             }
 
-            globalRotaData = data;
+            // Client-side composite key map deduplication to handle exact copy rows cleanly
+            const seen = new Set();
+            const uniqueRecords = data.filter(slot => {
+                const compositeKey = `${slot.slot_date}_${slot.rota_name}_${slot.role}_${slot.assigned_names}`;
+                if (seen.has(compositeKey)) return false;
+                seen.add(compositeKey);
+                return true;
+            });
+
+            globalRotaData = uniqueRecords;
             
             buildDynamicTabs();
             renderFilteredView(currentActiveTab);
@@ -535,7 +552,11 @@
                 return acc;
             }, {});
 
-            for (const [rawDate, slots] of Object.entries(grouped)) {
+            // Explicitly sort date object keys to guarantee fixed chronological layout sequence order
+            const sortedDates = Object.keys(grouped).sort((a, b) => new Date(a) - new Date(b));
+
+            sortedDates.forEach(rawDate => {
+                const slots = grouped[rawDate];
                 const parsedDate = new Date(rawDate);
                 const structuredDate = parsedDate.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
@@ -576,7 +597,7 @@
                         </table>
                     </div>
                 `;
-            }
+            });
         }
 
         // --- OVERLAY INTERACTIVE MODAL ACTIONS ---
