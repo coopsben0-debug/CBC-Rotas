@@ -1,40 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-    <div id="debug">Connecting to database...</div>
-
+    <div id="debug" style="font-family: sans-serif; padding: 20px;">Testing connection...</div>
+    
     <script>
-        // Configuration
         const SUPABASE_URL = "https://ojzwujpahfjmaeisnfez.supabase.co";
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qend1anBhaGZqbWFlaXNuZmV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTA5NDMsImV4cCI6MjA5NDU4Njk0M30.VvszGR6MbUnBhKsmsXBikkrjok2-F1bnyS4zOwDX5hg";
 
-        // Main function
-        async function loadRota() {
+        async function testConnection() {
             const display = document.getElementById('debug');
             try {
-                // Initialize
+                // Initialize client
                 const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
                 
-                // Fetch data from your rota_slots table
+                // Attempt to fetch from your table
                 const { data, error } = await supabase.from('rota_slots').select('*');
                 
                 if (error) {
-                    display.innerText = "Error: " + error.message;
+                    display.innerText = "DATABASE ERROR: " + error.message;
                 } else {
-                    display.innerText = "Success! Found " + data.length + " rows.";
-                    console.log(data); // Check your browser console (F12)
+                    display.innerText = "SUCCESS! Found " + data.length + " rows.";
                 }
             } catch (err) {
-                display.innerText = "System Failure: " + err.message;
+                display.innerText = "CRITICAL ERROR: " + err.message;
             }
         }
-
-        // Run when page loads
-        loadRota();
+        testConnection();
     </script>
 </body>
 </html>
