@@ -8,7 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="bg-slate-50 text-slate-900 pb-10">
-    <nav class="bg-slate-900 text-white p-4 sticky top-0 z-10 shadow-md">
+    <nav class="bg-slate-900 text-white p-4 shadow-md sticky top-0">
         <h1 class="font-black text-lg">Craigavon Baptist Rota</h1>
     </nav>
 
@@ -17,16 +17,15 @@
     </main>
 
     <script>
-        // Supabase configuration
-        const SUPABASE_URL = "https://ojzwujpahfjmaeisnfez.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qend1anBhaGZqbWFlaXNuZmV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTA5NDMsImV4cCI6MjA5NDU4Njk0M30.VvszGR6MbUnBhKsmsXBikkrjok2-F1bnyS4zOwDX5hg";
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const supabase = supabase.createClient(
+            "https://ojzwujpahfjmaeisnfez.supabase.co", 
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qend1anBhaGZqbWFlaXNuZmV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTA5NDMsImV4cCI6MjA5NDU4Njk0M30.VvszGR6MbUnBhKsmsXBikkrjok2-F1bnyS4zOwDX5hg"
+        );
 
         async function fetchRota() {
             const today = new Date().toISOString().split('T')[0];
             
-            // Querying the primary rota_slots table joined with service_dates
-            // Ensure you have established a Foreign Key relationship between these tables in Supabase
+            // Join rota_slots with service_dates
             const { data, error } = await supabase
                 .from('rota_slots')
                 .select('role_title, member_name_text, service_dates(date)')
@@ -34,7 +33,7 @@
                 .order('date', { foreignTable: 'service_dates', ascending: true });
 
             if (error) {
-                document.getElementById('rota-container').innerHTML = `<p class="text-red-500 p-4">Error loading data: ${error.message}</p>`;
+                document.getElementById('rota-container').innerHTML = `<p class="text-red-500 p-4">Error: ${error.message}</p>`;
                 return;
             }
 
@@ -43,28 +42,28 @@
                 return;
             }
 
-            // Group data by date to keep roles together under one Sunday card
+            // Grouping logic for the UI
             const grouped = data.reduce((acc, slot) => {
-                const date = slot.service_dates?.date || 'Unknown Date';
+                const date = slot.service_dates?.date;
+                if (!date) return acc;
                 if (!acc[date]) acc[date] = [];
                 acc[date].push(slot);
                 return acc;
             }, {});
 
-            // Render the cards
-            const container = document.getElementById('rota-container');
-            container.innerHTML = Object.keys(grouped).map(date => `
+            document.getElementById('rota-container').innerHTML = Object.keys(grouped).map(date => `
                 <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-                    <h2 class="font-black text-lg mb-4 text-blue-700 border-b pb-2">${new Date(date).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}</h2>
-                    <div class="space-y-4">
+                    <h2 class="font-black text-lg mb-4 text-blue-700 border-b pb-2">
+                        ${new Date(date).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}
+                    </h2>
+                    <div class="space-y-3">
                         ${grouped[date].map(s => `
-                            <div class="flex justify-between items-start">
+                            <div class="flex justify-between items-center">
                                 <div>
-                                    <p class="text-[10px] font-black uppercase text-slate-400 tracking-wider">${s.role_title}</p>
-                                    <p class="font-semibold text-slate-800">${s.member_name_text}</p>
+                                    <p class="text-[9px] font-black uppercase text-slate-400 tracking-wider">${s.role_title}</p>
+                                    <p class="font-semibold text-slate-800 text-sm">${s.member_name_text}</p>
                                 </div>
-                                <a href="mailto:?subject=Rota Swap: ${s.role_title} (${date})" 
-                                   class="text-[10px] bg-slate-100 hover:bg-slate-200 px-3 py-1 rounded-full font-bold transition">Swap</a>
+                                <a href="mailto:?subject=Swap Request: ${s.role_title} on ${date}" class="text-[10px] bg-slate-100 px-3 py-1 rounded-full font-bold">Swap</a>
                             </div>
                         `).join('')}
                     </div>
