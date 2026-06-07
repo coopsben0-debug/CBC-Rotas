@@ -470,7 +470,6 @@
             const dd = String(localDate.getDate()).padStart(2, '0');
             const todayBoundaryStr = `${yyyy}-${mm}-${dd}`;
 
-            // Fetch current and forward records
             const { data, error } = await db
                 .from('rota_slots')
                 .select('*')
@@ -487,11 +486,6 @@
             data.forEach(slot => {
                 let currentName = slot.rota_name;
                 
-                /* --- OPTIONAL DATA NORMALIZATION BLOCK ---
-                  If your new database configuration directly stores final clean names 
-                  (like "Welcome Team", "Music Team", etc.), you can safely leave this block as is 
-                  or remove it entirely. It acts as an override helper for legacy layouts.
-                */
                 if (currentName === "Welcome & Preparation" || currentName === "Welcome and Preparation") {
                     if (slot.role.toLowerCase().includes("communion") || slot.role.toLowerCase().includes("table")) {
                         currentName = "Communion & Table Preparation";
@@ -500,7 +494,6 @@
                     }
                 }
 
-                // Maps rows directly 1:1 to their true database date without duplication projection
                 cleanedRecords.push({
                     ...slot,
                     rota_name: currentName,
@@ -537,7 +530,6 @@
                 return;
             }
 
-            // Sort search results chronologically
             matchedSlots.sort((a, b) => new Date(a.slot_date) - new Date(b.slot_date));
 
             matchedSlots.forEach(slot => {
@@ -558,7 +550,7 @@
                         <div style="font-weight: bold; color: var(--cb-text);">${parsedDate} — <span style="font-weight: 500; color: #555;">${slot.role}</span></div>
                         <div style="font-size: 13px; color: #666; margin-top: 2px;">Focus: <strong>${contextLine || 'Standard Duty'}</strong></div>
                     </div>
-                    <button class="action-btn" onclick="openEditModal('${slot.id}', '${slot.assigned_names.replace(/'/g, "\\'")}', ${slot.needs_cover}, '${(slot.story || '').replace(/'/g, "\\'")}', '${(slot.memory_verse || '').replace(/'/g, "\\'")}', '${(slot.notes || slot.details || '').replace(/'/g, "\\'")}')">
+                    <button class="action-btn" onclick="openEditModal('${slot.id}')">
                         🔄 Update
                     </button>
                 `;
@@ -606,7 +598,6 @@
                 return;
             }
 
-            // Group dates hierarchically
             const groupedByDate = filtered.reduce((acc, row) => {
                 if (!acc[row.slot_date]) acc[row.slot_date] = [];
                 acc[row.slot_date].push(row);
@@ -620,7 +611,6 @@
                 const parsedDate = new Date(rawDate);
                 const structuredDate = parsedDate.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
-                // Group entries by team section inside the dashboard view
                 const sectionsMap = slotsForDate.reduce((acc, slot) => {
                     if (!acc[slot.rota_name]) acc[slot.rota_name] = [];
                     acc[slot.rota_name].push(slot);
@@ -669,7 +659,7 @@
                                 <td>${coreDetailsDisplay}</td>
                                 <td style="text-align: right;">
                                     ${slot.needs_cover ? '<span class="alert-badge">Needs Cover</span><br>' : ''}
-                                    <button class="action-btn" onclick="openEditModal('${slot.id}', '${slot.assigned_names.replace(/'/g, "\\'")}', ${slot.needs_cover}, '${(slot.story || '').replace(/'/g, "\\'")}', '${(slot.memory_verse || '').replace(/'/g, "\\'")}', '${(slot.notes || slot.details || '').replace(/'/g, "\\'")}')">
+                                    <button class="action-btn" onclick="openEditModal('${slot.id}')">
                                         Edit Details
                                     </button>
                                 </td>
@@ -686,13 +676,22 @@
         }
 
         // --- MODAL CONFIGURATION DRIVER ---
-        function openEditModal(id, currentNames, needsCover, story, verse, notes) {
-            document.getElementById('edit-slot-id').value = id;
-            document.getElementById('edit-names').value = currentNames;
-            document.getElementById('edit-cover-checkbox').checked = needsCover;
-            document.getElementById('edit-story').value = story;
-            document.getElementById('edit-verse').value = verse;
-            document.getElementById('edit-notes').value = notes;
+        function openEditModal(id) {
+            // Secure lookup directly out of local memory to avoid HTML string injection bugs
+            const slot = globalRotaData.find(item => item.id === id);
+            if (!slot) return;
+
+            document.getElementById('edit-slot-id').value = slot.id;
+            document.getElementById('edit-names').value = slot.assigned_names || '';
+            document.getElementById('edit-cover-checkbox').checked = slot.needs_cover || false;
+            document.getElementById('edit-story').value = slot.story || '';
+            document.getElementById('edit-verse').value = slot.memory_verse || '';
+            document.getElementById('edit-notes').value = slot.notes || slot.details || '';
+
+            // Dynamically show or hide Sunday School inputs based on the target group category
+            const isSundaySchool = slot.rota_name.toLowerCase().includes("sunday school");
+            document.getElementById('modal-story-group').style.display = isSundaySchool ? 'block' : 'none';
+            document.getElementById('modal-verse-group').style.display = isSundaySchool ? 'block' : 'none';
 
             document.getElementById('edit-modal').style.display = 'flex';
         }
@@ -722,7 +721,7 @@
                     story: updatedStory.trim(),
                     memory_verse: updatedVerse.trim(),
                     notes: updatedNotes.trim(),
-                    details: updatedNotes.trim() // Sync fields across historical layouts securely
+                    details: updatedNotes.trim()
                 })
                 .eq('id', id);
 
