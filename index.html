@@ -541,9 +541,9 @@
                 return;
             }
 
-            // LOOKS INSIDE CORRECT PLURAL COLUMN: assigned_persons
+            // FIXED SCHEMA COLUMN: assigned_person
             const matchedSlots = globalRotaData.filter(slot => 
-                slot.assigned_persons && slot.assigned_persons.toLowerCase().includes(searchName)
+                slot.assigned_person && slot.assigned_person.toLowerCase().includes(searchName)
             );
 
             container.innerHTML = "";
@@ -676,11 +676,11 @@
                             coreDetailsDisplay = `<div class="details-box"><strong>📌 Note:</strong> ${slot.focus_context || slot.notes || slot.details}</div>`;
                         }
 
-                        // FIXED SCHEMA MAPPING: Renders from slot.assigned_persons
+                        // FIXED SCHEMA MAPPING: Renders from slot.assigned_person
                         singleDateHtmlBlock += `
                             <tr class="${rowStatusClass}">
                                 <td><strong>${slot.role}</strong></td>
-                                <td>${slot.assigned_persons || '<em style="color:var(--cb-alert);">Vacant Input</em>'}</td>
+                                <td>${slot.assigned_person || '<em style="color:var(--cb-alert);">Vacant Input</em>'}</td>
                                 <td>${coreDetailsDisplay}</td>
                                 <td style="text-align: right;">
                                     ${slot.needs_cover ? '<span class="alert-badge">Needs Cover</span><br>' : ''}
@@ -702,12 +702,14 @@
 
         // --- EDIT MODAL CONTROLLER SYSTEM ---
         function openEditModal(id) {
-            const slot = globalRotaData.find(item => item.id === id);
+            // FIXED ID TYPE MATCHING Bug: Using loose equality (==) 
+            // because id passed from DOM element string attribute needs to match numerical index values
+            const slot = globalRotaData.find(item => item.id == id);
             if (!slot) return;
 
             // Target correct row parameters
             document.getElementById('edit-slot-id').value = slot.id;
-            document.getElementById('edit-names').value = slot.assigned_persons || '';
+            document.getElementById('edit-names').value = slot.assigned_person || '';
             document.getElementById('edit-cover-checkbox').checked = slot.needs_cover || false;
             document.getElementById('edit-story').value = slot.story || '';
             document.getElementById('edit-verse').value = slot.memory_verse || '';
@@ -744,11 +746,12 @@
                 return;
             }
 
-            // TARGET CLIENT INSTANCE (db) & MULTI-FIELD SCHEMA RECORD MAPPING
+            // FIXED SCHEMA RECORD MAPPING: assigned_person
+            // NOTE: Make sure focus_context, notes, and details match your exact table configuration.
             const { error } = await db
                 .from('rotas')
                 .update({ 
-                    assigned_persons: updatedNames.trim(),
+                    assigned_person: updatedNames.trim(),
                     needs_cover: updatedCover,
                     story: updatedStory.trim(),
                     memory_verse: updatedVerse.trim(),
