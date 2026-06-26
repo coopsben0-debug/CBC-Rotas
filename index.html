@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Craigavon Baptist Church | Rota System</title>
+    
+    <!-- Added Favicon to show the logo on the browser tab -->
+    <link rel="icon" href="cbc%20logo.webp" type="image/webp">
+    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
@@ -469,7 +473,8 @@
 
     <div id="login-screen">
         <div class="login-box">
-            <img src="cbc logo.webp" alt="CBC Logo" class="login-logo" onerror="this.style.display='none'">
+            <!-- Updated src to handle spaces safely -->
+            <img src="cbc%20logo.webp" alt="CBC Logo" class="login-logo" onerror="this.style.display='none'">
             <h2>Craigavon Baptist</h2>
             <p>Enter connection key code to access layouts.</p>
             <input type="password" id="keycode-input" placeholder="••••">
@@ -480,7 +485,8 @@
 
     <div id="app-screen">
         <header>
-            <img src="cbc logo.webp" alt="CBC Logo" class="header-logo" onerror="this.style.display='none'">
+            <!-- Updated src to handle spaces safely -->
+            <img src="cbc%20logo.webp" alt="CBC Logo" class="header-logo" onerror="this.style.display='none'">
             <div class="header-text">
                 <h1>Church Rota Hub</h1>
                 <span>Live Schedule Dashboard</span>
@@ -781,7 +787,8 @@
         }
 
         function openEditModal(id) {
-            const slot = globalRotaData.find(item => item.id === id);
+            // FIXED: Using String() wrapper ensures database integer IDs don't fail strict equality checks
+            const slot = globalRotaData.find(item => String(item.id) === String(id));
             if (!slot) return;
 
             document.getElementById('edit-slot-id').value = slot.id;
