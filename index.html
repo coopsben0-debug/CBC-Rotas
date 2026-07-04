@@ -130,6 +130,7 @@
             padding: 25px 0;
             border-bottom: 3px solid var(--cb-gray-border);
             margin-bottom: 30px;
+            flex-wrap: wrap;
         }
 
         .header-logo {
@@ -220,6 +221,8 @@
             justify-content: space-between;
             align-items: center;
             border: 1px solid #D5E6F7;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         /* --- Dynamic Tabs --- */
@@ -289,12 +292,14 @@
 
         .table-responsive {
             overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
+            min-width: 600px;
         }
 
         th, td {
@@ -373,6 +378,8 @@
             justify-content: center;
             align-items: center;
             z-index: 1000;
+            padding: 20px;
+            box-sizing: border-box;
         }
 
         .modal-content {
@@ -431,6 +438,7 @@
             margin-top: 25px;
             border-top: 1px solid var(--cb-gray-border);
             padding-top: 20px;
+            flex-wrap: wrap;
         }
 
         .save-btn {
@@ -442,6 +450,8 @@
             cursor: pointer;
             font-weight: 600;
             transition: background-color 0.2s;
+            flex: 1;
+            text-align: center;
         }
 
         .save-btn:hover { background-color: var(--cb-dark-blue); }
@@ -455,6 +465,8 @@
             cursor: pointer;
             font-weight: 600;
             transition: background-color 0.2s;
+            flex: 1;
+            text-align: center;
         }
 
         .cancel-btn:hover { background-color: #E2E8F0; }
@@ -467,13 +479,48 @@
             border-radius: 8px;
             border: 1px dashed var(--cb-gray-border);
         }
+
+        /* --- Responsiveness for Mobile/Tablets --- */
+        @media (max-width: 768px) {
+            header {
+                justify-content: center;
+                text-align: center;
+            }
+            .header-logo {
+                margin-right: 0;
+                margin-bottom: 15px;
+            }
+            .finder-input-row {
+                flex-direction: column;
+            }
+            .finder-btn {
+                padding: 14px;
+                width: 100%;
+            }
+            .rota-section {
+                padding: 15px;
+            }
+            .rota-date-header {
+                font-size: 18px;
+            }
+            th, td {
+                font-size: 14px;
+                padding: 12px 10px;
+            }
+            .action-btn {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+            .modal-content {
+                padding: 20px;
+            }
+        }
     </style>
 </head>
 <body>
 
     <div id="login-screen">
         <div class="login-box">
-            <!-- Updated src to handle spaces safely -->
             <img src="cbc%20logo.webp" alt="CBC Logo" class="login-logo" onerror="this.style.display='none'">
             <h2>Craigavon Baptist</h2>
             <p>Enter connection key code to access layouts.</p>
@@ -485,7 +532,6 @@
 
     <div id="app-screen">
         <header>
-            <!-- Updated src to handle spaces safely -->
             <img src="cbc%20logo.webp" alt="CBC Logo" class="header-logo" onerror="this.style.display='none'">
             <div class="header-text">
                 <h1>Church Rota Hub</h1>
@@ -607,9 +653,17 @@
                     }
                 }
 
+                // Extracted strictly the YYYY-MM-DD to group properly
+                let normalizedDate = slot.date;
+                if (normalizedDate && normalizedDate.includes('T')) {
+                    normalizedDate = normalizedDate.split('T')[0];
+                } else if (normalizedDate && normalizedDate.includes(' ')) {
+                    normalizedDate = normalizedDate.split(' ')[0];
+                }
+
                 cleanedRecords.push({
                     ...slot,
-                    slot_date: slot.date, 
+                    slot_date: normalizedDate, 
                     rota_name: currentName,
                     tracking_id: slot.id
                 });
@@ -738,10 +792,10 @@
                         <table>
                             <thead>
                                 <tr>
-                                    <th style="width: 25%;">Role / Assignment Track</th>
-                                    <th style="width: 25%;">Assigned Person(s)</th>
-                                    <th style="width: 35%;">Focus Context / Lesson Details</th>
-                                    <th style="width: 15%; text-align: right;">Actions</th>
+                                    <th>Role / Assignment Track</th>
+                                    <th>Assigned Person(s)</th>
+                                    <th>Focus Context / Lesson Details</th>
+                                    <th style="text-align: right;">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -753,7 +807,7 @@
                         let coreDetailsDisplay = "—";
                         const checkLowerTitle = sectionTitle.toLowerCase();
                         
-                        if (checkLowerTitle.includes("sunday school") || checkLowerTitle.includes("sunday kids")) {
+                        if (checkLowerTitle.includes("sunday school") || checkLowerTitle.includes("sunday kids") || checkLowerTitle.includes("jr") || checkLowerTitle.includes("senior")) {
                             coreDetailsDisplay = `
                                 <div class="details-box">
                                     <strong>📖 Story:</strong> ${slot.story || '—'}<br>
@@ -787,7 +841,6 @@
         }
 
         function openEditModal(id) {
-            // FIXED: Using String() wrapper ensures database integer IDs don't fail strict equality checks
             const slot = globalRotaData.find(item => String(item.id) === String(id));
             if (!slot) return;
 
@@ -801,7 +854,9 @@
             document.getElementById('modal-title').innerText = `Edit: ${slot.rota_name}`;
             document.getElementById('modal-role-label').innerText = `Assigning to [ ${slot.role} ] :`;
 
-            const isSundaySchool = slot.rota_name.toLowerCase().includes("sunday school") || slot.rota_name.toLowerCase().includes("sunday kids");
+            const checkLowerTitle = slot.rota_name.toLowerCase();
+            const isSundaySchool = checkLowerTitle.includes("sunday school") || checkLowerTitle.includes("sunday kids") || checkLowerTitle.includes("jr") || checkLowerTitle.includes("senior");
+            
             document.getElementById('modal-story-group').style.display = isSundaySchool ? 'block' : 'none';
             document.getElementById('modal-verse-group').style.display = isSundaySchool ? 'block' : 'none';
 
@@ -825,7 +880,6 @@
                 return;
             }
 
-            // Target the button to show loading state
             const saveBtn = document.querySelector('.save-btn');
             saveBtn.innerText = "Saving...";
             saveBtn.disabled = true;
@@ -854,7 +908,8 @@
                 
                 await fetchUpcomingRotas();
                 
-                if(document.getElementById('personal-name-input').value.trim()) {
+                // If the user currently has the personal search results active, refresh them.
+                if (document.getElementById('personal-results-area').style.display === "block") {
                     findPersonalSchedule();
                 }
             }
