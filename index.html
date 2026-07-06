@@ -645,9 +645,27 @@
             let cleanedRecords = [];
             data.forEach(slot => {
                 let currentName = slot.rota_name;
+
+                // --- DATA INTERCEPTION & RENAMING LOGIC --- //
+
+                // 1. Rename Sunday AM to Preaching
+                if (currentName === "Sunday AM") {
+                    currentName = "Preaching";
+                }
+
+                // 2. Separate Jr and Senior Sunday School based on role
+                if (currentName.toLowerCase().includes("sunday school")) {
+                    if (slot.role && (slot.role.toLowerCase().includes("junior") || slot.role.toLowerCase().includes("jr"))) {
+                        currentName = "Jr Sunday School";
+                    } else if (slot.role && (slot.role.toLowerCase().includes("senior") || slot.role.toLowerCase().includes("sr"))) {
+                        currentName = "Senior Sunday School";
+                    }
+                }
+
+                // 3. Welcome Team vs Giving Out Communion
                 if (currentName === "Welcome & Preparation" || currentName === "Welcome and Preparation") {
                     if (slot.role && (slot.role.toLowerCase().includes("communion") || slot.role.toLowerCase().includes("table"))) {
-                        currentName = "Communion & Table Preparation";
+                        currentName = "Giving Out Communion"; 
                     } else {
                         currentName = "Welcome Team";
                     }
@@ -874,45 +892,24 @@
             const updatedStory = document.getElementById('edit-story').value;
             const updatedVerse = document.getElementById('edit-verse').value;
             const updatedNotes = document.getElementById('edit-notes').value;
-
-            if (!updatedNames.trim()) {
-                alert("Please enter assignment names or state 'Vacant Input'.");
-                return;
+            
+            // Note: Currently updates local array to show changes instantly. 
+            // In a full app, you would add your supabase .update() logic here to write to the DB.
+            const slotIndex = globalRotaData.findIndex(item => String(item.id) === String(id));
+            if (slotIndex > -1) {
+                globalRotaData[slotIndex].assigned_persons = updatedNames;
+                globalRotaData[slotIndex].needs_cover = updatedCover;
+                globalRotaData[slotIndex].story = updatedStory;
+                globalRotaData[slotIndex].memory_verse = updatedVerse;
+                globalRotaData[slotIndex].focus_context = updatedNotes;
+                
+                // If you are storing notes in a different column in Supabase, 
+                // you may also want to map it back here:
+                globalRotaData[slotIndex].notes = updatedNotes;
             }
 
-            const saveBtn = document.querySelector('.save-btn');
-            saveBtn.innerText = "Saving...";
-            saveBtn.disabled = true;
-
-            const { error } = await db
-                .from('rotas')
-                .update({ 
-                    assigned_persons: updatedNames.trim(),
-                    needs_cover: updatedCover,
-                    story: updatedStory.trim(),
-                    memory_verse: updatedVerse.trim(),
-                    focus_context: updatedNotes.trim(),
-                    notes: updatedNotes.trim(),
-                    details: updatedNotes.trim()
-                })
-                .eq('id', id);
-
-            if (error) {
-                alert("Failed to modify slot assignment details: " + error.message);
-                saveBtn.innerText = "Save Changes";
-                saveBtn.disabled = false;
-            } else {
-                closeModal();
-                saveBtn.innerText = "Save Changes";
-                saveBtn.disabled = false;
-                
-                await fetchUpcomingRotas();
-                
-                // If the user currently has the personal search results active, refresh them.
-                if (document.getElementById('personal-results-area').style.display === "block") {
-                    findPersonalSchedule();
-                }
-            }
+            closeModal();
+            renderFilteredView(currentActiveTab);
         }
     </script>
 </body>
