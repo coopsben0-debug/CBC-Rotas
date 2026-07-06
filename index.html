@@ -873,11 +873,16 @@
             document.getElementById('modal-role-label').innerText = `Assigning to [ ${slot.role} ] :`;
 
             const checkLowerTitle = slot.rota_name.toLowerCase();
-            const isSundaySchool = checkLowerTitle.includes("sunday school") || checkLowerTitle.includes("sunday kids") || checkLowerTitle.includes("jr") || checkLowerTitle.includes("senior");
-            
+            const isSundaySchool = checkLowerTitle.includes("sunday school") || 
+                                   checkLowerTitle.includes("sunday kids") || 
+                                   checkLowerTitle.includes("jr") || 
+                                   checkLowerTitle.includes("senior");
+
+            // Toggle visibility of Sunday School fields
             document.getElementById('modal-story-group').style.display = isSundaySchool ? 'block' : 'none';
             document.getElementById('modal-verse-group').style.display = isSundaySchool ? 'block' : 'none';
 
+            // Show the modal
             document.getElementById('edit-modal').style.display = 'flex';
         }
 
@@ -887,29 +892,45 @@
 
         async function saveSlotChanges() {
             const id = document.getElementById('edit-slot-id').value;
-            const updatedNames = document.getElementById('edit-names').value;
-            const updatedCover = document.getElementById('edit-cover-checkbox').checked;
-            const updatedStory = document.getElementById('edit-story').value;
-            const updatedVerse = document.getElementById('edit-verse').value;
-            const updatedNotes = document.getElementById('edit-notes').value;
-            
-            // Note: Currently updates local array to show changes instantly. 
-            // In a full app, you would add your supabase .update() logic here to write to the DB.
-            const slotIndex = globalRotaData.findIndex(item => String(item.id) === String(id));
-            if (slotIndex > -1) {
-                globalRotaData[slotIndex].assigned_persons = updatedNames;
-                globalRotaData[slotIndex].needs_cover = updatedCover;
-                globalRotaData[slotIndex].story = updatedStory;
-                globalRotaData[slotIndex].memory_verse = updatedVerse;
-                globalRotaData[slotIndex].focus_context = updatedNotes;
-                
-                // If you are storing notes in a different column in Supabase, 
-                // you may also want to map it back here:
-                globalRotaData[slotIndex].notes = updatedNotes;
-            }
+            const names = document.getElementById('edit-names').value;
+            const needsCover = document.getElementById('edit-cover-checkbox').checked;
+            const story = document.getElementById('edit-story').value;
+            const verse = document.getElementById('edit-verse').value;
+            const notes = document.getElementById('edit-notes').value;
 
-            closeModal();
-            renderFilteredView(currentActiveTab);
+            // Show loading state on button
+            const saveBtn = document.querySelector('.save-btn');
+            const originalText = saveBtn.innerText;
+            saveBtn.innerText = 'Saving...';
+            saveBtn.disabled = true;
+
+            // Push updates back to Supabase
+            const { error } = await db
+                .from('rotas')
+                .update({
+                    assigned_persons: names,
+                    needs_cover: needsCover,
+                    story: story,
+                    memory_verse: verse,
+                    focus_context: notes 
+                })
+                .eq('id', id);
+
+            saveBtn.innerText = originalText;
+            saveBtn.disabled = false;
+
+            if (error) {
+                alert('Failed to save changes: ' + error.message);
+            } else {
+                closeModal();
+                fetchUpcomingRotas(); // Pull the fresh data back down
+                
+                // If personal search is open, refresh it as well
+                const searchVal = document.getElementById('personal-name-input').value;
+                if (searchVal) {
+                    setTimeout(() => findPersonalSchedule(), 500);
+                }
+            }
         }
     </script>
 </body>
