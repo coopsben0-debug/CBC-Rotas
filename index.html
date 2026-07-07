@@ -131,7 +131,6 @@
             padding-bottom: 40px;
         }
 
-        /* Header */
         header {
             background: linear-gradient(135deg, var(--cbc-navy) 0%, var(--cbc-blue) 100%);
             color: var(--cbc-white);
@@ -184,7 +183,6 @@
             background: rgba(255, 255, 255, 0.3);
         }
 
-        /* Navigation & Filters */
         .nav-bar {
             background: var(--cbc-white);
             padding: 16px 20px;
@@ -237,7 +235,6 @@
             box-shadow: 0 0 0 3px rgba(232, 80, 27, 0.1);
         }
 
-        /* Filters */
         .filter-bar {
             background: var(--cbc-white);
             padding: 16px 20px;
@@ -287,14 +284,12 @@
             border-color: var(--cbc-accent);
         }
 
-        /* Content Area */
         .content-wrapper {
             max-width: 1000px;
             margin: 0 auto;
             padding: 24px 20px;
         }
 
-        /* Date Group Section */
         .date-group {
             margin-bottom: 32px;
             animation: fadeIn 0.4s ease;
@@ -335,7 +330,6 @@
             margin-left: auto;
         }
 
-        /* Rota Card */
         .rota-card {
             background: var(--cbc-white);
             border-radius: 12px;
@@ -417,7 +411,6 @@
             color: var(--cbc-accent);
         }
 
-        /* Empty State */
         .empty-state {
             text-align: center;
             padding: 60px 20px;
@@ -441,7 +434,6 @@
             font-size: 14px;
         }
 
-        /* Person Lookup Results */
         .person-results {
             background: var(--cbc-white);
             border-radius: 12px;
@@ -476,7 +468,6 @@
             font-weight: 600;
         }
 
-        /* Responsive */
         @media (max-width: 768px) {
             .login-container {
                 margin: 20px;
@@ -516,7 +507,6 @@
             }
         }
 
-        /* Loading Spinner */
         .spinner {
             border: 3px solid var(--cbc-border);
             border-top: 3px solid var(--cbc-accent);
@@ -651,14 +641,24 @@
                 return;
             }
 
-            // Content-based deduplication logic to clear structural duplicates
+            // 1. Sort records so that filled assignments bubble up BEFORE empty ones
+            const sortedData = (data || []).sort((a, b) => {
+                const aHasPerson = a.assigned_persons && a.assigned_persons.trim() ? 1 : 0;
+                const bHasPerson = b.assigned_persons && b.assigned_persons.trim() ? 1 : 0;
+                return bHasPerson - aHasPerson; 
+            });
+
+            // 2. Filter using a key based strictly on slot parameters (date, name, role, time)
             const seen = new Set();
-            allRotas = (data || []).filter(item => {
-                const uniqueKey = `${item.date}-${item.rota_name}-${item.time || ''}-${item.assigned_persons || ''}`;
+            allRotas = sortedData.filter(item => {
+                const uniqueKey = `${item.date}-${item.rota_name}-${item.role || ''}-${item.time || ''}`;
                 if (seen.has(uniqueKey)) return false;
                 seen.add(uniqueKey);
                 return true;
             });
+
+            // 3. Put rotas back into structural sorting by date
+            allRotas.sort((a, b) => new Date(a.date) - new Date(b.date));
 
             renderFilterBar();
             
@@ -684,13 +684,12 @@
         function isSundayOrWednesday(dateString) {
             const date = new Date(dateString + 'T00:00:00');
             const day = date.getDay();
-            return day === 0 || day === 3; // 0 = Sunday, 3 = Wednesday
+            return day === 0 || day === 3; 
         }
 
-        getFilteredRotas = function() {
+        let getFilteredRotas = function() {
             const todayStr = getTodayStr();
             
-            // Filter out past dates and match Sunday/Wednesday rules
             let filtered = allRotas.filter(rota => isSundayOrWednesday(rota.date) && rota.date >= todayStr);
             
             if (selectedRotaFilter !== 'all') {
@@ -821,6 +820,28 @@
         }
 
         // ════════════════════════════════════════════════════════════════
+        // RENDER: COMPONENT CARD
+        // ════════════════════════════════════════════════════════════════
+        function renderRotaCard(rota) {
+            const badgeHtml = rota.assigned_persons 
+                ? `<span class="person-badge">${rota.assigned_persons}</span>`
+                : `<span class="vacant">No one assigned</span>`;
+
+            return `
+                <div class="rota-card">
+                    <div class="rota-header">
+                        <div class="rota-role">${rota.role || rota.rota_name}</div>
+                        <div class="rota-time">${rota.time || ''}</div>
+                    </div>
+                    <div class="rota-person" id="person-container-${rota.id}">
+                        ${badgeHtml}
+                        <button class="rota-btn" style="margin-left: auto;" onclick="editPerson('${rota.id}')">✏️ Edit</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ════════════════════════════════════════════════════════════════
         // RENDER: ALL ROTAS GROUPED BY DATE
         // ════════════════════════════════════════════════════════════════
         function renderAllRotas() {
@@ -891,7 +912,6 @@
 
             const todayStr = getTodayStr();
 
-            // Filter out past assignments from search view
             const filtered = allRotas.filter(rota => 
                 isSundayOrWednesday(rota.date) &&
                 rota.date >= todayStr &&
@@ -932,12 +952,12 @@
                                 <div class="rota-card">
                                     <div class="rota-header">
                                         <div>
-                                            <div class="rota-role">${rota.rota_name}</div>
+                                            <div class="rota-role">${rota.role || rota.rota_name}</div>
                                             <div style="font-size: 12px; color: var(--cbc-muted); margin-top: 4px;">
                                                 ${new Date(rota.date + 'T00:00:00').toLocaleDateString('en-GB', { weekday: 'short', month: 'short', day: 'numeric' })}
                                             </div>
                                         </div>
-                                        ${rota.time ? `<div class="rota-time">${rota.time}</div>` : ''}
+                                        <div class="rota-time">${rota.time || ''}</div>
                                     </div>
                                     <div class="rota-person" id="person-container-${rota.id}">
                                         <span class="person-badge">${rota.assigned_persons}</span>
@@ -950,28 +970,6 @@
             });
 
             document.getElementById('content-area').innerHTML = html;
-        }
-
-        // ════════════════════════════════════════════════════════════════
-        // RENDER: INDIVIDUAL ROTA CARD
-        // ════════════════════════════════════════════════════════════════
-        function renderRotaCard(rota) {
-            const personBadge = rota.assigned_persons 
-                ? `<span class="person-badge">${rota.assigned_persons}</span>`
-                : `<span class="vacant">No one assigned</span>`;
-
-            return `
-                <div class="rota-card">
-                    <div class="rota-header">
-                        <div class="rota-role">${rota.rota_name}</div>
-                        ${rota.time ? `<div class="rota-time">${rota.time}</div>` : ''}
-                    </div>
-                    <div class="rota-person" id="person-container-${rota.id}">
-                        ${personBadge}
-                        <button class="rota-btn" style="margin-left: auto;" onclick="editPerson('${rota.id}')">✏️ Edit</button>
-                    </div>
-                </div>
-            `;
         }
     </script>
 </body>
