@@ -3,102 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Craigavon Baptist | Rota Hub</title>
+    <title>Craigavon Baptist Church | Rota Hub</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --cb-dark-blue: #002D62;
-            --cb-light-blue: #00509E;
-            --cb-bg: #F4F7F9;
-            --cb-white: #FFFFFF;
-        }
-        body { font-family: 'Inter', sans-serif; background-color: var(--cb-bg); margin: 0; padding-bottom: 50px; }
-        header { background: var(--cb-white); padding: 20px 40px; display: flex; align-items: center; gap: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .logo { height: 50px; }
+        :root { --cb-dark-blue: #002D62; --cb-light-blue: #00509E; --cb-bg: #F4F7F9; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--cb-bg); margin: 0; }
         
-        #app-screen { max-width: 900px; margin: 30px auto; padding: 0 20px; }
+        /* Login Screen */
+        #login-screen { height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--cb-dark-blue); }
+        .login-box { background: white; padding: 40px; border-radius: 12px; text-align: center; }
         
-        .search-box { background: white; padding: 20px; border-radius: 12px; margin-bottom: 30px; border-left: 5px solid var(--cb-light-blue); }
-        .search-box input { padding: 10px; width: 250px; border: 1px solid #ddd; border-radius: 6px; }
+        /* Dashboard */
+        #app-screen { display: none; max-width: 900px; margin: 0 auto; padding: 20px; }
+        header { background: white; padding: 20px; display: flex; align-items: center; gap: 15px; border-radius: 12px; margin-bottom: 20px; }
+        .logo { height: 50px; width: 50px; object-fit: contain; }
         
-        .tabs { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 30px; }
-        .tab-btn { padding: 8px 16px; border-radius: 20px; border: 1px solid var(--cb-dark-blue); background: white; cursor: pointer; color: var(--cb-dark-blue); font-weight: 600; }
-        .tab-btn.active { background: var(--cb-dark-blue); color: white; }
-
-        .date-group { margin-bottom: 25px; }
-        .date-label { font-weight: 700; color: var(--cb-dark-blue); margin-bottom: 10px; display: block; border-bottom: 2px solid var(--cb-light-blue); width: fit-content; }
-        
-        .rota-card { background: white; padding: 15px 20px; border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .edit-btn { background: var(--cb-light-blue); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; }
+        .rota-card { background: white; padding: 20px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .rota-title { font-size: 1.2rem; font-weight: 700; color: var(--cb-dark-blue); }
+        .rota-names { font-size: 1.1rem; color: #333; margin-top: 8px; }
+        .edit-btn { background: var(--cb-light-blue); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; }
     </style>
 </head>
 <body>
 
-    <header>
-        <img src="cbc logo_2.webp" class="logo" alt="Logo">
-        <h1>Church Rota Hub</h1>
-    </header>
+    <div id="login-screen">
+        <div class="login-box">
+            <h2>Church Access Required</h2>
+            <input type="password" id="pass" placeholder="Enter Security Code">
+            <button onclick="checkLogin()">Login</button>
+        </div>
+    </div>
 
     <div id="app-screen">
-        <div class="search-box">
-            <strong>🔍 My Upcoming Dates</strong><br><br>
-            <input type="text" id="name-search" placeholder="Enter your name...">
-            <button class="edit-btn" onclick="filterByName()">Find</button>
-        </div>
-
-        <div class="tabs" id="tabs-container"></div>
+        <header>
+            <img src="cbc logo_2.webp" class="logo" alt="Logo">
+            <h1>Craigavon Baptist Church Rota</h1>
+        </header>
         <div id="content-area"></div>
     </div>
 
     <script>
         const db = supabase.createClient("https://ojzwujpahfjmaeisnfez.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qend1anBhaGZqbWFlaXNuZmV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTA5NDMsImV4cCI6MjA5NDU4Njk0M30.VvszGR6MbUnBhKsmsXBikkrjok2-F1bnyS4zOwDX5hg");
-        let allData = [];
+        
+        function checkLogin() {
+            if(document.getElementById('pass').value === "1234") {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('app-screen').style.display = 'block';
+                loadData();
+            } else { alert("Incorrect Code"); }
+        }
 
-        async function init() {
+        async function loadData() {
             const { data } = await db.from('rotas').select('*').order('date', { ascending: true });
-            allData = data;
-            renderTabs();
-            renderView(allData);
-        }
-
-        function renderTabs() {
-            const categories = ['All', ...new Set(allData.map(i => i.rota_name))];
-            document.getElementById('tabs-container').innerHTML = categories.map(cat => 
-                `<button class="tab-btn" onclick="filterByCategory('${cat}')">${cat}</button>`
-            ).join('');
-        }
-
-        function renderView(data) {
-            const container = document.getElementById('content-area');
-            const grouped = data.reduce((acc, item) => {
-                (acc[item.date] = acc[item.date] || []).push(item);
-                return acc;
-            }, {});
-            
-            container.innerHTML = Object.keys(grouped).map(date => `
-                <div class="date-group">
-                    <span class="date-label">${new Date(date).toLocaleDateString()}</span>
-                    ${grouped[date].map(item => `
-                        <div class="rota-card">
-                            <div><strong>${item.rota_name}</strong> - ${item.role}<br><small>${item.assigned_persons || 'Vacant'}</small></div>
-                            <button class="edit-btn">Edit</button>
-                        </div>
-                    `).join('')}
+            document.getElementById('content-area').innerHTML = data.map(item => `
+                <div class="rota-card">
+                    <div class="rota-title">${new Date(item.date).toLocaleDateString()} | ${item.rota_name}</div>
+                    <div class="rota-names"><strong>${item.role}:</strong> ${item.assigned_persons || 'Vacant'}</div>
                 </div>
             `).join('');
         }
-
-        function filterByCategory(cat) {
-            renderView(cat === 'All' ? allData : allData.filter(i => i.rota_name === cat));
-        }
-
-        function filterByName() {
-            const name = document.getElementById('name-search').value.toLowerCase();
-            renderView(allData.filter(i => i.assigned_persons?.toLowerCase().includes(name)));
-        }
-
-        init();
     </script>
 </body>
 </html>
