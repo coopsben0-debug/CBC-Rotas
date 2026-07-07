@@ -146,7 +146,7 @@
 
         .header-content {
             flex: 1;
-            }
+        }
 
         .header-title {
             font-family: 'Poppins', sans-serif;
@@ -641,18 +641,36 @@
                 return;
             }
 
-            // 1. Sort records so that filled assignments bubble up BEFORE empty ones
+            // 1. Group check for filled slots per ministry per date
+            const ministryHasFilledSlots = {};
             const sortedData = (data || []).sort((a, b) => {
                 const aHasPerson = a.assigned_persons && a.assigned_persons.trim() ? 1 : 0;
                 const bHasPerson = b.assigned_persons && b.assigned_persons.trim() ? 1 : 0;
                 return bHasPerson - aHasPerson; 
             });
 
-            // 2. Filter using a key based strictly on slot parameters (date, name, role, time)
+            sortedData.forEach(item => {
+                const key = `${item.date}-${item.rota_name}`;
+                if (item.assigned_persons && item.assigned_persons.trim()) {
+                    ministryHasFilledSlots[key] = true;
+                }
+            });
+
+            // 2. Filter using a key based strictly on slot parameters AND drop empty ghost rows
             const seen = new Set();
             allRotas = sortedData.filter(item => {
                 const uniqueKey = `${item.date}-${item.rota_name}-${item.role || ''}-${item.time || ''}`;
                 if (seen.has(uniqueKey)) return false;
+                
+                const ministryKey = `${item.date}-${item.rota_name}`;
+                const hasPersons = item.assigned_persons && item.assigned_persons.trim();
+                
+                // If this ministry has filled slots on this date, drop any unassigned duplicate slots 
+                // to prevent empty ghost roles from rendering alongside active ones.
+                if (ministryHasFilledSlots[ministryKey] && !hasPersons) {
+                    return false;
+                }
+
                 seen.add(uniqueKey);
                 return true;
             });
@@ -935,51 +953,38 @@
                 return;
             }
 
-            const byPerson = {};
-            filtered.forEach(rota => {
-                const person = rota.assigned_persons;
-                if (!byPerson[person]) byPerson[person] = [];
-                byPerson[person].push(rota);
-            });
+            let html = `
+                <div class="person-results">
+                    <div class="person-header">
+                        <div class="person-name">Schedules for "${name}"</div>
+                        <div class="person-count">${filtered.length} Commitment${filtered.length !== 1 ? 's' : ''}</div>
+                    </div>
+            `;
 
-            let html = '';
-            Object.keys(byPerson).sort().forEach(person => {
-                const rotas = byPerson[person];
+            filtered.sort((a, b) => new Date(a.date) - new Date(b.date)).forEach(rota => {
+                const dateObj = new Date(rota.date + 'T00:00:00');
+                const dateStr = dateObj.toLocaleDateString('en-GB', {
+                    weekday: 'short',
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                });
+
+                const displayTitle = rota.role && rota.role !== rota.rota_name
+                    ? `${rota.rota_name} — ${rota.role}`
+                    : (rota.rota_name || rota.role || 'Unassigned Rota');
+
                 html += `
-                    <div class="person-results">
-                        <div class="person-header">
-                            <div class="person-name">${person}</div>
-                            <div class="person-count">${rotas.length} future slot${rotas.length !== 1 ? 's' : ''}</div>
+                    <div class="rota-card">
+                        <div class="rota-header" style="margin-bottom: 0;">
+                            <div class="rota-role">${displayTitle}</div>
+                            <div class="rota-time">${dateStr} ${rota.time ? '• ' + rota.time : ''}</div>
                         </div>
-                        ${rotas
-                            .sort((a, b) => new Date(a.date) - new Date(b.date))
-                            .map(rota => {
-                                // Fix applied here too: Ensures clear title presentation inside individual user logs
-                                const displayTitle = rota.role && rota.role !== rota.rota_name 
-                                    ? `${rota.rota_name} — ${rota.role}` 
-                                    : (rota.rota_name || rota.role || 'Unassigned Rota');
-
-                                return `
-                                <div class="rota-card">
-                                    <div class="rota-header">
-                                        <div>
-                                            <div class="rota-role">${displayTitle}</div>
-                                            <div style="font-size: 12px; color: var(--cbc-muted); margin-top: 4px;">
-                                                ${new Date(rota.date + 'T00:00:00').toLocaleDateString('en-GB', { weekday: 'short', month: 'short', day: 'numeric' })}
-                                            </div>
-                                        </div>
-                                        <div class="rota-time">${rota.time || ''}</div>
-                                    </div>
-                                    <div class="rota-person" id="person-container-${rota.id}">
-                                        <span class="person-badge">${rota.assigned_persons}</span>
-                                        <button class="rota-btn" style="margin-left: auto;" onclick="editPerson('${rota.id}')">✏️ Edit</button>
-                                    </div>
-                                </div>
-                            `}).join('')}
                     </div>
                 `;
             });
 
+            html += `</div>`;
             document.getElementById('content-area').innerHTML = html;
         }
     </script>
