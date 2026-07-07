@@ -57,12 +57,6 @@
             text-align: center;
         }
 
-        .login-logo {
-            height: 64px;
-            margin-bottom: 24px;
-            object-fit: contain;
-        }
-
         .login-header {
             font-size: 28px;
             font-weight: 700;
@@ -149,13 +143,6 @@
             position: sticky;
             top: 0;
             z-index: 100;
-        }
-
-        .header-logo {
-            height: 48px;
-            width: auto;
-            object-fit: contain;
-            flex-shrink: 0;
         }
 
         .header-content {
@@ -307,30 +294,6 @@
             padding: 24px 20px;
         }
 
-        .view-toggle {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 24px;
-        }
-
-        .view-toggle button {
-            padding: 8px 16px;
-            border: 2px solid var(--cbc-border);
-            background: var(--cbc-white);
-            color: var(--cbc-text);
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .view-toggle button.active {
-            background: var(--cbc-accent);
-            color: var(--cbc-white);
-            border-color: var(--cbc-accent);
-        }
-
         /* Date Group Section */
         .date-group {
             margin-bottom: 32px;
@@ -436,17 +399,8 @@
             font-size: 13px;
         }
 
-        .rota-actions {
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid var(--cbc-border);
-            display: flex;
-            gap: 8px;
-        }
-
         .rota-btn {
-            flex: 1;
-            padding: 8px 12px;
+            padding: 4px 10px;
             border: 1px solid var(--cbc-border);
             background: var(--cbc-white);
             color: var(--cbc-text);
@@ -580,7 +534,6 @@
 <body>
     <div id="login-screen">
         <div class="login-container">
-            <img src="cbc logo_2.webp" alt="CBC Logo" class="login-logo">
             <h2 class="login-header">CBC Rotas</h2>
             <p class="login-subheader">Craigavon Baptist Church</p>
             <div class="login-group">
@@ -599,7 +552,6 @@
 
     <div id="app-screen">
         <header>
-            <img src="cbc logo_2.webp" alt="CBC Logo" class="header-logo">
             <div class="header-content">
                 <h1 class="header-title">CBC Rotas</h1>
                 <p class="header-subtitle">Craigavon Baptist Church Rota Management</p>
@@ -624,20 +576,7 @@
 
         <div class="filter-bar" id="filter-bar" style="display: none;">
             <div class="filter-label">Filter by Rota:</div>
-            <div class="filter-pills">
-                <button class="filter-pill active" onclick="filterRota('all')">All Rotas</button>
-                <button class="filter-pill" onclick="filterRota('A/V Team')">A/V Team</button>
-                <button class="filter-pill" onclick="filterRota('Cleaning Rota')">Cleaning</button>
-                <button class="filter-pill" onclick="filterRota('Communion')">Communion</button>
-                <button class="filter-pill" onclick="filterRota('Jr Sunday School')">Jr School</button>
-                <button class="filter-pill" onclick="filterRota('Music')">Music</button>
-                <button class="filter-pill" onclick="filterRota('Prayer Meetings')">Prayer Meetings</button>
-                <button class="filter-pill" onclick="filterRota('Preaching')">Preaching</button>
-                <button class="filter-pill" onclick="filterRota('Sports Hall')">Sports Hall</button>
-                <button class="filter-pill" onclick="filterRota('Sr Sunday School')">Sr School</button>
-                <button class="filter-pill" onclick="filterRota('Tea Rota')">Tea Rota</button>
-                <button class="filter-pill" onclick="filterRota('Welcome')">Welcome</button>
-            </div>
+            <div class="filter-pills"></div>
         </div>
 
         <div class="content-wrapper">
@@ -706,8 +645,23 @@
                 return;
             }
 
-            allRotas = data || [];
-            renderAllRotas();
+            // Deduplicate items cleanly to prevent any ui redundancy
+            const seen = new Set();
+            allRotas = (data || []).filter(item => {
+                const uniqueKey = item.id ? String(item.id) : `${item.date}-${item.rota_name}-${item.time}-${item.assigned_persons}`;
+                if (seen.has(uniqueKey)) return false;
+                seen.add(uniqueKey);
+                return true;
+            });
+
+            renderFilterBar();
+            
+            if (currentView === 'all') {
+                renderAllRotas();
+            } else if (currentView === 'person') {
+                const searchVal = document.getElementById('person-search').value;
+                searchPerson(searchVal);
+            }
         }
 
         // ════════════════════════════════════════════════════════════════
@@ -730,13 +684,15 @@
         }
 
         // ════════════════════════════════════════════════════════════════
-        // VIEWS
+        // VIEWS & DYNAMIC FILTERS
         // ════════════════════════════════════════════════════════════════
         function switchView(view) {
             currentView = view;
             const navBtns = document.querySelectorAll('.nav-btn');
             navBtns.forEach(btn => btn.classList.remove('active'));
-            event?.target?.classList.add('active');
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
 
             document.getElementById('person-search').style.display = 
                 view === 'person' ? 'block' : 'none';
@@ -750,18 +706,95 @@
             }
         }
 
+        function renderFilterBar() {
+            const pillsContainer = document.querySelector('.filter-pills');
+            if (!pillsContainer) return;
+
+            const validRotas = allRotas.filter(rota => isSundayOrWednesday(rota.date));
+            const uniqueRotaNames = [...new Set(validRotas.map(r => r.rota_name).filter(Boolean))].sort();
+
+            let html = `<button class="filter-pill ${selectedRotaFilter === 'all' ? 'active' : ''}" onclick="filterRota('all')">All Rotas</button>`;
+            
+            uniqueRotaNames.forEach(name => {
+                html += `<button class="filter-pill ${selectedRotaFilter === name ? 'active' : ''}" onclick="filterRota('${name}')">${name}</button>`;
+            });
+
+            pillsContainer.innerHTML = html;
+        }
+
         function filterRota(rota) {
             selectedRotaFilter = rota;
-            
-            // Update active filter pill
-            document.querySelectorAll('.filter-pill').forEach(pill => {
-                pill.classList.remove('active');
-                if (pill.textContent.includes(rota === 'all' ? 'All Rotas' : rota)) {
-                    pill.classList.add('active');
-                }
-            });
-            
+            renderFilterBar();
             renderAllRotas();
+        }
+
+        // ════════════════════════════════════════════════════════════════
+        // EDIT FEATURES (ANYONE CAN CHANGE A PERSON ASSIGNED TO A ROLE)
+        // ════════════════════════════════════════════════════════════════
+        function editPerson(id) {
+            const rota = allRotas.find(r => String(r.id) === String(id));
+            if (!rota) return;
+            
+            const currentName = rota.assigned_persons || '';
+            const container = document.getElementById(`person-container-${id}`);
+            if (!container) return;
+
+            container.innerHTML = `
+                <input type="text" id="edit-input-${id}" class="search-input" style="padding: 4px 8px; font-size: 13px; flex: 1; min-width: 120px;" value="${currentName.replace(/"/g, '&quot;')}" placeholder="Enter name...">
+                <button class="nav-btn active" style="padding: 4px 10px; font-size: 12px; white-space: nowrap;" onclick="savePerson('${id}')">Save</button>
+                <button class="nav-btn" style="padding: 4px 10px; font-size: 12px; margin-left: 4px; white-space: nowrap;" onclick="cancelEdit('${id}')">Cancel</button>
+            `;
+            document.getElementById(`edit-input-${id}`).focus();
+        }
+
+        async function savePerson(id) {
+            const inputField = document.getElementById(`edit-input-${id}`);
+            if (!inputField) return;
+            const newName = inputField.value.trim();
+            
+            const container = document.getElementById(`person-container-${id}`);
+            container.innerHTML = `<div class="spinner" style="width: 16px; height: 16px;"></div> <span style="font-size: 12px; margin-left: 6px; color: var(--cbc-muted);">Updating...</span>`;
+
+            const { error } = await db
+                .from('rotas')
+                .update({ assigned_persons: newName || null })
+                .eq('id', id);
+
+            if (error) {
+                console.error('Error updating assignment data:', error);
+                alert('Could not update role. Please check connection and try again.');
+                loadAllRotas();
+                return;
+            }
+
+            const rotaIndex = allRotas.findIndex(r => String(r.id) === String(id));
+            if (rotaIndex !== -1) {
+                allRotas[rotaIndex].assigned_persons = newName || null;
+            }
+
+            if (currentView === 'all') {
+                renderAllRotas();
+            } else {
+                const currentSearch = document.getElementById('person-search').value;
+                searchPerson(currentSearch);
+            }
+        }
+
+        function cancelEdit(id) {
+            const rota = allRotas.find(r => String(r.id) === String(id));
+            if (!rota) return;
+            
+            const container = document.getElementById(`person-container-${id}`);
+            if (!container) return;
+
+            const badgeHtml = rota.assigned_persons 
+                ? `<span class="person-badge">${rota.assigned_persons}</span>`
+                : `<span class="vacant">No one assigned</span>`;
+
+            container.innerHTML = `
+                ${badgeHtml}
+                <button class="rota-btn" style="margin-left: auto;" onclick="editPerson('${rota.id}')">✏️ Edit</button>
+            `;
         }
 
         // ════════════════════════════════════════════════════════════════
@@ -781,7 +814,6 @@
                 return;
             }
 
-            // Group by date
             const grouped = {};
             filtered.forEach(rota => {
                 const dateKey = rota.date;
@@ -851,7 +883,6 @@
                 return;
             }
 
-            // Group by person
             const byPerson = {};
             filtered.forEach(rota => {
                 const person = rota.assigned_persons;
@@ -881,6 +912,10 @@
                                         </div>
                                         ${rota.time ? `<div class="rota-time">${rota.time}</div>` : ''}
                                     </div>
+                                    <div class="rota-person" id="person-container-${rota.id}">
+                                        <span class="person-badge">${rota.assigned_persons}</span>
+                                        <button class="rota-btn" style="margin-left: auto;" onclick="editPerson('${rota.id}')">✏️ Edit</button>
+                                    </div>
                                 </div>
                             `).join('')}
                     </div>
@@ -904,8 +939,9 @@
                         <div class="rota-role">${rota.rota_name}</div>
                         ${rota.time ? `<div class="rota-time">${rota.time}</div>` : ''}
                     </div>
-                    <div class="rota-person">
+                    <div class="rota-person" id="person-container-${rota.id}">
                         ${personBadge}
+                        <button class="rota-btn" style="margin-left: auto;" onclick="editPerson('${rota.id}')">✏️ Edit</button>
                     </div>
                     ${rota.notes ? `<div style="font-size: 12px; color: var(--cbc-muted); margin-top: 8px;">📝 ${rota.notes}</div>` : ''}
                 </div>
