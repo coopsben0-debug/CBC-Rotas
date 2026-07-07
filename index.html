@@ -146,7 +146,7 @@
 
         .header-content {
             flex: 1;
-        }
+            }
 
         .header-title {
             font-family: 'Poppins', sans-serif;
@@ -827,10 +827,15 @@
                 ? `<span class="person-badge">${rota.assigned_persons}</span>`
                 : `<span class="vacant">No one assigned</span>`;
 
+            // Fix applied here: Ensures main Rota Name shows up cleanly alongside sub-roles
+            const displayTitle = rota.role && rota.role !== rota.rota_name 
+                ? `${rota.rota_name} — ${rota.role}` 
+                : (rota.rota_name || rota.role || 'Unassigned Rota');
+
             return `
                 <div class="rota-card">
                     <div class="rota-header">
-                        <div class="rota-role">${rota.role || rota.rota_name}</div>
+                        <div class="rota-role">${displayTitle}</div>
                         <div class="rota-time">${rota.time || ''}</div>
                     </div>
                     <div class="rota-person" id="person-container-${rota.id}">
@@ -948,11 +953,17 @@
                         </div>
                         ${rotas
                             .sort((a, b) => new Date(a.date) - new Date(b.date))
-                            .map(rota => `
+                            .map(rota => {
+                                // Fix applied here too: Ensures clear title presentation inside individual user logs
+                                const displayTitle = rota.role && rota.role !== rota.rota_name 
+                                    ? `${rota.rota_name} — ${rota.role}` 
+                                    : (rota.rota_name || rota.role || 'Unassigned Rota');
+
+                                return `
                                 <div class="rota-card">
                                     <div class="rota-header">
                                         <div>
-                                            <div class="rota-role">${rota.role || rota.rota_name}</div>
+                                            <div class="rota-role">${displayTitle}</div>
                                             <div style="font-size: 12px; color: var(--cbc-muted); margin-top: 4px;">
                                                 ${new Date(rota.date + 'T00:00:00').toLocaleDateString('en-GB', { weekday: 'short', month: 'short', day: 'numeric' })}
                                             </div>
@@ -964,7 +975,7 @@
                                         <button class="rota-btn" style="margin-left: auto;" onclick="editPerson('${rota.id}')">✏️ Edit</button>
                                     </div>
                                 </div>
-                            `).join('')}
+                            `}).join('')}
                     </div>
                 `;
             });
