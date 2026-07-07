@@ -122,6 +122,43 @@
             display: none;
         }
 
+        .login-divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 24px 0;
+            color: var(--cbc-muted);
+            font-size: 13px;
+        }
+
+        .login-divider::before,
+        .login-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--cbc-border);
+        }
+
+        .user-badge {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: var(--cbc-navy);
+            color: var(--cbc-white);
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            display: none;
+            z-index: 50;
+            max-width: 200px;
+            word-wrap: break-word;
+        }
+
+        .user-badge.active {
+            display: block;
+        }
+
         /* ════════════════════════════════════════════════════════════════ */
         /* APP SCREEN */
         /* ════════════════════════════════════════════════════════════════ */
@@ -468,6 +505,77 @@
             font-weight: 600;
         }
 
+        .upload-section {
+            background: var(--cbc-white);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: var(--cbc-shadow);
+            text-align: center;
+            border: 2px dashed var(--cbc-border);
+        }
+
+        .upload-section.dragover {
+            border-color: var(--cbc-accent);
+            background: rgba(232, 80, 27, 0.05);
+        }
+
+        .upload-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--cbc-navy);
+            margin-bottom: 12px;
+        }
+
+        .upload-text {
+            font-size: 14px;
+            color: var(--cbc-muted);
+            margin-bottom: 20px;
+        }
+
+        .upload-btn {
+            background: linear-gradient(135deg, var(--cbc-accent) 0%, #d63d10 100%);
+            color: var(--cbc-white);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(232, 80, 27, 0.3);
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        .upload-status {
+            font-size: 13px;
+            margin-top: 16px;
+            padding: 12px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .upload-status.success {
+            background: rgba(39, 174, 96, 0.1);
+            color: var(--cbc-success);
+            display: block;
+        }
+
+        .upload-status.error {
+            background: rgba(231, 76, 60, 0.1);
+            color: #e74c3c;
+            display: block;
+        }
+
         @media (max-width: 768px) {
             .login-container {
                 margin: 20px;
@@ -529,6 +637,15 @@
             <p class="login-subheader">Craigavon Baptist Church</p>
             <div class="login-group">
                 <input 
+                    type="text" 
+                    id="full-name" 
+                    class="login-input" 
+                    placeholder="Full Name"
+                    onkeypress="event.key === 'Enter' && checkLogin()"
+                >
+            </div>
+            <div class="login-group">
+                <input 
                     type="password" 
                     id="security-code" 
                     class="login-input" 
@@ -538,6 +655,11 @@
             </div>
             <button class="login-btn" onclick="checkLogin()">Access Rotas</button>
             <div class="login-error" id="login-error">Incorrect security code</div>
+            <div class="login-divider">or</div>
+            <div class="upload-text" style="margin-bottom: 16px;">Upload a rota photo to auto-fill assignments</div>
+            <button class="upload-btn" onclick="document.getElementById('file-input').click()">📸 Upload Rota Photo</button>
+            <input type="file" id="file-input" accept="image/*" onchange="handleFileUpload(event)">
+            <div class="upload-status" id="upload-status"></div>
         </div>
     </div>
 
@@ -571,9 +693,12 @@
         </div>
 
         <div class="content-wrapper">
+            <div id="upload-section-container"></div>
             <div id="content-area"></div>
         </div>
     </div>
+
+    <div class="user-badge" id="user-badge"></div>
 
     <script>
         // ════════════════════════════════════════════════════════════════
@@ -590,34 +715,197 @@
         let allRotas = [];
         let currentView = 'all';
         let selectedRotaFilter = 'all';
+        let loggedInUser = '';
 
         // ════════════════════════════════════════════════════════════════
         // LOGIN
         // ════════════════════════════════════════════════════════════════
         function checkLogin() {
             const code = document.getElementById('security-code').value;
+            const name = document.getElementById('full-name').value.trim();
             const errorEl = document.getElementById('login-error');
+
+            if (!name) {
+                errorEl.textContent = 'Please enter your full name';
+                errorEl.style.display = 'block';
+                return;
+            }
 
             if (code === "1234") {
                 errorEl.style.display = 'none';
+                loggedInUser = name;
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('app-screen').style.display = 'block';
+                updateUserBadge();
+                renderUploadSection();
                 loadAllRotas();
             } else {
+                errorEl.textContent = 'Incorrect security code';
                 errorEl.style.display = 'block';
                 document.getElementById('security-code').value = '';
             }
         }
 
+        function updateUserBadge() {
+            const badge = document.getElementById('user-badge');
+            badge.textContent = '👤 ' + loggedInUser;
+            badge.classList.add('active');
+        }
+
         function logout() {
             if (confirm('Log out of CBC Rotas?')) {
                 document.getElementById('security-code').value = '';
+                document.getElementById('full-name').value = '';
                 document.getElementById('login-screen').style.display = 'flex';
                 document.getElementById('app-screen').style.display = 'none';
                 document.getElementById('content-area').innerHTML = '';
+                document.getElementById('user-badge').classList.remove('active');
+                loggedInUser = '';
                 currentView = 'all';
                 switchView('all', null);
             }
+        }
+
+        // ════════════════════════════════════════════════════════════════
+        // PHOTO UPLOAD & OCR
+        // ════════════════════════════════════════════════════════════════
+        async function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const statusEl = document.getElementById('upload-status');
+            statusEl.textContent = '📸 Processing image...';
+            statusEl.className = 'upload-status';
+            statusEl.style.display = 'block';
+
+            try {
+                const base64Image = await fileToBase64(file);
+                
+                statusEl.textContent = '🔍 Analyzing rota...';
+
+                const response = await fetch("https://api.anthropic.com/v1/messages", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        model: "claude-opus-4-6",
+                        max_tokens: 2000,
+                        messages: [
+                            {
+                                role: "user",
+                                content: [
+                                    {
+                                        type: "image",
+                                        source: {
+                                            type: "base64",
+                                            media_type: "image/jpeg",
+                                            data: base64Image
+                                        }
+                                    },
+                                    {
+                                        type: "text",
+                                        text: `Analyze this rota image and extract the assignments in JSON format. For each date and role, identify who is assigned. Return ONLY valid JSON with this structure:
+{
+  "rotas": [
+    {
+      "date": "YYYY-MM-DD",
+      "rota_name": "Ministry Name",
+      "role": "Specific Role",
+      "time": "Time if visible",
+      "assigned_person": "Person Name"
+    }
+  ]
+}
+Only include entries where you can clearly identify an assigned person. Be accurate with names and dates.`
+                    }
+                ]
+                            }
+                        ]
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (!data.content || !data.content[0] || data.content[0].type !== 'text') {
+                    throw new Error('Invalid response from AI');
+                }
+
+                const textContent = data.content[0].text;
+                const jsonMatch = textContent.match(/\{[\s\S]*\}/);
+                
+                if (!jsonMatch) {
+                    throw new Error('Could not extract JSON from response');
+                }
+
+                const extractedData = JSON.parse(jsonMatch[0]);
+                
+                if (!extractedData.rotas || extractedData.rotas.length === 0) {
+                    statusEl.textContent = '⚠️ No assignments found in image. Try a clearer photo.';
+                    statusEl.className = 'upload-status error';
+                    return;
+                }
+
+                await updateRotasFromExtraction(extractedData.rotas);
+                
+                statusEl.textContent = `✅ Updated ${extractedData.rotas.length} assignments!`;
+                statusEl.className = 'upload-status success';
+                
+                document.getElementById('file-input').value = '';
+                
+                setTimeout(() => {
+                    loadAllRotas();
+                }, 1500);
+
+            } catch (error) {
+                console.error('Upload error:', error);
+                statusEl.textContent = '❌ Error processing image. Please try again.';
+                statusEl.className = 'upload-status error';
+                document.getElementById('file-input').value = '';
+            }
+        }
+
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const result = reader.result;
+                    const base64 = result.split(',')[1];
+                    resolve(base64);
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function updateRotasFromExtraction(extractedRotas) {
+            for (const rota of extractedRotas) {
+                const { data, error } = await db
+                    .from('rotas')
+                    .update({ assigned_persons: rota.assigned_person })
+                    .match({
+                        date: rota.date,
+                        rota_name: rota.rota_name,
+                        role: rota.role || null
+                    });
+
+                if (error) {
+                    console.error('Error updating rota:', error);
+                }
+            }
+        }
+
+        function renderUploadSection() {
+            const container = document.getElementById('upload-section-container');
+            container.innerHTML = `
+                <div class="upload-section">
+                    <div class="upload-title">📸 Upload Updated Rota</div>
+                    <div class="upload-text">Take a photo of the printed rota and we'll automatically update assignments</div>
+                    <button class="upload-btn" onclick="document.getElementById('app-file-input').click()">Upload Photo</button>
+                    <input type="file" id="app-file-input" accept="image/*" style="display: none;" onchange="handleFileUpload(event)">
+                    <div class="upload-status" id="app-upload-status"></div>
+                </div>
+            `;
         }
 
         // ════════════════════════════════════════════════════════════════
