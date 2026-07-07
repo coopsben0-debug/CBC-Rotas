@@ -250,6 +250,56 @@
             box-shadow: 0 0 0 3px rgba(232, 80, 27, 0.1);
         }
 
+        /* Filters */
+        .filter-bar {
+            background: var(--cbc-white);
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--cbc-border);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            overflow-x: auto;
+        }
+
+        .filter-label {
+            font-weight: 600;
+            color: var(--cbc-text);
+            white-space: nowrap;
+            font-size: 14px;
+        }
+
+        .filter-pills {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            flex: 1;
+        }
+
+        .filter-pill {
+            padding: 6px 12px;
+            border: 2px solid var(--cbc-border);
+            background: var(--cbc-white);
+            color: var(--cbc-text);
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+        }
+
+        .filter-pill:hover {
+            border-color: var(--cbc-accent);
+            color: var(--cbc-accent);
+        }
+
+        .filter-pill.active {
+            background: var(--cbc-accent);
+            color: var(--cbc-white);
+            border-color: var(--cbc-accent);
+        }
+
         /* Content Area */
         .content-wrapper {
             max-width: 1000px;
@@ -531,7 +581,7 @@
     <!-- LOGIN SCREEN -->
     <div id="login-screen">
         <div class="login-container">
-            <img src="cbc logo_2.webp" alt="CBC Logo" class="login-logo">
+            <img src="cbc-logo.png" alt="CBC Logo" class="login-logo">
             <h2 class="login-header">CBC Rotas</h2>
             <p class="login-subheader">Craigavon Baptist Church</p>
             <div class="login-group">
@@ -552,7 +602,7 @@
     <div id="app-screen">
         <!-- Header -->
         <header>
-            <img src="cbc logo_2.webp" alt="CBC Logo" class="header-logo">
+            <img src="cbc-logo.png" alt="CBC Logo" class="header-logo">
             <div class="header-content">
                 <h1 class="header-title">CBC Rotas</h1>
                 <p class="header-subtitle">Craigavon Baptist Church Rota Management</p>
@@ -576,6 +626,25 @@
             >
         </div>
 
+        <!-- Rota Type Filters -->
+        <div class="filter-bar" id="filter-bar" style="display: none;">
+            <div class="filter-label">Filter by Rota:</div>
+            <div class="filter-pills">
+                <button class="filter-pill active" onclick="filterRota('all')">All Rotas</button>
+                <button class="filter-pill" onclick="filterRota('A/V Team')">A/V Team</button>
+                <button class="filter-pill" onclick="filterRota('Cleaning Rota')">Cleaning</button>
+                <button class="filter-pill" onclick="filterRota('Communion')">Communion</button>
+                <button class="filter-pill" onclick="filterRota('Jr Sunday School')">Jr School</button>
+                <button class="filter-pill" onclick="filterRota('Music')">Music</button>
+                <button class="filter-pill" onclick="filterRota('Prayer Meetings')">Prayer Meetings</button>
+                <button class="filter-pill" onclick="filterRota('Preaching')">Preaching</button>
+                <button class="filter-pill" onclick="filterRota('Sports Hall')">Sports Hall</button>
+                <button class="filter-pill" onclick="filterRota('Sr Sunday School')">Sr School</button>
+                <button class="filter-pill" onclick="filterRota('Tea Rota')">Tea Rota</button>
+                <button class="filter-pill" onclick="filterRota('Welcome')">Welcome</button>
+            </div>
+        </div>
+
         <!-- Content Area -->
         <div class="content-wrapper">
             <div id="content-area"></div>
@@ -596,6 +665,7 @@
         // ════════════════════════════════════════════════════════════════
         let allRotas = [];
         let currentView = 'all';
+        let selectedRotaFilter = 'all';
 
         // ════════════════════════════════════════════════════════════════
         // LOGIN
@@ -647,6 +717,25 @@
         }
 
         // ════════════════════════════════════════════════════════════════
+        // HELPER FUNCTIONS
+        // ════════════════════════════════════════════════════════════════
+        function isSundayOrWednesday(dateString) {
+            const date = new Date(dateString + 'T00:00:00');
+            const day = date.getDay();
+            return day === 0 || day === 3; // 0 = Sunday, 3 = Wednesday
+        }
+
+        function getFilteredRotas() {
+            let filtered = allRotas.filter(rota => isSundayOrWednesday(rota.date));
+            
+            if (selectedRotaFilter !== 'all') {
+                filtered = filtered.filter(rota => rota.rota_name === selectedRotaFilter);
+            }
+            
+            return filtered;
+        }
+
+        // ════════════════════════════════════════════════════════════════
         // VIEWS
         // ════════════════════════════════════════════════════════════════
         function switchView(view) {
@@ -657,6 +746,8 @@
 
             document.getElementById('person-search').style.display = 
                 view === 'person' ? 'block' : 'none';
+            document.getElementById('filter-bar').style.display = 
+                view === 'all' ? 'flex' : 'none';
 
             if (view === 'all') {
                 renderAllRotas();
@@ -665,16 +756,32 @@
             }
         }
 
+        function filterRota(rota) {
+            selectedRotaFilter = rota;
+            
+            // Update active filter pill
+            document.querySelectorAll('.filter-pill').forEach(pill => {
+                pill.classList.remove('active');
+                if (pill.textContent.includes(rota === 'all' ? 'All Rotas' : rota)) {
+                    pill.classList.add('active');
+                }
+            });
+            
+            renderAllRotas();
+        }
+
         // ════════════════════════════════════════════════════════════════
         // RENDER: ALL ROTAS GROUPED BY DATE
         // ════════════════════════════════════════════════════════════════
         function renderAllRotas() {
-            if (!allRotas || allRotas.length === 0) {
+            const filtered = getFilteredRotas();
+
+            if (!filtered || filtered.length === 0) {
                 document.getElementById('content-area').innerHTML = `
                     <div class="empty-state">
                         <div class="empty-icon">📅</div>
-                        <div class="empty-title">No Rotas Scheduled</div>
-                        <div class="empty-text">Check back soon for upcoming schedules</div>
+                        <div class="empty-title">No Rotas Found</div>
+                        <div class="empty-text">${selectedRotaFilter !== 'all' ? `No ${selectedRotaFilter} rotas scheduled` : 'Check back soon for upcoming schedules'}</div>
                     </div>
                 `;
                 return;
@@ -682,7 +789,7 @@
 
             // Group by date
             const grouped = {};
-            allRotas.forEach(rota => {
+            filtered.forEach(rota => {
                 const dateKey = rota.date;
                 if (!grouped[dateKey]) grouped[dateKey] = [];
                 grouped[dateKey].push(rota);
@@ -734,6 +841,7 @@
             }
 
             const filtered = allRotas.filter(rota => 
+                isSundayOrWednesday(rota.date) &&
                 rota.assigned_persons && 
                 rota.assigned_persons.toLowerCase().includes(name.toLowerCase())
             );
