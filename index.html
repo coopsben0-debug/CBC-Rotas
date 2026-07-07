@@ -651,7 +651,7 @@
                 return;
             }
 
-            // Standard content-based deduplication logic to clear out structural duplicates
+            // Content-based deduplication logic to clear structural duplicates
             const seen = new Set();
             allRotas = (data || []).filter(item => {
                 const uniqueKey = `${item.date}-${item.rota_name}-${item.time || ''}-${item.assigned_persons || ''}`;
@@ -671,8 +671,16 @@
         }
 
         // ════════════════════════════════════════════════════════════════
-        // HELPER FUNCTIONS
+        // DATE & TIME FILTERS (UPCOMING EVENTS ONLY)
         // ════════════════════════════════════════════════════════════════
+        function getTodayStr() {
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd}`;
+        }
+
         function isSundayOrWednesday(dateString) {
             const date = new Date(dateString + 'T00:00:00');
             const day = date.getDay();
@@ -680,7 +688,10 @@
         }
 
         getFilteredRotas = function() {
-            let filtered = allRotas.filter(rota => isSundayOrWednesday(rota.date));
+            const todayStr = getTodayStr();
+            
+            // Filter out past dates and match Sunday/Wednesday rules
+            let filtered = allRotas.filter(rota => isSundayOrWednesday(rota.date) && rota.date >= todayStr);
             
             if (selectedRotaFilter !== 'all') {
                 filtered = filtered.filter(rota => rota.rota_name === selectedRotaFilter);
@@ -700,7 +711,6 @@
             if (eventObj && eventObj.target) {
                 eventObj.target.classList.add('active');
             } else {
-                // Default fallback highlighting if clicked programmatically
                 const buttons = document.querySelectorAll('.nav-bar .nav-btn');
                 if (view === 'all' && buttons[0]) buttons[0].classList.add('active');
                 if (view === 'person' && buttons[1]) buttons[1].classList.add('active');
@@ -722,7 +732,8 @@
             const pillsContainer = document.querySelector('.filter-pills');
             if (!pillsContainer) return;
 
-            const validRotas = allRotas.filter(rota => isSundayOrWednesday(rota.date));
+            const todayStr = getTodayStr();
+            const validRotas = allRotas.filter(rota => isSundayOrWednesday(rota.date) && rota.date >= todayStr);
             const uniqueRotaNames = [...new Set(validRotas.map(r => r.rota_name).filter(Boolean))].sort();
 
             let html = `<button class="filter-pill ${selectedRotaFilter === 'all' ? 'active' : ''}" onclick="filterRota('all')">All Rotas</button>`;
@@ -741,7 +752,7 @@
         }
 
         // ════════════════════════════════════════════════════════════════
-        // EDIT FEATURES (ANYONE CAN CHANGE A PERSON ASSIGNED TO A ROLE)
+        // EDIT FEATURES
         // ════════════════════════════════════════════════════════════════
         function editPerson(id) {
             const rota = allRotas.find(r => String(r.id) === String(id));
@@ -819,8 +830,8 @@
                 document.getElementById('content-area').innerHTML = `
                     <div class="empty-state">
                         <div class="empty-icon">📅</div>
-                        <div class="empty-title">No Rotas Found</div>
-                        <div class="empty-text">${selectedRotaFilter !== 'all' ? `No ${selectedRotaFilter} rotas scheduled` : 'Check back soon for upcoming schedules'}</div>
+                        <div class="empty-title">No Upcoming Rotas</div>
+                        <div class="empty-text">${selectedRotaFilter !== 'all' ? `No future ${selectedRotaFilter} schedules found.` : 'Check back soon for future schedules.'}</div>
                     </div>
                 `;
                 return;
@@ -866,8 +877,8 @@
             document.getElementById('content-area').innerHTML = `
                 <div class="empty-state">
                     <div class="empty-icon">🔍</div>
-                    <div class="empty-title">Search for a Person</div>
-                    <div class="empty-text">Type a name in the search box to see their schedule</div>
+                    <div class="empty-title">Search for Upcoming Schedules</div>
+                    <div class="empty-text">Type a name in the box above to find future commitments</div>
                 </div>
             `;
         }
@@ -878,8 +889,12 @@
                 return;
             }
 
+            const todayStr = getTodayStr();
+
+            // Filter out past assignments from search view
             const filtered = allRotas.filter(rota => 
                 isSundayOrWednesday(rota.date) &&
+                rota.date >= todayStr &&
                 rota.assigned_persons && 
                 rota.assigned_persons.toLowerCase().includes(name.toLowerCase())
             );
@@ -888,8 +903,8 @@
                 document.getElementById('content-area').innerHTML = `
                     <div class="empty-state">
                         <div class="empty-icon">😐</div>
-                        <div class="empty-title">No Results</div>
-                        <div class="empty-text">No rotas found for "${name}"</div>
+                        <div class="empty-title">No Upcoming Rotas</div>
+                        <div class="empty-text">No upcoming schedules found for "${name}"</div>
                     </div>
                 `;
                 return;
@@ -909,7 +924,7 @@
                     <div class="person-results">
                         <div class="person-header">
                             <div class="person-name">${person}</div>
-                            <div class="person-count">${rotas.length} slot${rotas.length !== 1 ? 's' : ''}</div>
+                            <div class="person-count">${rotas.length} future slot${rotas.length !== 1 ? 's' : ''}</div>
                         </div>
                         ${rotas
                             .sort((a, b) => new Date(a.date) - new Date(b.date))
@@ -938,7 +953,7 @@
         }
 
         // ════════════════════════════════════════════════════════════════
-        // RENDER: INDIVIDUAL ROTA CARD (REPAIRED)
+        // RENDER: INDIVIDUAL ROTA CARD
         // ════════════════════════════════════════════════════════════════
         function renderRotaCard(rota) {
             const personBadge = rota.assigned_persons 
