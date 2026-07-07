@@ -3,66 +3,830 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Craigavon Baptist Church | Rota Hub</title>
+    <title>CBC Rotas | Craigavon Baptist Church</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
-        :root { --cb-dark-blue: #002D62; --cb-light-blue: #00509E; --cb-bg: #F4F7F9; }
-        body { font-family: 'Inter', sans-serif; background-color: var(--cb-bg); margin: 0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
-        /* Login Screen */
-        #login-screen { height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--cb-dark-blue); }
-        .login-box { background: white; padding: 40px; border-radius: 12px; text-align: center; }
-        
-        /* Dashboard */
-        #app-screen { display: none; max-width: 900px; margin: 0 auto; padding: 20px; }
-        header { background: white; padding: 20px; display: flex; align-items: center; gap: 15px; border-radius: 12px; margin-bottom: 20px; }
-        .logo { height: 50px; width: 50px; object-fit: contain; }
-        
-        .rota-card { background: white; padding: 20px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .rota-title { font-size: 1.2rem; font-weight: 700; color: var(--cb-dark-blue); }
-        .rota-names { font-size: 1.1rem; color: #333; margin-top: 8px; }
-        .edit-btn { background: var(--cb-light-blue); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+        :root {
+            --cbc-navy: #1e3a5f;
+            --cbc-blue: #2d5a8c;
+            --cbc-accent: #e8501b;
+            --cbc-light: #f8f9fa;
+            --cbc-white: #ffffff;
+            --cbc-text: #2c3e50;
+            --cbc-muted: #7f8c8d;
+            --cbc-border: #ecf0f1;
+            --cbc-success: #27ae60;
+            --cbc-shadow: 0 4px 12px rgba(30, 58, 95, 0.08);
+            --cbc-shadow-lg: 0 8px 24px rgba(30, 58, 95, 0.12);
+        }
+
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: var(--cbc-light);
+            color: var(--cbc-text);
+            line-height: 1.6;
+        }
+
+        /* ════════════════════════════════════════════════════════════════ */
+        /* LOGIN SCREEN */
+        /* ════════════════════════════════════════════════════════════════ */
+        #login-screen {
+            height: 100vh;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--cbc-navy) 0%, var(--cbc-blue) 100%);
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+
+        .login-container {
+            background: var(--cbc-white);
+            border-radius: 16px;
+            padding: 48px 40px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: var(--cbc-shadow-lg);
+            text-align: center;
+        }
+
+        .login-logo {
+            height: 64px;
+            margin-bottom: 24px;
+            object-fit: contain;
+        }
+
+        .login-header {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--cbc-navy);
+            margin-bottom: 12px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .login-subheader {
+            font-size: 14px;
+            color: var(--cbc-muted);
+            margin-bottom: 32px;
+        }
+
+        .login-group {
+            margin-bottom: 20px;
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--cbc-border);
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+            letter-spacing: 0.1em;
+        }
+
+        .login-input:focus {
+            outline: none;
+            border-color: var(--cbc-accent);
+            box-shadow: 0 0 0 3px rgba(232, 80, 27, 0.1);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, var(--cbc-accent) 0%, #d63d10 100%);
+            color: var(--cbc-white);
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(232, 80, 27, 0.3);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .login-error {
+            color: #e74c3c;
+            font-size: 13px;
+            margin-top: 12px;
+            display: none;
+        }
+
+        /* ════════════════════════════════════════════════════════════════ */
+        /* APP SCREEN */
+        /* ════════════════════════════════════════════════════════════════ */
+        #app-screen {
+            display: none;
+            min-height: 100vh;
+            padding-bottom: 40px;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--cbc-navy) 0%, var(--cbc-blue) 100%);
+            color: var(--cbc-white);
+            padding: 24px 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: var(--cbc-shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-logo {
+            height: 48px;
+            width: auto;
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+
+        .header-content {
+            flex: 1;
+        }
+
+        .header-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .header-subtitle {
+            font-size: 13px;
+            opacity: 0.85;
+            margin-top: 4px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: var(--cbc-white);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Navigation & Filters */
+        .nav-bar {
+            background: var(--cbc-white);
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--cbc-border);
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            max-width: 100%;
+            overflow-x: auto;
+        }
+
+        .nav-btn {
+            padding: 8px 16px;
+            border: 2px solid var(--cbc-border);
+            background: var(--cbc-white);
+            color: var(--cbc-text);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            border-color: var(--cbc-accent);
+            color: var(--cbc-accent);
+        }
+
+        .nav-btn.active {
+            background: var(--cbc-accent);
+            color: var(--cbc-white);
+            border-color: var(--cbc-accent);
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 8px 16px;
+            border: 2px solid var(--cbc-border);
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--cbc-accent);
+            box-shadow: 0 0 0 3px rgba(232, 80, 27, 0.1);
+        }
+
+        /* Content Area */
+        .content-wrapper {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 24px 20px;
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        .view-toggle button {
+            padding: 8px 16px;
+            border: 2px solid var(--cbc-border);
+            background: var(--cbc-white);
+            color: var(--cbc-text);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .view-toggle button.active {
+            background: var(--cbc-accent);
+            color: var(--cbc-white);
+            border-color: var(--cbc-accent);
+        }
+
+        /* Date Group Section */
+        .date-group {
+            margin-bottom: 32px;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .date-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 3px solid var(--cbc-accent);
+        }
+
+        .date-icon {
+            width: 8px;
+            height: 8px;
+            background: var(--cbc-accent);
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .date-label {
+            font-family: 'Poppins', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--cbc-navy);
+        }
+
+        .date-day {
+            font-size: 13px;
+            color: var(--cbc-muted);
+            margin-left: auto;
+        }
+
+        /* Rota Card */
+        .rota-card {
+            background: var(--cbc-white);
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 12px;
+            box-shadow: var(--cbc-shadow);
+            transition: all 0.3s ease;
+            border-left: 4px solid var(--cbc-accent);
+        }
+
+        .rota-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--cbc-shadow-lg);
+        }
+
+        .rota-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .rota-role {
+            font-family: 'Poppins', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--cbc-navy);
+        }
+
+        .rota-time {
+            font-size: 12px;
+            color: var(--cbc-muted);
+            background: var(--cbc-light);
+            padding: 4px 10px;
+            border-radius: 4px;
+        }
+
+        .rota-person {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: var(--cbc-text);
+            margin-bottom: 6px;
+        }
+
+        .person-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--cbc-blue) 0%, var(--cbc-accent) 100%);
+            color: var(--cbc-white);
+            padding: 4px 10px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .vacant {
+            display: inline-block;
+            color: #e74c3c;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .rota-actions {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--cbc-border);
+            display: flex;
+            gap: 8px;
+        }
+
+        .rota-btn {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid var(--cbc-border);
+            background: var(--cbc-white);
+            color: var(--cbc-text);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .rota-btn:hover {
+            background: var(--cbc-light);
+            border-color: var(--cbc-accent);
+            color: var(--cbc-accent);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--cbc-muted);
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .empty-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--cbc-text);
+            margin-bottom: 8px;
+        }
+
+        .empty-text {
+            font-size: 14px;
+        }
+
+        /* Person Lookup Results */
+        .person-results {
+            background: var(--cbc-white);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+            box-shadow: var(--cbc-shadow);
+        }
+
+        .person-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid var(--cbc-border);
+        }
+
+        .person-name {
+            font-family: 'Poppins', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--cbc-navy);
+        }
+
+        .person-count {
+            margin-left: auto;
+            background: var(--cbc-accent);
+            color: var(--cbc-white);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .login-container {
+                margin: 20px;
+                padding: 32px 24px;
+            }
+
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .header-actions {
+                width: 100%;
+            }
+
+            .nav-bar {
+                flex-direction: column;
+            }
+
+            .search-input {
+                min-width: 100%;
+            }
+
+            .rota-card {
+                padding: 14px;
+            }
+
+            .date-header {
+                flex-wrap: wrap;
+            }
+
+            .date-day {
+                flex-basis: 100%;
+                margin-left: 0;
+                margin-top: 4px;
+            }
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            border: 3px solid var(--cbc-border);
+            border-top: 3px solid var(--cbc-accent);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
-
+    <!-- LOGIN SCREEN -->
     <div id="login-screen">
-        <div class="login-box">
-            <h2>Church Access Required</h2>
-            <input type="password" id="pass" placeholder="Enter Security Code">
-            <button onclick="checkLogin()">Login</button>
+        <div class="login-container">
+            <img src="cbc logo_2.webp" alt="CBC Logo" class="login-logo">
+            <h2 class="login-header">CBC Rotas</h2>
+            <p class="login-subheader">Craigavon Baptist Church</p>
+            <div class="login-group">
+                <input 
+                    type="password" 
+                    id="security-code" 
+                    class="login-input" 
+                    placeholder="Security Code"
+                    onkeypress="event.key === 'Enter' && checkLogin()"
+                >
+            </div>
+            <button class="login-btn" onclick="checkLogin()">Access Rotas</button>
+            <div class="login-error" id="login-error">Incorrect security code</div>
         </div>
     </div>
 
+    <!-- APP SCREEN -->
     <div id="app-screen">
+        <!-- Header -->
         <header>
-            <img src="cbc logo_2.webp" class="logo" alt="Logo">
-            <h1>Craigavon Baptist Church Rota</h1>
+            <img src="cbc logo_2.webp" alt="CBC Logo" class="header-logo">
+            <div class="header-content">
+                <h1 class="header-title">CBC Rotas</h1>
+                <p class="header-subtitle">Craigavon Baptist Church Rota Management</p>
+            </div>
+            <div class="header-actions">
+                <button class="logout-btn" onclick="logout()">Log Out</button>
+            </div>
         </header>
-        <div id="content-area"></div>
+
+        <!-- Navigation Bar -->
+        <div class="nav-bar">
+            <button class="nav-btn active" onclick="switchView('all')">All Rotas</button>
+            <button class="nav-btn" onclick="switchView('person')">Find My Schedule</button>
+            <input 
+                type="text" 
+                id="person-search" 
+                class="search-input" 
+                placeholder="Search by name..." 
+                style="display: none;"
+                onkeyup="searchPerson(this.value)"
+            >
+        </div>
+
+        <!-- Content Area -->
+        <div class="content-wrapper">
+            <div id="content-area"></div>
+        </div>
     </div>
 
     <script>
-        const db = supabase.createClient("https://ojzwujpahfjmaeisnfez.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qend1anBhaGZqbWFlaXNuZmV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTA5NDMsImV4cCI6MjA5NDU4Njk0M30.VvszGR6MbUnBhKsmsXBikkrjok2-F1bnyS4zOwDX5hg");
-        
+        // ════════════════════════════════════════════════════════════════
+        // SUPABASE CONFIG
+        // ════════════════════════════════════════════════════════════════
+        const db = supabase.createClient(
+            "https://ojzwujpahfjmaeisnfez.supabase.co",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qend1anBhaGZqbWFlaXNuZmV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTA5NDMsImV4cCI6MjA5NDU4Njk0M30.VvszGR6MbUnBhKsmsXBikkrjok2-F1bnyS4zOwDX5hg"
+        );
+
+        // ════════════════════════════════════════════════════════════════
+        // STATE
+        // ════════════════════════════════════════════════════════════════
+        let allRotas = [];
+        let currentView = 'all';
+
+        // ════════════════════════════════════════════════════════════════
+        // LOGIN
+        // ════════════════════════════════════════════════════════════════
         function checkLogin() {
-            if(document.getElementById('pass').value === "1234") {
+            const code = document.getElementById('security-code').value;
+            const errorEl = document.getElementById('login-error');
+
+            if (code === "1234") {
+                errorEl.style.display = 'none';
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('app-screen').style.display = 'block';
-                loadData();
-            } else { alert("Incorrect Code"); }
+                loadAllRotas();
+            } else {
+                errorEl.style.display = 'block';
+                document.getElementById('security-code').value = '';
+            }
         }
 
-        async function loadData() {
-            const { data } = await db.from('rotas').select('*').order('date', { ascending: true });
-            document.getElementById('content-area').innerHTML = data.map(item => `
-                <div class="rota-card">
-                    <div class="rota-title">${new Date(item.date).toLocaleDateString()} | ${item.rota_name}</div>
-                    <div class="rota-names"><strong>${item.role}:</strong> ${item.assigned_persons || 'Vacant'}</div>
-                </div>
-            `).join('');
+        function logout() {
+            if (confirm('Log out of CBC Rotas?')) {
+                document.getElementById('security-code').value = '';
+                document.getElementById('login-screen').style.display = 'flex';
+                document.getElementById('app-screen').style.display = 'none';
+                document.getElementById('content-area').innerHTML = '';
+                currentView = 'all';
+                switchView('all');
+            }
         }
+
+        // ════════════════════════════════════════════════════════════════
+        // DATA LOADING
+        // ════════════════════════════════════════════════════════════════
+        async function loadAllRotas() {
+            const { data, error } = await db
+                .from('rotas')
+                .select('*')
+                .order('date', { ascending: true })
+                .order('rota_name', { ascending: true });
+
+            if (error) {
+                console.error('Error loading rotas:', error);
+                renderError();
+                return;
+            }
+
+            allRotas = data || [];
+            renderAllRotas();
+        }
+
+        // ════════════════════════════════════════════════════════════════
+        // VIEWS
+        // ════════════════════════════════════════════════════════════════
+        function switchView(view) {
+            currentView = view;
+            const navBtns = document.querySelectorAll('.nav-btn');
+            navBtns.forEach(btn => btn.classList.remove('active'));
+            event?.target?.classList.add('active');
+
+            document.getElementById('person-search').style.display = 
+                view === 'person' ? 'block' : 'none';
+
+            if (view === 'all') {
+                renderAllRotas();
+            } else if (view === 'person') {
+                renderPersonSearch();
+            }
+        }
+
+        // ════════════════════════════════════════════════════════════════
+        // RENDER: ALL ROTAS GROUPED BY DATE
+        // ════════════════════════════════════════════════════════════════
+        function renderAllRotas() {
+            if (!allRotas || allRotas.length === 0) {
+                document.getElementById('content-area').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📅</div>
+                        <div class="empty-title">No Rotas Scheduled</div>
+                        <div class="empty-text">Check back soon for upcoming schedules</div>
+                    </div>
+                `;
+                return;
+            }
+
+            // Group by date
+            const grouped = {};
+            allRotas.forEach(rota => {
+                const dateKey = rota.date;
+                if (!grouped[dateKey]) grouped[dateKey] = [];
+                grouped[dateKey].push(rota);
+            });
+
+            let html = '';
+            Object.keys(grouped).sort().forEach(dateKey => {
+                const rotas = grouped[dateKey];
+                const dateObj = new Date(dateKey + 'T00:00:00');
+                const dateStr = dateObj.toLocaleDateString('en-GB', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+
+                html += `
+                    <div class="date-group">
+                        <div class="date-header">
+                            <div class="date-icon"></div>
+                            <div class="date-label">${dateStr}</div>
+                            <div class="date-day">${rotas.length} role${rotas.length !== 1 ? 's' : ''}</div>
+                        </div>
+                        ${rotas.map(rota => renderRotaCard(rota)).join('')}
+                    </div>
+                `;
+            });
+
+            document.getElementById('content-area').innerHTML = html;
+        }
+
+        // ════════════════════════════════════════════════════════════════
+        // RENDER: PERSON SEARCH
+        // ════════════════════════════════════════════════════════════════
+        function renderPersonSearch() {
+            document.getElementById('content-area').innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">🔍</div>
+                    <div class="empty-title">Search for a Person</div>
+                    <div class="empty-text">Type a name in the search box to see their schedule</div>
+                </div>
+            `;
+        }
+
+        function searchPerson(name) {
+            if (!name.trim()) {
+                renderPersonSearch();
+                return;
+            }
+
+            const filtered = allRotas.filter(rota => 
+                rota.assigned_persons && 
+                rota.assigned_persons.toLowerCase().includes(name.toLowerCase())
+            );
+
+            if (filtered.length === 0) {
+                document.getElementById('content-area').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">😐</div>
+                        <div class="empty-title">No Results</div>
+                        <div class="empty-text">No rotas found for "${name}"</div>
+                    </div>
+                `;
+                return;
+            }
+
+            // Group by person
+            const byPerson = {};
+            filtered.forEach(rota => {
+                const person = rota.assigned_persons;
+                if (!byPerson[person]) byPerson[person] = [];
+                byPerson[person].push(rota);
+            });
+
+            let html = '';
+            Object.keys(byPerson).sort().forEach(person => {
+                const rotas = byPerson[person];
+                html += `
+                    <div class="person-results">
+                        <div class="person-header">
+                            <div class="person-name">${person}</div>
+                            <div class="person-count">${rotas.length} slot${rotas.length !== 1 ? 's' : ''}</div>
+                        </div>
+                        ${rotas
+                            .sort((a, b) => new Date(a.date) - new Date(b.date))
+                            .map(rota => `
+                                <div class="rota-card">
+                                    <div class="rota-header">
+                                        <div>
+                                            <div class="rota-role">${rota.rota_name}</div>
+                                            <div style="font-size: 12px; color: var(--cbc-muted); margin-top: 4px;">
+                                                ${new Date(rota.date + 'T00:00:00').toLocaleDateString('en-GB', { weekday: 'short', month: 'short', day: 'numeric' })}
+                                            </div>
+                                        </div>
+                                        ${rota.time ? `<div class="rota-time">${rota.time}</div>` : ''}
+                                    </div>
+                                </div>
+                            `).join('')}
+                    </div>
+                `;
+            });
+
+            document.getElementById('content-area').innerHTML = html;
+        }
+
+        // ════════════════════════════════════════════════════════════════
+        // RENDER: INDIVIDUAL ROTA CARD
+        // ════════════════════════════════════════════════════════════════
+        function renderRotaCard(rota) {
+            const personBadge = rota.assigned_persons 
+                ? `<span class="person-badge">${rota.assigned_persons}</span>`
+                : `<span class="vacant">No one assigned</span>`;
+
+            return `
+                <div class="rota-card">
+                    <div class="rota-header">
+                        <div class="rota-role">${rota.rota_name}</div>
+                        ${rota.time ? `<div class="rota-time">${rota.time}</div>` : ''}
+                    </div>
+                    <div class="rota-person">
+                        ${personBadge}
+                    </div>
+                    ${rota.notes ? `<div style="font-size: 12px; color: var(--cbc-muted); margin-top: 8px;">📝 ${rota.notes}</div>` : ''}
+                </div>
+            `;
+        }
+
+        // ════════════════════════════════════════════════════════════════
+        // ERROR HANDLING
+        // ════════════════════════════════════════════════════════════════
+        function renderError() {
+            document.getElementById('content-area').innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">⚠️</div>
+                    <div class="empty-title">Connection Error</div>
+                    <div class="empty-text">Unable to load rotas. Please try again.</div>
+                </div>
+            `;
+        }
+
+        // Focus security code input on load
+        window.addEventListener('load', () => {
+            document.getElementById('security-code').focus();
+        });
     </script>
 </body>
 </html>
