@@ -191,9 +191,9 @@
             border-bottom: 1px solid var(--cbc-border);
             display: flex;
             gap: 12px;
+            align-items: center;
             flex-wrap: wrap;
             max-width: 100%;
-            overflow-x: auto;
         }
 
         .nav-btn {
@@ -494,6 +494,7 @@
 
             .nav-bar {
                 flex-direction: column;
+                align-items: stretch;
             }
 
             .search-input {
@@ -562,8 +563,8 @@
         </header>
 
         <div class="nav-bar">
-            <button class="nav-btn active" onclick="switchView('all')">All Rotas</button>
-            <button class="nav-btn" onclick="switchView('person')">Find My Schedule</button>
+            <button class="nav-btn active" onclick="switchView('all', event)">All Rotas</button>
+            <button class="nav-btn" onclick="switchView('person', event)">Find My Schedule</button>
             <input 
                 type="text" 
                 id="person-search" 
@@ -625,12 +626,12 @@
                 document.getElementById('app-screen').style.display = 'none';
                 document.getElementById('content-area').innerHTML = '';
                 currentView = 'all';
-                switchView('all');
+                switchView('all', null);
             }
         }
 
         // ════════════════════════════════════════════════════════════════
-        // DATA LOADING
+        // DATA LOADING & REFINED DEDUPLICATION
         // ════════════════════════════════════════════════════════════════
         async function loadAllRotas() {
             const { data, error } = await db
@@ -641,14 +642,19 @@
 
             if (error) {
                 console.error('Error loading rotas:', error);
-                renderError();
+                document.getElementById('content-area').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">⚠️</div>
+                        <div class="empty-title">Connection Error</div>
+                        <div class="empty-text">Could not synchronize workspace with database. Please try again.</div>
+                    </div>`;
                 return;
             }
 
-            // Deduplicate items cleanly to prevent any ui redundancy
+            // Standard content-based deduplication logic to clear out structural duplicates
             const seen = new Set();
             allRotas = (data || []).filter(item => {
-                const uniqueKey = item.id ? String(item.id) : `${item.date}-${item.rota_name}-${item.time}-${item.assigned_persons}`;
+                const uniqueKey = `${item.date}-${item.rota_name}-${item.time || ''}-${item.assigned_persons || ''}`;
                 if (seen.has(uniqueKey)) return false;
                 seen.add(uniqueKey);
                 return true;
@@ -673,7 +679,7 @@
             return day === 0 || day === 3; // 0 = Sunday, 3 = Wednesday
         }
 
-        function getFilteredRotas() {
+        getFilteredRotas = function() {
             let filtered = allRotas.filter(rota => isSundayOrWednesday(rota.date));
             
             if (selectedRotaFilter !== 'all') {
@@ -686,12 +692,18 @@
         // ════════════════════════════════════════════════════════════════
         // VIEWS & DYNAMIC FILTERS
         // ════════════════════════════════════════════════════════════════
-        function switchView(view) {
+        function switchView(view, eventObj) {
             currentView = view;
-            const navBtns = document.querySelectorAll('.nav-btn');
+            const navBtns = document.querySelectorAll('.nav-bar .nav-btn');
             navBtns.forEach(btn => btn.classList.remove('active'));
-            if (event && event.target) {
-                event.target.classList.add('active');
+            
+            if (eventObj && eventObj.target) {
+                eventObj.target.classList.add('active');
+            } else {
+                // Default fallback highlighting if clicked programmatically
+                const buttons = document.querySelectorAll('.nav-bar .nav-btn');
+                if (view === 'all' && buttons[0]) buttons[0].classList.add('active');
+                if (view === 'person' && buttons[1]) buttons[1].classList.add('active');
             }
 
             document.getElementById('person-search').style.display = 
@@ -926,7 +938,7 @@
         }
 
         // ════════════════════════════════════════════════════════════════
-        // RENDER: INDIVIDUAL ROTA CARD
+        // RENDER: INDIVIDUAL ROTA CARD (REPAIRED)
         // ════════════════════════════════════════════════════════════════
         function renderRotaCard(rota) {
             const personBadge = rota.assigned_persons 
@@ -943,28 +955,9 @@
                         ${personBadge}
                         <button class="rota-btn" style="margin-left: auto;" onclick="editPerson('${rota.id}')">✏️ Edit</button>
                     </div>
-                    ${rota.notes ? `<div style="font-size: 12px; color: var(--cbc-muted); margin-top: 8px;">📝 ${rota.notes}</div>` : ''}
                 </div>
             `;
         }
-
-        // ════════════════════════════════════════════════════════════════
-        // ERROR HANDLING
-        // ════════════════════════════════════════════════════════════════
-        function renderError() {
-            document.getElementById('content-area').innerHTML = `
-                <div class="empty-state">
-                    <div class="empty-icon">⚠️</div>
-                    <div class="empty-title">Connection Error</div>
-                    <div class="empty-text">Unable to load rotas. Please try again.</div>
-                </div>
-            `;
-        }
-
-        // Focus security code input on load
-        window.addEventListener('load', () => {
-            document.getElementById('security-code').focus();
-        });
     </script>
 </body>
 </html>
