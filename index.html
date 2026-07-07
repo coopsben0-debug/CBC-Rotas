@@ -3,172 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Craigavon Baptist Church | Rota System</title>
-    <link rel="icon" href="cbc%20logo.webp" type="image/webp">
+    <title>Craigavon Baptist | Rota Hub</title>
+    <link rel="icon" href="cbc logo_2.webp" type="image/webp">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --cb-dark-blue: #002D62;
             --cb-light-blue: #00509E;
             --cb-white: #FFFFFF;
-            --cb-gray-bg: #F4F7F9;
-            --cb-gray-border: #E1E8ED;
-            --cb-text-main: #2C3E50;
-            --cb-text-muted: #5C6F82;
-            --cb-alert: #E74C3C;
-            --cb-alert-bg: #FDEDEC;
-            --cb-accent: #EBF3FC;
+            --cb-bg: #F4F7F9;
+            --cb-text: #1A202C;
         }
 
-        body { font-family: 'Inter', sans-serif; background-color: var(--cb-gray-bg); color: var(--cb-text-main); margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--cb-bg); color: var(--cb-text); margin: 0; }
 
-        /* --- Login Gateway --- */
-        #login-screen { display: flex; align-items: center; justify-content: center; height: 100vh; background: linear-gradient(135deg, var(--cb-dark-blue) 0%, var(--cb-light-blue) 100%); padding: 20px; }
-        .login-box { background: var(--cb-white); padding: 40px; border-radius: 12px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 100%; max-width: 400px; }
-        #keycode-input { width: 100%; padding: 14px; font-size: 20px; border: 2px solid var(--cb-gray-border); border-radius: 8px; margin-bottom: 20px; text-align: center; letter-spacing: 4px; box-sizing: border-box; }
-        #login-btn { width: 100%; padding: 14px; font-size: 16px; background-color: var(--cb-light-blue); color: var(--cb-white); border: none; border-radius: 8px; cursor: pointer; font-weight: 600; }
-        
-        /* --- Main Layout --- */
-        #app-screen { display: none; max-width: 1200px; margin: 0 auto; padding: 20px; }
-        header { display: flex; align-items: center; padding: 25px 0; border-bottom: 3px solid var(--cb-gray-border); margin-bottom: 30px; }
-        
-        /* --- Components --- */
-        .finder-section { background: var(--cb-white); padding: 25px; border-radius: 12px; border: 1px solid var(--cb-gray-border); margin-bottom: 35px; border-left: 6px solid var(--cb-light-blue); }
-        .finder-input-row { display: flex; gap: 15px; margin-top: 15px; }
-        .finder-input { flex: 1; padding: 14px; border: 1px solid var(--cb-gray-border); border-radius: 8px; }
-        .finder-btn { background-color: var(--cb-dark-blue); color: var(--cb-white); border: none; padding: 0 30px; border-radius: 8px; cursor: pointer; }
-        
-        .tabs { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 30px; justify-content: center; }
-        .tab-btn { background-color: var(--cb-white); border: 1px solid var(--cb-gray-border); padding: 12px 20px; border-radius: 50px; cursor: pointer; font-weight: 600; font-size: 14px; }
-        .tab-btn.active { background-color: var(--cb-light-blue); color: var(--cb-white); border-color: var(--cb-light-blue); }
+        /* Header */
+        header { 
+            background: var(--cb-white); padding: 20px 40px; 
+            display: flex; align-items: center; gap: 20px; 
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        .logo { height: 60px; width: auto; }
+        .header-text h1 { margin: 0; font-size: 28px; color: var(--cb-dark-blue); }
 
-        .rota-section { background: var(--cb-white); padding: 25px; border-radius: 12px; margin-bottom: 40px; border: 1px solid var(--cb-gray-border); }
-        .rota-date-header { color: var(--cb-dark-blue); border-bottom: 2px solid var(--cb-gray-bg); padding-bottom: 15px; }
-        .rota-group-title { background-color: var(--cb-gray-bg); color: var(--cb-text-muted); font-weight: 700; padding: 10px 15px; margin-top: 25px; border-radius: 6px 6px 0 0; text-transform: uppercase; font-size: 14px; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { text-align: left; padding: 16px 15px; border: 1px solid var(--cb-gray-border); }
-        .needs-cover-row td { background-color: var(--cb-alert-bg) !important; }
-        .action-btn { background-color: transparent; color: var(--cb-light-blue); border: 1px solid var(--cb-light-blue); padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; }
-        
-        /* --- Modal --- */
-        #edit-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,45,98,0.6); backdrop-filter: blur(3px); justify-content: center; align-items: center; z-index: 1000; }
-        .modal-content { background: var(--cb-white); padding: 30px; border-radius: 12px; width: 100%; max-width: 500px; }
-        .form-group { margin-bottom: 18px; }
-        .form-group input, .form-group textarea { width: 100%; padding: 12px; border: 1px solid var(--cb-gray-border); border-radius: 6px; box-sizing: border-box; }
-        .modal-actions { display: flex; gap: 12px; margin-top: 25px; }
-        .save-btn { background-color: var(--cb-light-blue); color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; flex: 1; }
+        /* Container */
+        #app-screen { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+
+        /* Tabs */
+        .tabs { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 30px; }
+        .tab-btn { 
+            background: white; border: 1px solid #E2E8F0; padding: 10px 20px; 
+            border-radius: 50px; cursor: pointer; font-weight: 600; transition: all 0.2s;
+        }
+        .tab-btn.active { background: var(--cb-dark-blue); color: white; border-color: var(--cb-dark-blue); }
+
+        /* Cards */
+        .rota-section { 
+            background: white; padding: 20px 25px; border-radius: 16px; 
+            margin-bottom: 20px; border-left: 6px solid var(--cb-light-blue);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center;
+        }
+        .rota-details h3 { margin: 0 0 5px 0; color: var(--cb-dark-blue); }
+        .action-btn { 
+            background: var(--cb-light-blue); color: white; border: none; 
+            padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer;
+        }
     </style>
 </head>
 <body>
 
-    <div id="login-screen">
-        <div class="login-box">
-            <h2>Craigavon Baptist</h2>
-            <input type="password" id="keycode-input" placeholder="••••">
-            <button id="login-btn" onclick="checkCode()">Secure Login</button>
+    <!-- Header -->
+    <header>
+        <img src="cbc logo_2.webp" class="logo" alt="Craigavon Baptist Logo">
+        <div class="header-text">
+            <h1>Church Rota Hub</h1>
         </div>
-    </div>
+    </header>
 
+    <!-- Main App -->
     <div id="app-screen">
-        <header>
-            <div class="header-text"><h1>Church Rota Hub</h1><span>Live Schedule Dashboard</span></div>
-        </header>
-
-        <div class="finder-section">
-            <h3>🔍 My Upcoming Dates</h3>
-            <div class="finder-input-row">
-                <input type="text" id="personal-name-input" placeholder="Enter your name">
-                <button class="finder-btn" onclick="findPersonalSchedule()">Find</button>
-            </div>
-            <div id="personal-results-area" style="display:none; margin-top:20px;"></div>
-        </div>
-
         <div class="tabs" id="tabs-container"></div>
         <div id="content-area"></div>
     </div>
 
-    <div id="edit-modal">
-        <div class="modal-content">
-            <h3 id="modal-title">Edit Assignment</h3>
-            <input type="hidden" id="edit-slot-id">
-            <div class="form-group"><label>Assigned Person(s):</label><input type="text" id="edit-names"></div>
-            <div class="form-group" id="modal-story-group"><label>Lesson Story:</label><input type="text" id="edit-story"></div>
-            <div class="form-group" id="modal-verse-group"><label>Memory Verse:</label><input type="text" id="edit-verse"></div>
-            <div class="form-group"><label>Notes:</label><textarea id="edit-notes" rows="3"></textarea></div>
-            <div class="form-group"><input type="checkbox" id="edit-cover-checkbox"> <label style="display:inline;">Flag as Needs Cover</label></div>
-            <div class="modal-actions">
-                <button class="save-btn" onclick="closeModal()" style="background-color:gray;">Cancel</button>
-                <button class="save-btn" onclick="saveSlotChanges()">Save Changes</button>
-            </div>
-        </div>
-    </div>
-
     <script>
         const db = supabase.createClient("https://ojzwujpahfjmaeisnfez.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qend1anBhaGZqbWFlaXNuZmV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTA5NDMsImV4cCI6MjA5NDU4Njk0M30.VvszGR6MbUnBhKsmsXBikkrjok2-F1bnyS4zOwDX5hg");
-        let globalRotaData = [];
-        let currentActiveTab = "Main";
-
-        function checkCode() {
-            if (document.getElementById('keycode-input').value === "1234") {
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('app-screen').style.display = 'block';
-                fetchUpcomingRotas();
-            }
-        }
-
-        async function fetchUpcomingRotas() {
-            const { data, error } = await db.from('rotas').select('*').order('date', { ascending: true });
-            if (error) return;
-
-            globalRotaData = data.filter(slot => {
-                // Filter out Home Group
-                if (slot.rota_name && slot.rota_name.toLowerCase().includes("home group")) return false;
-                return true;
-            }).map(slot => {
-                let name = slot.rota_name;
-                if (name === "Sunday AM") name = "Preaching";
-                return { ...slot, rota_name: name, slot_date: slot.date.split('T')[0] };
-            });
-
-            buildDynamicTabs();
-            renderFilteredView(currentActiveTab);
-        }
-
-        function buildDynamicTabs() {
-            const container = document.getElementById('tabs-container');
-            const unique = [...new Set(globalRotaData.map(i => i.rota_name))];
-            container.innerHTML = `<button class="tab-btn ${currentActiveTab==='Main'?'active':''}" onclick="switchTab('Main')">All</button>` + 
-                                  unique.map(n => `<button class="tab-btn ${currentActiveTab===n?'active':''}" onclick="switchTab('${n}')">${n}</button>`).join('');
-        }
-
-        function switchTab(t) { currentActiveTab = t; buildDynamicTabs(); renderFilteredView(t); }
-
-        function renderFilteredView(view) {
-            const filtered = view === "Main" ? globalRotaData : globalRotaData.filter(s => s.rota_name === view);
-            document.getElementById('content-area').innerHTML = filtered.map(slot => `
+        
+        async function loadRotas() {
+            const { data } = await db.from('rotas').select('*').order('date', { ascending: true });
+            
+            const container = document.getElementById('content-area');
+            container.innerHTML = data.map(slot => `
                 <div class="rota-section">
-                    <h3>${slot.slot_date} - ${slot.rota_name}</h3>
-                    <p><strong>${slot.role}</strong>: ${slot.assigned_persons || 'Vacant'}</p>
-                    <button class="action-btn" onclick="openEditModal('${slot.id}')">Edit</button>
+                    <div class="rota-details">
+                        <h3>${new Date(slot.date).toLocaleDateString()} | ${slot.rota_name}</h3>
+                        <p><strong>${slot.role}:</strong> ${slot.assigned_persons || 'Vacant'}</p>
+                    </div>
+                    <button class="action-btn" onclick="alert('Edit clicked')">Edit</button>
                 </div>
             `).join('');
         }
-
-        function openEditModal(id) {
-            const s = globalRotaData.find(i => String(i.id) === String(id));
-            document.getElementById('edit-slot-id').value = s.id;
-            document.getElementById('edit-names').value = s.assigned_persons || '';
-            document.getElementById('edit-modal').style.display = 'flex';
-        }
-
-        function closeModal() { document.getElementById('edit-modal').style.display = 'none'; }
-
-        async function saveSlotChanges() {
-            const id = document.getElementById('edit-slot-id').value;
-            await db.from('rotas').update({ assigned_persons: document.getElementById('edit-names').value }).eq('id', id);
-            closeModal();
-            fetchUpcomingRotas();
-        }
+        
+        loadRotas();
     </script>
 </body>
 </html>
