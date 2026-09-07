@@ -4,9 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CBC Rotas - Dashboard</title>
-  <!-- Supabase Client Library -->
+  <!-- Supabase JS Library -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- Inter Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -17,445 +16,109 @@
       --primary: #0f2b48;
       --primary-hover: #1e3a5f;
       --accent: #0d9488;
-      --accent-hover: #0f766e;
       --text-main: #0f172a;
       --text-muted: #64748b;
       --border-color: #e2e8f0;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background-color: var(--bg-main); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; }
 
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: var(--bg-main);
-      color: var(--text-main);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
+    /* Top Navigation Bar */
+    .header { background-color: var(--primary); color: white; padding: 1rem 2rem; box-shadow: 0 4px 12px rgba(15, 43, 72, 0.15); }
+    .header-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-logo { width: 38px; height: 38px; background: var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+    .brand-logo svg { width: 22px; height: 22px; fill: white; }
+    .brand h1 { font-size: 1.25rem; font-weight: 700; }
 
-    /* Top Navigation Header */
-    .header {
-      background-color: var(--primary);
-      color: white;
-      padding: 1rem 2rem;
-      box-shadow: 0 4px 12px rgba(15, 43, 72, 0.15);
-    }
+    .user-profile { display: flex; align-items: center; gap: 12px; }
+    .sync-status { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: #94a3b8; font-weight: 500; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background-color: #10b981; box-shadow: 0 0 8px #10b981; }
 
-    .header-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .brand-logo {
-      width: 38px;
-      height: 38px;
-      background: var(--accent);
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .brand-logo svg {
-      width: 22px;
-      height: 22px;
-      fill: white;
-    }
-
-    .brand h1 {
-      font-size: 1.25rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-    }
-
-    .user-profile {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .sync-status {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.8rem;
-      color: #94a3b8;
-      font-weight: 500;
-    }
-
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background-color: #10b981;
-      box-shadow: 0 0 8px #10b981;
-    }
-
+    /* User Name Badge in Top Corner */
     .user-pill {
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.18);
       backdrop-filter: blur(8px);
-      padding: 6px 14px;
+      padding: 6px 16px;
       border-radius: 20px;
       font-size: 0.85rem;
       font-weight: 600;
-      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.25);
     }
 
-    .btn-logout {
-      background: rgba(239, 68, 68, 0.15);
-      color: #fca5a5;
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      padding: 6px 14px;
-      border-radius: 8px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
+    .btn-logout { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); padding: 6px 14px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    .btn-logout:hover { background: #dc2626; color: white; }
 
-    .btn-logout:hover {
-      background: #dc2626;
-      color: white;
-      border-color: #dc2626;
-    }
+    /* Dashboard Layout */
+    .dashboard { max-width: 1200px; width: 100%; margin: 2rem auto; padding: 0 1.5rem; display: flex; flex-direction: column; gap: 1.5rem; flex-grow: 1; }
 
-    /* Main Content Dashboard */
-    .dashboard {
-      max-width: 1200px;
-      width: 100%;
-      margin: 2rem auto;
-      padding: 0 1.5rem;
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-      flex-grow: 1;
-    }
+    /* View Switcher Buttons */
+    .view-switchers { display: flex; gap: 10px; }
+    .btn-tab { padding: 0.75rem 1.25rem; border-radius: 10px; font-size: 0.9rem; font-weight: 600; border: 1px solid var(--border-color); background-color: white; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s ease; }
+    .btn-tab.active { background-color: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 10px rgba(15, 43, 72, 0.15); }
 
-    /* Schedule View Switcher Buttons */
-    .view-switchers {
-      display: flex;
-      gap: 10px;
-    }
+    /* Banner */
+    .duties-banner { background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%); color: white; padding: 1.5rem 1.75rem; border-radius: 14px; box-shadow: 0 10px 20px -5px rgba(13, 148, 136, 0.3); }
+    .duties-banner h2 { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.75rem; }
+    .duties-list { list-style: none; display: flex; flex-wrap: wrap; gap: 0.75rem; }
+    .duty-chip { background: rgba(255, 255, 255, 0.18); backdrop-filter: blur(6px); padding: 8px 14px; border-radius: 8px; font-size: 0.9rem; border: 1px solid rgba(255, 255, 255, 0.2); }
 
-    .btn-tab {
-      padding: 0.75rem 1.25rem;
-      border-radius: 10px;
-      font-size: 0.9rem;
-      font-weight: 600;
-      border: 1px solid var(--border-color);
-      background-color: white;
-      color: var(--text-muted);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transition: all 0.2s ease;
-    }
-
-    .btn-tab.active {
-      background-color: var(--primary);
-      color: white;
-      border-color: var(--primary);
-      box-shadow: 0 4px 10px rgba(15, 43, 72, 0.15);
-    }
-
-    .btn-tab:hover:not(.active) {
-      background-color: #f1f5f9;
-      color: var(--text-main);
-    }
-
-    /* Banner / My Duties Section */
-    .duties-banner {
-      background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
-      color: white;
-      padding: 1.5rem 1.75rem;
-      border-radius: 14px;
-      box-shadow: 0 10px 20px -5px rgba(13, 148, 136, 0.3);
-    }
-
-    .duties-banner h2 {
-      font-size: 1.1rem;
-      font-weight: 700;
-      margin-bottom: 0.75rem;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .duties-list {
-      list-style: none;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.75rem;
-    }
-
-    .duty-chip {
-      background: rgba(255, 255, 255, 0.18);
-      backdrop-filter: blur(6px);
-      padding: 8px 14px;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      font-weight: 500;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    /* Control Panel Card */
-    .panel-card {
-      background: var(--card-bg);
-      border-radius: 14px;
-      border: 1px solid var(--border-color);
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-      padding: 1.25rem 1.5rem;
-      display: flex;
-      flex-direction: column;
-      gap: 1.25rem;
-    }
-
-    .search-row {
-      display: flex;
-      gap: 1rem;
-      align-items: flex-end;
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
-      flex-grow: 1;
-    }
-
-    label {
-      font-size: 0.75rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--text-muted);
-    }
-
-    input[type="text"] {
-      width: 100%;
-      padding: 0.7rem 0.9rem;
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      font-size: 0.9rem;
-      color: var(--text-main);
-      background-color: #f8fafc;
-      transition: all 0.2s;
-    }
-
-    input[type="text"]:focus {
-      outline: none;
-      border-color: var(--accent);
-      background-color: #ffffff;
-      box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
-    }
+    /* Filter Controls Card */
+    .panel-card { background: var(--card-bg); border-radius: 14px; border: 1px solid var(--border-color); box-shadow: 0 1px 3px rgba(0,0,0,0.05); padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; }
+    .search-row { display: flex; gap: 1rem; align-items: flex-end; }
+    .form-group { display: flex; flex-direction: column; gap: 0.4rem; flex-grow: 1; }
+    label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); }
+    input[type="text"] { width: 100%; padding: 0.7rem 0.9rem; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.9rem; color: var(--text-main); background-color: #f8fafc; }
 
     /* Clickable Category Chips */
-    .chips-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 4px;
-    }
+    .chips-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+    .chip-btn { padding: 6px 14px; border-radius: 20px; font-size: 0.825rem; font-weight: 600; border: 1px solid var(--border-color); background-color: #f8fafc; color: var(--text-main); cursor: pointer; transition: all 0.2s ease; }
+    .chip-btn:hover { background-color: #e2e8f0; }
+    .chip-btn.active { background-color: var(--accent); color: white; border-color: var(--accent); }
 
-    .chip-btn {
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 0.825rem;
-      font-weight: 600;
-      border: 1px solid var(--border-color);
-      background-color: #f8fafc;
-      color: var(--text-main);
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .chip-btn:hover {
-      background-color: #e2e8f0;
-    }
-
-    .chip-btn.active {
-      background-color: var(--accent);
-      color: white;
-      border-color: var(--accent);
-      box-shadow: 0 2px 6px rgba(13, 148, 136, 0.25);
-    }
-
-    .btn-action {
-      padding: 0.7rem 1.2rem;
-      background-color: var(--primary);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background-color 0.2s;
-      height: 42px;
-      white-space: nowrap;
-    }
-
-    .btn-action:hover {
-      background-color: var(--primary-hover);
-    }
+    .btn-action { padding: 0.7rem 1.2rem; background-color: var(--primary); color: white; border: none; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; height: 42px; white-space: nowrap; }
 
     /* Table Container */
-    .table-card {
-      background: var(--card-bg);
-      border-radius: 14px;
-      border: 1px solid var(--border-color);
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-      overflow: hidden;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: left;
-    }
-
-    th {
-      background: #f8fafc;
-      color: var(--text-muted);
-      font-size: 0.75rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      padding: 1rem 1.25rem;
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    td {
-      padding: 1rem 1.25rem;
-      border-bottom: 1px solid var(--border-color);
-      font-size: 0.9rem;
-      color: var(--text-main);
-    }
-
-    tr:last-child td {
-      border-bottom: none;
-    }
-
-    tr:hover td {
-      background-color: #f8fafc;
-    }
-
-    .highlight-row td {
-      background-color: #f0fdfa !important;
-      font-weight: 600;
-    }
-
-    .badge-role {
-      display: inline-block;
-      padding: 4px 10px;
-      border-radius: 6px;
-      background-color: #f1f5f9;
-      color: var(--text-main);
-      font-weight: 600;
-      font-size: 0.8rem;
-    }
-
-    .btn-edit {
-      background: #f1f5f9;
-      color: var(--text-main);
-      border: 1px solid var(--border-color);
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .btn-edit:hover {
-      background: var(--primary);
-      color: white;
-      border-color: var(--primary);
-    }
-
-    /* Modal Styling */
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(15, 23, 42, 0.6);
-      backdrop-filter: blur(4px);
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-    }
-
-    .modal-card {
-      background: white;
-      padding: 2rem;
-      border-radius: 14px;
-      width: 90%;
-      max-width: 440px;
-      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
-    }
-
-    .modal-actions {
-      display: flex;
-      gap: 10px;
-      margin-top: 1.5rem;
-    }
+    .table-card { background: var(--card-bg); border-radius: 14px; border: 1px solid var(--border-color); overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th { background: #f8fafc; color: var(--text-muted); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; padding: 1rem 1.25rem; border-bottom: 1px solid var(--border-color); }
+    td { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border-color); font-size: 0.9rem; }
+    .highlight-row td { background-color: #f0fdfa !important; font-weight: 600; }
+    .badge-role { display: inline-block; padding: 4px 10px; border-radius: 6px; background-color: #f1f5f9; font-weight: 600; font-size: 0.8rem; }
+    .btn-edit { background: #f1f5f9; color: var(--text-main); border: 1px solid var(--border-color); padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+    .btn-edit:hover { background: var(--primary); color: white; }
   </style>
 </head>
 <body>
 
-  <!-- Navigation Header -->
   <header class="header">
     <div class="header-container">
       <div class="brand">
         <div class="brand-logo">
-          <svg viewBox="0 0 24 24">
-            <path d="M12 2L4 7v13h16V7l-8-5zm6 16H6V8.5l6-3.75 6 3.75V18z"/>
-          </svg>
+          <svg viewBox="0 0 24 24"><path d="M12 2L4 7v13h16V7l-8-5zm6 16H6V8.5l6-3.75 6 3.75V18z"/></svg>
         </div>
         <h1>Craigavon Baptist Rotas</h1>
       </div>
       <div class="user-profile">
-        <div class="sync-status">
-          <span class="status-dot"></span>
-          Live
-        </div>
-        <div class="user-pill" id="logged-user-label">Logged In</div>
+        <div class="sync-status"><span class="status-dot"></span> Live</div>
+        <!-- Logged In User Name Badge -->
+        <div class="user-pill" id="logged-user-label">👤 Guest</div>
         <button class="btn-logout" onclick="handleLogout()">Logout</button>
       </div>
     </div>
   </header>
 
-  <!-- Main Dashboard View -->
   <main class="dashboard">
 
-    <!-- Primary Schedule Mode Buttons -->
+    <!-- Schedule Mode Switcher Buttons -->
     <div class="view-switchers">
-      <button class="btn-tab active" id="btn-view-all" onclick="switchView('ALL')">
-        🌐 All Events & Rotas
-      </button>
-      <button class="btn-tab" id="btn-view-mine" onclick="switchView('MY_SCHEDULE')">
-        👤 My Personal Schedule
-      </button>
+      <button class="btn-tab active" id="btn-view-all" onclick="switchView('ALL')">🌐 All Events & Rotas</button>
+      <button class="btn-tab" id="btn-view-mine" onclick="switchView('MY_SCHEDULE')">👤 My Personal Schedule</button>
     </div>
 
-    <!-- My Upcoming Duties Banner -->
+    <!-- Personal Duties Banner -->
     <section class="duties-banner" id="duties-banner">
       <h2 id="my-duties-title">📋 My Upcoming Rota Duties</h2>
       <ul class="duties-list" id="my-duties-list">
@@ -463,7 +126,7 @@
       </ul>
     </section>
 
-    <!-- Controls & Clickable Filters Panel -->
+    <!-- Controls Panel -->
     <section class="panel-card">
       <div class="search-row">
         <div class="form-group">
@@ -476,12 +139,12 @@
       <div class="form-group">
         <label>Filter by Service / Role</label>
         <div class="chips-container" id="chips-container">
-          <button class="chip-btn active" data-role="ALL" onclick="selectChip('ALL')">All Roles</button>
+          <button class="chip-btn active" onclick="selectChip('ALL')">All Roles</button>
         </div>
       </div>
     </section>
 
-    <!-- Schedule Data Table -->
+    <!-- Rota Data Table -->
     <section class="table-card">
       <table>
         <thead>
@@ -502,59 +165,40 @@
     </section>
   </main>
 
-  <!-- Edit Assignment Modal -->
-  <div class="modal-overlay" id="edit-modal">
-    <div class="modal-card">
-      <h3 style="font-size:1.1rem; color:var(--primary); margin-bottom:0.5rem;">Edit Assignment</h3>
-      <p id="modal-details" style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1.25rem;"></p>
-      
-      <form id="edit-form" onsubmit="handleEditSubmit(event); return false;">
-        <input type="hidden" id="modal-rota-id">
-        <div class="form-group">
-          <label for="modal-assigned">Assigned Member(s)</label>
-          <input type="text" id="modal-assigned" required>
-        </div>
-        <div class="modal-actions">
-          <button type="button" class="btn-action" style="background:#e2e8f0; color:#334155; flex:1;" onclick="closeEditModal()">Cancel</button>
-          <button type="submit" class="btn-action" style="flex:1;">Save</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
   <script>
-    const currentUserName = localStorage.getItem('cbc_user_name');
-    if (!currentUserName) {
-      window.location.href = "index.html";
-    }
+    // Get logged-in user name from localStorage
+    const currentUserName = localStorage.getItem('cbc_user_name') || localStorage.getItem('username') || localStorage.getItem('user') || 'Volunteer';
 
     const SUPABASE_URL = "https://ojzwujpahfjmaeisnfez.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_87n6hxMnH7uZENhXmNaikw_fCVVQWqZ";
+    
+    // PASTE YOUR COPIED "anon public" KEY BELOW (The top key from your screenshot starting with eyJhbGci...)
+    const SUPABASE_KEY = "PASTE_YOUR_ANON_PUBLIC_KEY_HERE";
 
-    let supabase = null;
+    let supabaseClient = null;
     let allRotas = [];
     let selectedRole = 'ALL';
-    let activeViewMode = 'ALL'; // 'ALL' or 'MY_SCHEDULE'
+    let activeViewMode = 'ALL';
 
-    function getSupabase() {
-      if (!supabase && window.supabase) {
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    function initSupabase() {
+      if (!supabaseClient && window.supabase) {
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
       }
-      return supabase;
+      return supabaseClient;
     }
 
     function handleLogout() {
       localStorage.removeItem('cbc_user_name');
+      localStorage.removeItem('username');
       window.location.href = "index.html";
     }
 
     async function loadRotas() {
       const tbody = document.getElementById('rotas-table-body');
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 2.5rem; color: var(--text-muted);">Fetching latest schedule...</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 2.5rem; color: var(--text-muted);">Fetching latest schedule from Supabase...</td></tr>';
 
-      const client = getSupabase();
+      const client = initSupabase();
       if (!client) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#ef4444; padding:2rem;">Database client failed to load. Please refresh the page.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#ef4444; padding:2rem;">Supabase SDK failed to load.</td></tr>';
         return;
       }
 
@@ -571,30 +215,26 @@
         renderTable();
         updatePersonalDuties();
       } catch (err) {
-        console.error("Error loading rotas:", err);
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#ef4444; padding:2rem;">Unable to fetch rotas: ${err.message}</td></tr>`;
+        console.error("Supabase load error:", err);
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#ef4444; padding:2rem;"><strong>Error loading rotas:</strong> ${err.message}</td></tr>`;
       }
     }
 
     function switchView(mode) {
       activeViewMode = mode;
-      
       const btnAll = document.getElementById('btn-view-all');
       const btnMine = document.getElementById('btn-view-mine');
-      const banner = document.getElementById('duties-banner');
       const searchInput = document.getElementById('search-input');
 
       if (mode === 'MY_SCHEDULE') {
         btnMine.classList.add('active');
         btnAll.classList.remove('active');
         searchInput.value = currentUserName;
-        banner.scrollIntoView({ behavior: 'smooth' });
       } else {
         btnAll.classList.add('active');
         btnMine.classList.remove('active');
         searchInput.value = '';
       }
-
       renderTable();
     }
 
@@ -621,7 +261,6 @@
 
     function selectChip(role) {
       selectedRole = role;
-      
       document.querySelectorAll('.chip-btn').forEach(btn => {
         if (btn.innerText === role || (role === 'ALL' && btn.innerText === 'All Roles')) {
           btn.classList.add('active');
@@ -629,7 +268,6 @@
           btn.classList.remove('active');
         }
       });
-
       renderTable();
     }
 
@@ -644,20 +282,15 @@
         const roleName = row.role || '';
         const assigned = (row.assigned_persons || row.person || '').toLowerCase();
 
-        // Role chip filter logic
         const matchesChip = (selectedRole === 'ALL' || rotaName === selectedRole || roleName === selectedRole);
-
-        // Search bar filter logic
         const matchesSearch = !searchVal || assigned.includes(searchVal) || rotaName.toLowerCase().includes(searchVal);
-
-        // My Schedule Mode logic
         const matchesViewMode = (activeViewMode === 'ALL') || assigned.includes(currentUserName.toLowerCase());
 
         return matchesChip && matchesSearch && matchesViewMode;
       });
 
       if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 2.5rem; color: var(--text-muted);">No matching rota assignments found.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 2.5rem; color: var(--text-muted);">No matching rota duties found.</td></tr>';
         return;
       }
 
@@ -676,7 +309,7 @@
           <td><span class="badge-role">${row.role || 'Volunteer'}</span></td>
           <td>${assigned}</td>
           <td style="text-align: right;">
-            <button class="btn-edit" onclick="openEditModal(${row.id}, '${escapeHtml(row.rota_name || row.role || '')}', '${escapeHtml(assigned)}')">Edit</button>
+            <button class="btn-edit" onclick="alert('Editing entry ID: ' + ${row.id})">Edit</button>
           </td>
         `;
         tbody.appendChild(tr);
@@ -695,7 +328,7 @@
       });
 
       if (userDuties.length === 0) {
-        listEl.innerHTML = '<li class="duty-chip">No upcoming duties scheduled for your name.</li>';
+        listEl.innerHTML = '<li class="duty-chip">No upcoming duties scheduled under your name.</li>';
       } else {
         listEl.innerHTML = userDuties.map(d => `
           <li class="duty-chip">📅 <strong>${d.date}</strong> — ${d.rota_name || d.role} (${d.role || 'Duty'})</li>
@@ -703,48 +336,11 @@
       }
     }
 
-    function openEditModal(id, role, currentAssigned) {
-      document.getElementById('modal-rota-id').value = id;
-      document.getElementById('modal-details').innerText = `Role / Event: ${role}`;
-      document.getElementById('modal-assigned').value = currentAssigned;
-      document.getElementById('edit-modal').style.display = 'flex';
-    }
-
-    function closeEditModal() {
-      document.getElementById('edit-modal').style.display = 'none';
-    }
-
-    async function handleEditSubmit(event) {
-      event.preventDefault();
-      const id = document.getElementById('modal-rota-id').value;
-      const newAssigned = document.getElementById('modal-assigned').value.trim();
-
-      const client = getSupabase();
-      if (!client) return;
-
-      const { error } = await client
-        .from('rotas')
-        .update({ assigned_persons: newAssigned })
-        .eq('id', id);
-
-      if (error) {
-        alert("Failed to update assignment: " + error.message);
-      } else {
-        closeEditModal();
-        loadRotas();
-      }
-    }
-
-    function escapeHtml(str) {
-      return str.replace(/'/g, "\\'").replace(/"/g, "&quot;");
-    }
-
     window.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('logged-user-label').innerText = currentUserName;
+      // Set Top Right Corner Username
+      document.getElementById('logged-user-label').innerText = `👤 ${currentUserName}`;
 
-      document.getElementById('search-input').addEventListener('input', () => {
-        renderTable();
-      });
+      document.getElementById('search-input').addEventListener('input', renderTable);
 
       loadRotas();
     });
