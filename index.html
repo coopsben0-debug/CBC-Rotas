@@ -3,982 +3,373 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CBC Rotas | Craigavon Baptist Church</title>
+    <title>CBC Rotas - Craigavon Baptist Church</title>
+    <!-- Supabase JS Client Library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
         :root {
-            --cbc-navy: #1e3a5f;
-            --cbc-blue: #2d5a8c;
-            --cbc-accent: #e8501b;
-            --cbc-light: #f8f9fa;
-            --cbc-white: #ffffff;
-            --cbc-text: #2c3e50;
-            --cbc-muted: #7f8c8d;
-            --cbc-border: #ecf0f1;
-            --cbc-success: #27ae60;
-            --cbc-shadow: 0 4px 12px rgba(30, 58, 95, 0.08);
-            --cbc-shadow-lg: 0 8px 24px rgba(30, 58, 95, 0.12);
+            --primary-color: #0284c7;
+            --primary-hover: #0369a1;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --danger: #ef4444;
+            --success: #10b981;
         }
 
-        html { scroll-behavior: smooth; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background-color: var(--cbc-light);
-            color: var(--cbc-text);
-            line-height: 1.6;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
-        /* ════════════════════════════════════════════════════════════════ */
-        /* LOGIN SCREEN */
-        /* ════════════════════════════════════════════════════════════════ */
-        #login-screen {
-            height: 100vh;
-            width: 100%;
+        .hidden { display: none !important; }
+
+        /* Login Layout */
+        .login-wrapper {
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, var(--cbc-navy) 0%, var(--cbc-blue) 100%);
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 1000;
+            min-height: 100vh;
+            padding: 20px;
         }
 
         .login-container {
-            background: var(--cbc-white);
-            border-radius: 16px;
-            padding: 48px 40px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 32px;
             width: 100%;
-            max-width: 400px;
-            box-shadow: var(--cbc-shadow-lg);
+            max-width: 420px;
             text-align: center;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .login-logo {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            margin-bottom: 16px;
         }
 
         .login-header {
-            font-size: 28px;
+            font-size: 1.5rem;
             font-weight: 700;
-            color: var(--cbc-navy);
-            margin-bottom: 12px;
-            font-family: 'Poppins', sans-serif;
+            margin-bottom: 4px;
         }
 
         .login-subheader {
-            font-size: 14px;
-            color: var(--cbc-muted);
-            margin-bottom: 32px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 24px;
         }
 
-        .login-group {
-            margin-bottom: 20px;
+        .form-group {
+            margin-bottom: 16px;
+            text-align: left;
         }
 
-        .login-input {
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text-main);
+        }
+
+        .input-field, .textarea-field {
             width: 100%;
-            padding: 12px 16px;
-            border: 2px solid var(--cbc-border);
-            border-radius: 8px;
-            font-size: 16px;
-            font-family: 'Inter', sans-serif;
-            transition: all 0.3s ease;
-            letter-spacing: 0.1em;
-        }
-
-        .login-input:focus {
+            padding: 10px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.95rem;
             outline: none;
-            border-color: var(--cbc-accent);
-            box-shadow: 0 0 0 3px rgba(232, 80, 27, 0.1);
+            transition: border-color 0.2s;
         }
 
-        .login-btn {
+        .input-field:focus, .textarea-field:focus {
+            border-color: var(--primary-color);
+        }
+
+        .textarea-field {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .btn {
             width: 100%;
-            padding: 12px 24px;
-            background: linear-gradient(135deg, var(--cbc-accent) 0%, #d63d10 100%);
-            color: var(--cbc-white);
+            padding: 10px 16px;
+            background-color: var(--primary-color);
+            color: white;
             border: none;
-            border-radius: 8px;
-            font-size: 16px;
+            border-radius: 6px;
+            font-size: 0.95rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: 'Poppins', sans-serif;
+            transition: background-color 0.2s;
         }
 
-        .login-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(232, 80, 27, 0.3);
+        .btn:hover {
+            background-color: var(--primary-hover);
         }
 
-        .login-btn:active {
-            transform: translateY(0);
+        .btn-secondary {
+            background-color: #e2e8f0;
+            color: #334155;
         }
 
-        .login-error {
-            color: #e74c3c;
-            font-size: 13px;
-            margin-top: 12px;
-            display: none;
+        .btn-secondary:hover {
+            background-color: #cbd5e1;
         }
 
-        .login-divider {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin: 24px 0;
-            color: var(--cbc-muted);
-            font-size: 13px;
+        .btn-danger {
+            background-color: var(--danger);
         }
 
-        .login-divider::before,
-        .login-divider::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: var(--cbc-border);
+        .btn-danger:hover {
+            background-color: #dc2626;
         }
 
-        .user-badge {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            background: var(--cbc-navy);
-            color: var(--cbc-white);
-            padding: 12px 16px;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 600;
-            display: none;
-            z-index: 50;
-            max-width: 200px;
-            word-wrap: break-word;
-        }
-
-        .user-badge.active {
-            display: block;
-        }
-
-        /* ════════════════════════════════════════════════════════════════ */
-        /* APP SCREEN */
-        /* ════════════════════════════════════════════════════════════════ */
-        #app-screen {
-            display: none;
-            min-height: 100vh;
-            padding-bottom: 40px;
-        }
-
+        /* App Header */
         header {
-            background: linear-gradient(135deg, var(--cbc-navy) 0%, var(--cbc-blue) 100%);
-            color: var(--cbc-white);
-            padding: 24px 20px;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px 24px;
             display: flex;
             align-items: center;
-            gap: 16px;
-            box-shadow: var(--cbc-shadow);
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            justify-content: space-between;
         }
 
         .header-content {
-            flex: 1;
-        }
-
-        .header-title {
-            font-family: 'Poppins', sans-serif;
-            font-size: 24px;
-            font-weight: 700;
-            margin: 0;
-        }
-
-        .header-subtitle {
-            font-size: 13px;
-            opacity: 0.85;
-            margin-top: 4px;
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
-
-        .logout-btn {
-            background: rgba(255, 255, 255, 0.2);
-            color: var(--cbc-white);
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .logout-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        .nav-bar {
-            background: var(--cbc-white);
-            padding: 16px 20px;
-            border-bottom: 1px solid var(--cbc-border);
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            flex-wrap: wrap;
-            max-width: 100%;
-        }
-
-        .nav-btn {
-            padding: 8px 16px;
-            border: 2px solid var(--cbc-border);
-            background: var(--cbc-white);
-            color: var(--cbc-text);
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            white-space: nowrap;
-            transition: all 0.3s ease;
-        }
-
-        .nav-btn:hover {
-            border-color: var(--cbc-accent);
-            color: var(--cbc-accent);
-        }
-
-        .nav-btn.active {
-            background: var(--cbc-accent);
-            color: var(--cbc-white);
-            border-color: var(--cbc-accent);
-        }
-
-        .search-input {
-            flex: 1;
-            min-width: 200px;
-            padding: 8px 16px;
-            border: 2px solid var(--cbc-border);
-            border-radius: 6px;
-            font-size: 14px;
-            font-family: 'Inter', sans-serif;
-            transition: all 0.3s ease;
-        }
-
-        .search-input:focus {
-            outline: none;
-            border-color: var(--cbc-accent);
-            box-shadow: 0 0 0 3px rgba(232, 80, 27, 0.1);
-        }
-
-        .filter-bar {
-            background: var(--cbc-white);
-            padding: 16px 20px;
-            border-bottom: 1px solid var(--cbc-border);
             display: flex;
             align-items: center;
             gap: 16px;
-            flex-wrap: wrap;
-            overflow-x: auto;
         }
 
-        .filter-label {
-            font-weight: 600;
-            color: var(--cbc-text);
-            white-space: nowrap;
-            font-size: 14px;
+        .header-logo {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
         }
 
-        .filter-pills {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
+        .header-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .header-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* Main Content */
+        main {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 24px;
+            width: 100%;
             flex: 1;
         }
 
-        .filter-pill {
-            padding: 6px 12px;
-            border: 2px solid var(--cbc-border);
-            background: var(--cbc-white);
-            color: var(--cbc-text);
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 500;
-            white-space: nowrap;
-            transition: all 0.3s ease;
-        }
-
-        .filter-pill:hover {
-            border-color: var(--cbc-accent);
-            color: var(--cbc-accent);
-        }
-
-        .filter-pill.active {
-            background: var(--cbc-accent);
-            color: var(--cbc-white);
-            border-color: var(--cbc-accent);
-        }
-
-        .content-wrapper {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 24px 20px;
-        }
-
-        .date-group {
-            margin-bottom: 32px;
-            animation: fadeIn 0.4s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .date-header {
+        .controls-bar {
             display: flex;
+            justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
             gap: 12px;
-            margin-bottom: 16px;
-            padding-bottom: 12px;
-            border-bottom: 3px solid var(--cbc-accent);
+            margin-bottom: 24px;
         }
 
-        .date-icon {
-            width: 8px;
-            height: 8px;
-            background: var(--cbc-accent);
-            border-radius: 50%;
-            flex-shrink: 0;
+        .btn-group {
+            display: flex;
+            gap: 8px;
         }
 
-        .date-label {
-            font-family: 'Poppins', sans-serif;
-            font-size: 16px;
-            font-weight: 700;
-            color: var(--cbc-navy);
-        }
-
-        .date-day {
-            font-size: 13px;
-            color: var(--cbc-muted);
-            margin-left: auto;
+        /* Cards Layout */
+        .rota-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px;
         }
 
         .rota-card {
-            background: var(--cbc-white);
-            border-radius: 12px;
-            padding: 18px;
-            margin-bottom: 12px;
-            box-shadow: var(--cbc-shadow);
-            transition: all 0.3s ease;
-            border-left: 4px solid var(--cbc-accent);
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
 
-        .rota-card:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--cbc-shadow-lg);
-        }
-
-        .rota-header {
+        .rota-card-header {
             display: flex;
-            align-items: flex-start;
             justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .rota-date {
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .rota-service {
+            font-size: 0.85rem;
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+
+        .rota-role-list {
+            list-style: none;
             margin-bottom: 12px;
         }
 
-        .rota-role {
-            font-family: 'Poppins', sans-serif;
-            font-size: 15px;
-            font-weight: 700;
-            color: var(--cbc-navy);
+        .rota-role-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            font-size: 0.9rem;
         }
 
-        .rota-time {
-            font-size: 12px;
-            color: var(--cbc-muted);
-            background: var(--cbc-light);
-            padding: 4px 10px;
-            border-radius: 4px;
+        .role-name {
+            color: var(--text-muted);
         }
 
-        .rota-person {
+        .assignee-name {
+            font-weight: 600;
+        }
+
+        /* Modal Overlay */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
             display: flex;
             align-items: center;
-            gap: 8px;
-            font-size: 14px;
-            color: var(--cbc-text);
-            margin-bottom: 6px;
+            justify-content: center;
+            z-index: 1000;
         }
 
-        .person-badge {
-            display: inline-block;
-            background: linear-gradient(135deg, var(--cbc-blue) 0%, var(--cbc-accent) 100%);
-            color: var(--cbc-white);
-            padding: 4px 10px;
-            border-radius: 16px;
-            font-size: 12px;
-            font-weight: 600;
+        .modal {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
         }
 
-        .vacant {
-            display: inline-block;
-            color: #e74c3c;
-            font-weight: 600;
-            font-size: 13px;
-        }
-
-        .rota-btn {
-            padding: 4px 10px;
-            border: 1px solid var(--cbc-border);
-            background: var(--cbc-white);
-            color: var(--cbc-text);
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .rota-btn:hover {
-            background: var(--cbc-light);
-            border-color: var(--cbc-accent);
-            color: var(--cbc-accent);
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: var(--cbc-muted);
-        }
-
-        .empty-icon {
-            font-size: 48px;
+        .modal-title {
+            font-size: 1.2rem;
+            font-weight: 700;
             margin-bottom: 16px;
         }
 
-        .empty-title {
-            font-family: 'Poppins', sans-serif;
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--cbc-text);
-            margin-bottom: 8px;
+        .status-msg {
+            margin-top: 12px;
+            font-size: 0.85rem;
+            padding: 8px;
+            border-radius: 4px;
         }
-
-        .empty-text {
-            font-size: 14px;
-        }
-
-        .person-results {
-            background: var(--cbc-white);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 24px;
-            box-shadow: var(--cbc-shadow);
-        }
-
-        .person-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 20px;
-            padding-bottom: 16px;
-            border-bottom: 2px solid var(--cbc-border);
-        }
-
-        .person-name {
-            font-family: 'Poppins', sans-serif;
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--cbc-navy);
-        }
-
-        .person-count {
-            margin-left: auto;
-            background: var(--cbc-accent);
-            color: var(--cbc-white);
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .upload-section {
-            background: var(--cbc-white);
-            border-radius: 12px;
-            padding: 24px;
-            margin-bottom: 24px;
-            box-shadow: var(--cbc-shadow);
-            text-align: center;
-            border: 2px dashed var(--cbc-border);
-        }
-
-        .upload-section.dragover {
-            border-color: var(--cbc-accent);
-            background: rgba(232, 80, 27, 0.05);
-        }
-
-        .upload-title {
-            font-family: 'Poppins', sans-serif;
-            font-size: 16px;
-            font-weight: 700;
-            color: var(--cbc-navy);
-            margin-bottom: 12px;
-        }
-
-        .upload-text {
-            font-size: 14px;
-            color: var(--cbc-muted);
-            margin-bottom: 20px;
-        }
-
-        .upload-btn {
-            background: linear-gradient(135deg, var(--cbc-accent) 0%, #d63d10 100%);
-            color: var(--cbc-white);
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: 'Poppins', sans-serif;
-        }
-
-        .upload-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(232, 80, 27, 0.3);
-        }
-
-        #file-input {
-            display: none;
-        }
-
-        .upload-status {
-            font-size: 13px;
-            margin-top: 16px;
-            padding: 12px;
-            border-radius: 8px;
-            display: none;
-        }
-
-        .upload-status.success {
-            background: rgba(39, 174, 96, 0.1);
-            color: var(--cbc-success);
-            display: block;
-        }
-
-        .upload-status.error {
-            background: rgba(231, 76, 60, 0.1);
-            color: #e74c3c;
-            display: block;
-        }
-
-        @media (max-width: 768px) {
-            .login-container {
-                margin: 20px;
-                padding: 32px 24px;
-            }
-
-            header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .header-actions {
-                width: 100%;
-            }
-
-            .nav-bar {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .search-input {
-                min-width: 100%;
-            }
-
-            .rota-card {
-                padding: 14px;
-            }
-
-            .date-header {
-                flex-wrap: wrap;
-            }
-
-            .date-day {
-                flex-basis: 100%;
-                margin-left: 0;
-                margin-top: 4px;
-            }
-        }
-
-        .spinner {
-            border: 3px solid var(--cbc-border);
-            border-top: 3px solid var(--cbc-accent);
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        .status-success { background: #d1fae5; color: #065f46; }
+        .status-error { background: #fee2e2; color: #991b1b; }
     </style>
 </head>
 <body>
-    <div id="login-screen">
+
+    <!-- LOGIN SCREEN -->
+    <div id="login-view" class="login-wrapper">
         <div class="login-container">
+            <img src="https://raw.githubusercontent.com/coopsben0-debug/CBC-Rotas/main/cbc%20logo.webp" alt="CBC Logo" class="login-logo">
             <h2 class="login-header">CBC Rotas</h2>
             <p class="login-subheader">Craigavon Baptist Church</p>
-            <div class="login-group">
-                <input 
-                    type="text" 
-                    id="full-name" 
-                    class="login-input" 
-                    placeholder="Full Name"
-                    onkeypress="event.key === 'Enter' && checkLogin()"
-                >
-            </div>
-            <div class="login-group">
-                <input 
-                    type="password" 
-                    id="security-code" 
-                    class="login-input" 
-                    placeholder="Security Code"
-                    onkeypress="event.key === 'Enter' && checkLogin()"
-                >
-            </div>
-            <button class="login-btn" onclick="checkLogin()">Access Rotas</button>
-            <div class="login-error" id="login-error">Incorrect security code</div>
-            <div class="login-divider">or</div>
-            <div class="upload-text" style="margin-bottom: 16px;">Upload a rota photo to auto-fill assignments</div>
-            <button class="upload-btn" onclick="document.getElementById('file-input').click()">📸 Upload Rota Photo</button>
-            <input type="file" id="file-input" accept="image/*" onchange="handleFileUpload(event)">
-            <div class="upload-status" id="upload-status"></div>
+            
+            <form id="login-form" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="supabase-url">Supabase URL</label>
+                    <input type="text" id="supabase-url" class="input-field" placeholder="https://your-project.supabase.co" required>
+                </div>
+                <div class="form-group">
+                    <label for="supabase-key">Supabase Anon Key</label>
+                    <input type="password" id="supabase-key" class="input-field" placeholder="your-anon-key" required>
+                </div>
+                <button type="submit" class="btn">Connect & Login</button>
+            </form>
+            <div id="login-error" class="status-msg status-error hidden"></div>
         </div>
     </div>
 
-    <div id="app-screen">
+    <!-- MAIN APP SCREEN -->
+    <div id="app-view" class="hidden">
         <header>
             <div class="header-content">
-                <h1 class="header-title">CBC Rotas</h1>
-                <p class="header-subtitle">Craigavon Baptist Church Rota Management</p>
+                <img src="https://raw.githubusercontent.com/coopsben0-debug/CBC-Rotas/main/cbc%20logo.webp" alt="CBC Logo" class="header-logo">
+                <div>
+                    <h1 class="header-title">CBC Rotas</h1>
+                    <p class="header-subtitle">Craigavon Baptist Church Rota Management</p>
+                </div>
             </div>
-            <div class="header-actions">
-                <button class="logout-btn" onclick="logout()">Log Out</button>
-            </div>
+            <button onclick="logout()" class="btn btn-secondary" style="width: auto;">Logout</button>
         </header>
 
-        <div class="nav-bar">
-            <button class="nav-btn active" onclick="switchView('all', event)">All Rotas</button>
-            <button class="nav-btn" onclick="switchView('person', event)">Find My Schedule</button>
-            <input 
-                type="text" 
-                id="person-search" 
-                class="search-input" 
-                placeholder="Search by name..." 
-                style="display: none;"
-                onkeyup="searchPerson(this.value)"
-            >
-        </div>
+        <main>
+            <div class="controls-bar">
+                <h2>Upcoming Schedules</h2>
+                <div class="btn-group">
+                    <button onclick="openAiModal()" class="btn" style="width: auto;">✨ AI Text Upload</button>
+                </div>
+            </div>
 
-        <div class="filter-bar" id="filter-bar" style="display: none;">
-            <div class="filter-label">Filter by Rota:</div>
-            <div class="filter-pills"></div>
-        </div>
-
-        <div class="content-wrapper">
-            <div id="upload-section-container"></div>
-            <div id="content-area"></div>
-        </div>
+            <div id="rota-list" class="rota-grid"></div>
+            <div id="no-rotas-msg" class="hidden" style="text-align: center; color: var(--text-muted); margin-top: 40px;">
+                No upcoming rotas found.
+            </div>
+        </main>
     </div>
 
-    <div class="user-badge" id="user-badge"></div>
+    <!-- AI UPLOAD MODAL -->
+    <div id="ai-modal" class="modal-overlay hidden">
+        <div class="modal">
+            <h3 class="modal-title">✨ AI Rota Import</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">
+                Paste unformatted rota schedules below. The parser extracts dates and roles, saving them straight to Supabase.
+            </p>
+            <div class="form-group">
+                <textarea id="ai-text-input" class="textarea-field" placeholder="Example:&#10;2026-09-13&#10;Preacher: John Smith&#10;Worship Lead: Sarah Jenkins&#10;Sound Tech: Mark Wilson"></textarea>
+            </div>
+            <div id="ai-status" class="status-msg hidden"></div>
+            <div class="btn-group" style="margin-top: 16px;">
+                <button onclick="processAIUpload()" id="ai-submit-btn" class="btn">Process & Save</button>
+                <button onclick="closeAiModal()" class="btn btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
 
     <script>
         // ════════════════════════════════════════════════════════════════
-        // SUPABASE CONFIG
+        // GLOBAL STATE & CONNECTION PINGER
         // ════════════════════════════════════════════════════════════════
-        const db = supabase.createClient(
-            "https://ojzwujpahfjmaeisnfez.supabase.co",
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qend1anBhaGZqbWFlaXNuZmV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTA5NDMsImV4cCI6MjA5NDU4Njk0M30.VvszGR6MbUnBhKsmsXBikkrjok2-F1bnyS4zOwDX5hg"
-        );
+        let db = null;
+        let pingInterval = null;
 
-        // ════════════════════════════════════════════════════════════════
-        // STATE
-        // ════════════════════════════════════════════════════════════════
-        let allRotas = [];
-        let currentView = 'all';
-        let selectedRotaFilter = 'all';
-        let loggedInUser = '';
-
-        // ════════════════════════════════════════════════════════════════
-        // LOGIN
-        // ════════════════════════════════════════════════════════════════
-        function checkLogin() {
-            const code = document.getElementById('security-code').value;
-            const name = document.getElementById('full-name').value.trim();
-            const errorEl = document.getElementById('login-error');
-
-            if (!name) {
-                errorEl.textContent = 'Please enter your full name';
-                errorEl.style.display = 'block';
-                return;
-            }
-
-            if (code === "1234") {
-                errorEl.style.display = 'none';
-                loggedInUser = name;
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('app-screen').style.display = 'block';
-                updateUserBadge();
-                renderUploadSection();
-                loadAllRotas();
-            } else {
-                errorEl.textContent = 'Incorrect security code';
-                errorEl.style.display = 'block';
-                document.getElementById('security-code').value = '';
-            }
-        }
-
-        function updateUserBadge() {
-            const badge = document.getElementById('user-badge');
-            badge.textContent = '👤 ' + loggedInUser;
-            badge.classList.add('active');
-        }
-
-        function logout() {
-            if (confirm('Log out of CBC Rotas?')) {
-                document.getElementById('security-code').value = '';
-                document.getElementById('full-name').value = '';
-                document.getElementById('login-screen').style.display = 'flex';
-                document.getElementById('app-screen').style.display = 'none';
-                document.getElementById('content-area').innerHTML = '';
-                document.getElementById('user-badge').classList.remove('active');
-                loggedInUser = '';
-                currentView = 'all';
-                switchView('all', null);
-            }
-        }
-
-        // ════════════════════════════════════════════════════════════════
-        // PHOTO UPLOAD & OCR
-        // ════════════════════════════════════════════════════════════════
-        async function handleFileUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const statusEl = document.getElementById('upload-status');
-            statusEl.textContent = '📸 Processing image...';
-            statusEl.className = 'upload-status';
-            statusEl.style.display = 'block';
-
-            try {
-                const base64Image = await fileToBase64(file);
-                
-                statusEl.textContent = '🔍 Analyzing rota...';
-
-                const response = await fetch("https://api.anthropic.com/v1/messages", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        model: "claude-opus-4-6",
-                        max_tokens: 2000,
-                        messages: [
-                            {
-                                role: "user",
-                                content: [
-                                    {
-                                        type: "image",
-                                        source: {
-                                            type: "base64",
-                                            media_type: "image/jpeg",
-                                            data: base64Image
-                                        }
-                                    },
-                                    {
-                                        type: "text",
-                                        text: `Analyze this rota image and extract the assignments in JSON format. For each date and role, identify who is assigned. Return ONLY valid JSON with this structure:
-{
-  "rotas": [
-    {
-      "date": "YYYY-MM-DD",
-      "rota_name": "Ministry Name",
-      "role": "Specific Role",
-      "time": "Time if visible",
-      "assigned_person": "Person Name"
-    }
-  ]
-}
-Only include entries where you can clearly identify an assigned person. Be accurate with names and dates.`
-                    }
-                ]
-                            }
-                        ]
-                    })
-                });
-
-                const data = await response.json();
-                
-                if (!data.content || !data.content[0] || data.content[0].type !== 'text') {
-                    throw new Error('Invalid response from AI');
-                }
-
-                const textContent = data.content[0].text;
-                const jsonMatch = textContent.match(/\{[\s\S]*\}/);
-                
-                if (!jsonMatch) {
-                    throw new Error('Could not extract JSON from response');
-                }
-
-                const extractedData = JSON.parse(jsonMatch[0]);
-                
-                if (!extractedData.rotas || extractedData.rotas.length === 0) {
-                    statusEl.textContent = '⚠️ No assignments found in image. Try a clearer photo.';
-                    statusEl.className = 'upload-status error';
-                    return;
-                }
-
-                await updateRotasFromExtraction(extractedData.rotas);
-                
-                statusEl.textContent = `✅ Updated ${extractedData.rotas.length} assignments!`;
-                statusEl.className = 'upload-status success';
-                
-                document.getElementById('file-input').value = '';
-                
-                setTimeout(() => {
-                    loadAllRotas();
-                }, 1500);
-
-            } catch (error) {
-                console.error('Upload error:', error);
-                statusEl.textContent = '❌ Error processing image. Please try again.';
-                statusEl.className = 'upload-status error';
-                document.getElementById('file-input').value = '';
-            }
-        }
-
-        function fileToBase64(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => {
-                    const result = reader.result;
-                    const base64 = result.split(',')[1];
-                    resolve(base64);
-                };
-                reader.onerror = reject;
-                reader.readAsDataURL(file);
-            });
-        }
-
-        async function updateRotasFromExtraction(extractedRotas) {
-            for (const rota of extractedRotas) {
-                const { data, error } = await db
-                    .from('rotas')
-                    .update({ assigned_persons: rota.assigned_person })
-                    .match({
-                        date: rota.date,
-                        rota_name: rota.rota_name,
-                        role: rota.role || null
-                    });
-
-                if (error) {
-                    console.error('Error updating rota:', error);
-                }
-            }
-        }
-
-        function renderUploadSection() {
-            const container = document.getElementById('upload-section-container');
-            container.innerHTML = `
-                <div class="upload-section">
-                    <div class="upload-title">📸 Upload Updated Rota</div>
-                    <div class="upload-text">Take a photo of the printed rota and we'll automatically update assignments</div>
-                    <button class="upload-btn" onclick="document.getElementById('app-file-input').click()">Upload Photo</button>
-                    <input type="file" id="app-file-input" accept="image/*" style="display: none;" onchange="handleFileUpload(event)">
-                    <div class="upload-status" id="app-upload-status"></div>
-                </div>
-            `;
-        }
-
-        // ════════════════════════════════════════════════════════════════
-        // DATA LOADING & REFINED DEDUPLICATION
-        // ════════════════════════════════════════════════════════════════
-        async function loadAllRotas() {
-            const { data, error } = await db
-                .from('rotas')
-                .select('*')
-                .order('date', { ascending: true })
-                .order('rota_name', { ascending: true });
-
-            if (error) {
-                console.error('Error loading rotas:', error);
-                document.getElementById('content-area').innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-icon">⚠️</div>
-                        <div class="empty-title">Connection Error</div>
-                        <div class="empty-text">Could not synchronize workspace with database. Please try again.</div>
-                    </div>`;
-                return;
-            }
-
-            // 1. Group check for filled slots per ministry per date
-            const ministryHasFilledSlots = {};
-            const sortedData = (data || []).sort((a, b) => {
-                const aHasPerson = a.assigned_persons && a.assigned_persons.trim() ? 1 : 0;
-                const bHasPerson = b.assigned_persons && b.assigned_persons.trim() ? 1 : 0;
-                return bHasPerson - aHasPerson; 
-            });
-
-            sortedData.forEach(item => {
-                const key = `${item.date}-${item.rota_name}`;
-                if (item.assigned_persons && item.assigned_persons.trim()) {
-                    ministryHasFilledSlots[key] = true;
-                }
-            });
-
-            // 2. Filter using a key based strictly on slot parameters AND drop empty ghost rows
-            const seen = new Set();
-            allRotas = sortedData.filter(item => {
-                const uniqueKey = `${item.date}-${item.rota_name}-${item.role || ''}-${item.time || ''}`;
-                if (seen.has(uniqueKey)) return false;
-                
-                const ministryKey = `${item.date}-${item.rota_name}`;
-                const hasPersons = item.assigned_persons && item.assigned_persons.trim();
-                
-                // If this ministry has filled slots on this date, drop any unassigned duplicate slots 
-                // to prevent empty ghost roles from rendering alongside active ones.
-                if (ministryHasFilledSlots[ministryKey] && !hasPersons) {
-                    return false;
-                }
-
-                seen.add(uniqueKey);
-                return true;
-            });
-
-            // 3. Put rotas back into structural sorting by date
-            allRotas.sort((a, b) => new Date(a.date) - new Date(b.date));
-
-            renderFilterBar();
-            
-            if (currentView === 'all') {
-                renderAllRotas();
-            } else if (currentView === 'person') {
-                const searchVal = document.getElementById('person-search').value;
-                searchPerson(searchVal);
-            }
-        }
-
-        // ════════════════════════════════════════════════════════════════
-        // DATE & TIME FILTERS (UPCOMING EVENTS ONLY)
-        // ════════════════════════════════════════════════════════════════
         function getTodayStr() {
             const today = new Date();
             const yyyy = today.getFullYear();
@@ -987,294 +378,246 @@ Only include entries where you can clearly identify an assigned person. Be accur
             return `${yyyy}-${mm}-${dd}`;
         }
 
-        function isSundayOrWednesday(dateString) {
-            const date = new Date(dateString + 'T00:00:00');
-            const day = date.getDay();
-            return day === 0 || day === 3; 
-        }
-
-        let getFilteredRotas = function() {
-            const todayStr = getTodayStr();
+        function startBackgroundPing() {
+            if (pingInterval) clearInterval(pingInterval);
             
-            let filtered = allRotas.filter(rota => isSundayOrWednesday(rota.date) && rota.date >= todayStr);
-            
-            if (selectedRotaFilter !== 'all') {
-                filtered = filtered.filter(rota => rota.rota_name === selectedRotaFilter);
-            }
-            
-            return filtered;
+            // Runs every 5 minutes (300,000 ms) to keep session alive
+            pingInterval = setInterval(async () => {
+                if (!db) return;
+                try {
+                    const { error } = await db.from('rotas').select('id').limit(1);
+                    if (error) console.warn('Background ping warning:', error);
+                } catch (e) {
+                    console.error('Background ping failed:', e);
+                }
+            }, 300000);
         }
 
         // ════════════════════════════════════════════════════════════════
-        // VIEWS & DYNAMIC FILTERS
+        // AUTHENTICATION & LOGIN MANAGEMENT
         // ════════════════════════════════════════════════════════════════
-        function switchView(view, eventObj) {
-            currentView = view;
-            const navBtns = document.querySelectorAll('.nav-bar .nav-btn');
-            navBtns.forEach(btn => btn.classList.remove('active'));
-            
-            if (eventObj && eventObj.target) {
-                eventObj.target.classList.add('active');
-            } else {
-                const buttons = document.querySelectorAll('.nav-bar .nav-btn');
-                if (view === 'all' && buttons[0]) buttons[0].classList.add('active');
-                if (view === 'person' && buttons[1]) buttons[1].classList.add('active');
-            }
+        function handleLogin(e) {
+            e.preventDefault();
+            const url = document.getElementById('supabase-url').value.trim();
+            const key = document.getElementById('supabase-key').value.trim();
 
-            document.getElementById('person-search').style.display = 
-                view === 'person' ? 'block' : 'none';
-            document.getElementById('filter-bar').style.display = 
-                view === 'all' ? 'flex' : 'none';
+            if (!url || !key) return;
 
-            if (view === 'all') {
-                renderAllRotas();
-            } else if (view === 'person') {
-                renderPersonSearch();
+            try {
+                db = supabase.createClient(url, key);
+                localStorage.setItem('cbc_sb_url', url);
+                localStorage.setItem('cbc_sb_key', key);
+                
+                checkLogin();
+            } catch (err) {
+                showLoginError('Failed to initialize Supabase. Check credentials.');
             }
         }
 
-        function renderFilterBar() {
-            const pillsContainer = document.querySelector('.filter-pills');
-            if (!pillsContainer) return;
+        async function checkLogin() {
+            const url = localStorage.getItem('cbc_sb_url');
+            const key = localStorage.getItem('cbc_sb_key');
 
-            const todayStr = getTodayStr();
-            const validRotas = allRotas.filter(rota => isSundayOrWednesday(rota.date) && rota.date >= todayStr);
-            const uniqueRotaNames = [...new Set(validRotas.map(r => r.rota_name).filter(Boolean))].sort();
-
-            let html = `<button class="filter-pill ${selectedRotaFilter === 'all' ? 'active' : ''}" onclick="filterRota('all')">All Rotas</button>`;
-            
-            uniqueRotaNames.forEach(name => {
-                html += `<button class="filter-pill ${selectedRotaFilter === name ? 'active' : ''}" onclick="filterRota('${name}')">${name}</button>`;
-            });
-
-            pillsContainer.innerHTML = html;
+            if (url && key) {
+                db = supabase.createClient(url, key);
+                document.getElementById('login-view').classList.add('hidden');
+                document.getElementById('app-view').classList.remove('hidden');
+                
+                await loadAllRotas();
+                startBackgroundPing();
+            }
         }
 
-        function filterRota(rota) {
-            selectedRotaFilter = rota;
-            renderFilterBar();
-            renderAllRotas();
+        function logout() {
+            if (pingInterval) clearInterval(pingInterval);
+            localStorage.removeItem('cbc_sb_url');
+            localStorage.removeItem('cbc_sb_key');
+            db = null;
+
+            document.getElementById('app-view').classList.add('hidden');
+            document.getElementById('login-view').classList.remove('hidden');
+        }
+
+        function showLoginError(msg) {
+            const errDiv = document.getElementById('login-error');
+            errDiv.textContent = msg;
+            errDiv.classList.remove('hidden');
         }
 
         // ════════════════════════════════════════════════════════════════
-        // EDIT FEATURES
+        // ROTA FETCHING & DISPLAY
         // ════════════════════════════════════════════════════════════════
-        function editPerson(id) {
-            const rota = allRotas.find(r => String(r.id) === String(id));
-            if (!rota) return;
-            
-            const currentName = rota.assigned_persons || '';
-            const container = document.getElementById(`person-container-${id}`);
-            if (!container) return;
+        async function loadAllRotas() {
+            if (!db) return;
 
-            container.innerHTML = `
-                <input type="text" id="edit-input-${id}" class="search-input" style="padding: 4px 8px; font-size: 13px; flex: 1; min-width: 120px;" value="${currentName.replace(/"/g, '&quot;')}" placeholder="Enter name...">
-                <button class="nav-btn active" style="padding: 4px 10px; font-size: 12px; white-space: nowrap;" onclick="savePerson('${id}')">Save</button>
-                <button class="nav-btn" style="padding: 4px 10px; font-size: 12px; margin-left: 4px; white-space: nowrap;" onclick="cancelEdit('${id}')">Cancel</button>
-            `;
-            document.getElementById(`edit-input-${id}`).focus();
-        }
-
-        async function savePerson(id) {
-            const inputField = document.getElementById(`edit-input-${id}`);
-            if (!inputField) return;
-            const newName = inputField.value.trim();
-            
-            const container = document.getElementById(`person-container-${id}`);
-            container.innerHTML = `<div class="spinner" style="width: 16px; height: 16px;"></div> <span style="font-size: 12px; margin-left: 6px; color: var(--cbc-muted);">Updating...</span>`;
-
-            const { error } = await db
+            const today = getTodayStr();
+            const { data, error } = await db
                 .from('rotas')
-                .update({ assigned_persons: newName || null })
-                .eq('id', id);
+                .select('*')
+                .gte('date', today)
+                .order('date', { ascending: true });
+
+            const container = document.getElementById('rota-list');
+            const noDataMsg = document.getElementById('no-rotas-msg');
+            container.innerHTML = '';
 
             if (error) {
-                console.error('Error updating assignment data:', error);
-                alert('Could not update role. Please check connection and try again.');
+                console.error('Error fetching rotas:', error);
+                return;
+            }
+
+            if (!data || data.length === 0) {
+                noDataMsg.classList.remove('hidden');
+                return;
+            }
+
+            noDataMsg.classList.add('hidden');
+
+            data.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'rota-card';
+
+                const rolesObj = typeof item.roles === 'string' ? JSON.parse(item.roles || '{}') : (item.roles || {});
+                let rolesHTML = '';
+                
+                for (const [role, name] of Object.entries(rolesObj)) {
+                    rolesHTML += `
+                        <li class="rota-role-item">
+                            <span class="role-name">${role}</span>
+                            <span class="assignee-name">${name}</span>
+                        </li>`;
+                }
+
+                card.innerHTML = `
+                    <div class="rota-card-header">
+                        <span class="rota-date">${item.date}</span>
+                        <span class="rota-service">${item.service_type || 'Sunday Service'}</span>
+                    </div>
+                    <ul class="rota-role-list">
+                        ${rolesHTML || '<li class="rota-role-item"><span class="role-name">No roles assigned</span></li>'}
+                    </ul>
+                    <button onclick="deleteRota('${item.id}')" class="btn btn-danger" style="padding: 4px 8px; font-size: 0.8rem; width: auto;">Delete</button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        async function deleteRota(id) {
+            if (!confirm('Delete this rota entry?')) return;
+            const { error } = await db.from('rotas').delete().eq('id', id);
+            if (!error) {
                 loadAllRotas();
-                return;
-            }
-
-            const rotaIndex = allRotas.findIndex(r => String(r.id) === String(id));
-            if (rotaIndex !== -1) {
-                allRotas[rotaIndex].assigned_persons = newName || null;
-            }
-
-            if (currentView === 'all') {
-                renderAllRotas();
             } else {
-                const currentSearch = document.getElementById('person-search').value;
-                searchPerson(currentSearch);
+                alert('Error deleting entry: ' + error.message);
             }
         }
 
-        function cancelEdit(id) {
-            const rota = allRotas.find(r => String(r.id) === String(id));
-            if (!rota) return;
-            
-            const container = document.getElementById(`person-container-${id}`);
-            if (!container) return;
-
-            const badgeHtml = rota.assigned_persons 
-                ? `<span class="person-badge">${rota.assigned_persons}</span>`
-                : `<span class="vacant">No one assigned</span>`;
-
-            container.innerHTML = `
-                ${badgeHtml}
-                <button class="rota-btn" style="margin-left: auto;" onclick="editPerson('${rota.id}')">✏️ Edit</button>
-            `;
+        // ════════════════════════════════════════════════════════════════
+        // FIXED AI TEXT PARSER & SUPABASE UPLOADER
+        // ════════════════════════════════════════════════════════════════
+        function openAiModal() {
+            document.getElementById('ai-modal').classList.remove('hidden');
+            document.getElementById('ai-text-input').value = '';
+            document.getElementById('ai-status').classList.add('hidden');
         }
 
-        // ════════════════════════════════════════════════════════════════
-        // RENDER: COMPONENT CARD
-        // ════════════════════════════════════════════════════════════════
-        function renderRotaCard(rota) {
-            const badgeHtml = rota.assigned_persons 
-                ? `<span class="person-badge">${rota.assigned_persons}</span>`
-                : `<span class="vacant">No one assigned</span>`;
-
-            // Fix applied here: Ensures main Rota Name shows up cleanly alongside sub-roles
-            const displayTitle = rota.role && rota.role !== rota.rota_name 
-                ? `${rota.rota_name} — ${rota.role}` 
-                : (rota.rota_name || rota.role || 'Unassigned Rota');
-
-            return `
-                <div class="rota-card">
-                    <div class="rota-header">
-                        <div class="rota-role">${displayTitle}</div>
-                        <div class="rota-time">${rota.time || ''}</div>
-                    </div>
-                    <div class="rota-person" id="person-container-${rota.id}">
-                        ${badgeHtml}
-                        <button class="rota-btn" style="margin-left: auto;" onclick="editPerson('${rota.id}')">✏️ Edit</button>
-                    </div>
-                </div>
-            `;
+        function closeAiModal() {
+            document.getElementById('ai-modal').classList.add('hidden');
         }
 
-        // ════════════════════════════════════════════════════════════════
-        // RENDER: ALL ROTAS GROUPED BY DATE
-        // ════════════════════════════════════════════════════════════════
-        function renderAllRotas() {
-            const filtered = getFilteredRotas();
+        function parseRawRotaText(rawText) {
+            const lines = rawText.split('\n').filter(line => line.trim() !== '');
+            const parsedResults = [];
 
-            if (!filtered || filtered.length === 0) {
-                document.getElementById('content-area').innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-icon">📅</div>
-                        <div class="empty-title">No Upcoming Rotas</div>
-                        <div class="empty-text">${selectedRotaFilter !== 'all' ? `No future ${selectedRotaFilter} schedules found.` : 'Check back soon for future schedules.'}</div>
-                    </div>
-                `;
+            let currentDate = getTodayStr();
+            let currentService = 'Sunday Service';
+            let roles = {};
+
+            lines.forEach(line => {
+                // Match dates YYYY-MM-DD or DD/MM/YYYY
+                const dateMatch = line.match(/\b(\d{4}-\d{2}-\d{2})\b/) || line.match(/\b(\d{1,2}[\/\.-]\d{1,2}[\/\.-]\d{2,4})\b/);
+                if (dateMatch) {
+                    if (Object.keys(roles).length > 0) {
+                        parsedResults.push({ date: currentDate, service_type: currentService, roles: { ...roles } });
+                        roles = {};
+                    }
+                    currentDate = dateMatch[0];
+                }
+
+                // Extract roles based on ":" or "-" key-value patterns
+                if (line.includes(':') || line.includes('-')) {
+                    const parts = line.split(/[:\-]/);
+                    if (parts.length >= 2) {
+                        const roleName = parts[0].trim();
+                        const assignee = parts.slice(1).join(' ').trim();
+                        if (roleName && assignee) {
+                            roles[roleName] = assignee;
+                        }
+                    }
+                }
+            });
+
+            if (Object.keys(roles).length > 0) {
+                parsedResults.push({ date: currentDate, service_type: currentService, roles });
+            }
+
+            return parsedResults;
+        }
+
+        async function processAIUpload() {
+            const rawText = document.getElementById('ai-text-input').value.trim();
+            const statusDiv = document.getElementById('ai-status');
+            const submitBtn = document.getElementById('ai-submit-btn');
+
+            if (!rawText) {
+                statusDiv.textContent = 'Please paste schedule text to parse.';
+                statusDiv.className = 'status-msg status-error';
+                statusDiv.classList.remove('hidden');
                 return;
             }
 
-            const grouped = {};
-            filtered.forEach(rota => {
-                const dateKey = rota.date;
-                if (!grouped[dateKey]) grouped[dateKey] = [];
-                grouped[dateKey].push(rota);
-            });
+            submitBtn.disabled = true;
+            statusDiv.textContent = 'Parsing schedule and saving...';
+            statusDiv.className = 'status-msg status-success';
+            statusDiv.classList.remove('hidden');
 
-            let html = '';
-            Object.keys(grouped).sort().forEach(dateKey => {
-                const rotas = grouped[dateKey];
-                const dateObj = new Date(dateKey + 'T00:00:00');
-                const dateStr = dateObj.toLocaleDateString('en-GB', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                });
+            try {
+                const records = parseRawRotaText(rawText);
 
-                html += `
-                    <div class="date-group">
-                        <div class="date-header">
-                            <div class="date-icon"></div>
-                            <div class="date-label">${dateStr}</div>
-                            <div class="date-day">${rotas.length} role${rotas.length !== 1 ? 's' : ''}</div>
-                        </div>
-                        ${rotas.map(rota => renderRotaCard(rota)).join('')}
-                    </div>
-                `;
-            });
+                if (records.length === 0) {
+                    records.push({
+                        date: getTodayStr(),
+                        service_type: 'Parsed Schedule',
+                        roles: { 'Raw Note': rawText }
+                    });
+                }
 
-            document.getElementById('content-area').innerHTML = html;
-        }
+                const { error } = await db.from('rotas').insert(records);
 
-        // ════════════════════════════════════════════════════════════════
-        // RENDER: PERSON SEARCH
-        // ════════════════════════════════════════════════════════════════
-        function renderPersonSearch() {
-            document.getElementById('content-area').innerHTML = `
-                <div class="empty-state">
-                    <div class="empty-icon">🔍</div>
-                    <div class="empty-title">Search for Upcoming Schedules</div>
-                    <div class="empty-text">Type a name in the box above to find future commitments</div>
-                </div>
-            `;
-        }
+                if (error) throw error;
 
-        function searchPerson(name) {
-            if (!name.trim()) {
-                renderPersonSearch();
-                return;
+                statusDiv.textContent = `Successfully saved ${records.length} rota record(s)!`;
+                setTimeout(() => {
+                    closeAiModal();
+                    submitBtn.disabled = false;
+                    loadAllRotas();
+                }, 1200);
+
+            } catch (err) {
+                statusDiv.textContent = 'Upload Error: ' + err.message;
+                statusDiv.className = 'status-msg status-error';
+                submitBtn.disabled = false;
             }
-
-            const todayStr = getTodayStr();
-
-            const filtered = allRotas.filter(rota => 
-                isSundayOrWednesday(rota.date) &&
-                rota.date >= todayStr &&
-                rota.assigned_persons && 
-                rota.assigned_persons.toLowerCase().includes(name.toLowerCase())
-            );
-
-            if (filtered.length === 0) {
-                document.getElementById('content-area').innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-icon">😐</div>
-                        <div class="empty-title">No Upcoming Rotas</div>
-                        <div class="empty-text">No upcoming schedules found for "${name}"</div>
-                    </div>
-                `;
-                return;
-            }
-
-            let html = `
-                <div class="person-results">
-                    <div class="person-header">
-                        <div class="person-name">Schedules for "${name}"</div>
-                        <div class="person-count">${filtered.length} Commitment${filtered.length !== 1 ? 's' : ''}</div>
-                    </div>
-            `;
-
-            filtered.sort((a, b) => new Date(a.date) - new Date(b.date)).forEach(rota => {
-                const dateObj = new Date(rota.date + 'T00:00:00');
-                const dateStr = dateObj.toLocaleDateString('en-GB', {
-                    weekday: 'short',
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric'
-                });
-
-                const displayTitle = rota.role && rota.role !== rota.rota_name
-                    ? `${rota.rota_name} — ${rota.role}`
-                    : (rota.rota_name || rota.role || 'Unassigned Rota');
-
-                html += `
-                    <div class="rota-card">
-                        <div class="rota-header" style="margin-bottom: 0;">
-                            <div class="rota-role">${displayTitle}</div>
-                            <div class="rota-time">${dateStr} ${rota.time ? '• ' + rota.time : ''}</div>
-                        </div>
-                    </div>
-                `;
-            });
-
-            html += `</div>`;
-            document.getElementById('content-area').innerHTML = html;
         }
+
+        // Auto-run on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedUrl = localStorage.getItem('cbc_sb_url');
+            const savedKey = localStorage.getItem('cbc_sb_key');
+            if (savedUrl) document.getElementById('supabase-url').value = savedUrl;
+            if (savedKey) document.getElementById('supabase-key').value = savedKey;
+            checkLogin();
+        });
     </script>
 </body>
 </html>
