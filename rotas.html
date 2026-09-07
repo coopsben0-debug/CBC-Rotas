@@ -36,7 +36,6 @@
     .sync-status { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: #94a3b8; font-weight: 500; }
     .status-dot { width: 8px; height: 8px; border-radius: 50%; background-color: #10b981; box-shadow: 0 0 8px #10b981; }
 
-    /* User Name Badge in Top Corner */
     .user-pill {
       background: rgba(255, 255, 255, 0.18);
       backdrop-filter: blur(8px);
@@ -72,7 +71,7 @@
     label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); }
     input[type="text"] { width: 100%; padding: 0.7rem 0.9rem; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.9rem; color: var(--text-main); background-color: #f8fafc; }
 
-    /* Clickable Category Chips */
+    /* Category Chips */
     .chips-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
     .chip-btn { padding: 6px 14px; border-radius: 20px; font-size: 0.825rem; font-weight: 600; border: 1px solid var(--border-color); background-color: #f8fafc; color: var(--text-main); cursor: pointer; transition: all 0.2s ease; }
     .chip-btn:hover { background-color: #e2e8f0; }
@@ -87,8 +86,20 @@
     td { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border-color); font-size: 0.9rem; }
     .highlight-row td { background-color: #f0fdfa !important; font-weight: 600; }
     .badge-role { display: inline-block; padding: 4px 10px; border-radius: 6px; background-color: #f1f5f9; font-weight: 600; font-size: 0.8rem; }
+    .badge-swap { background-color: #fef3c7; color: #92400e; border: 1px solid #fcd34d; font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; margin-left: 6px; font-weight: 600; }
     .btn-edit { background: #f1f5f9; color: var(--text-main); border: 1px solid var(--border-color); padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
     .btn-edit:hover { background: var(--primary); color: white; }
+
+    /* Edit Modal Overlay */
+    .modal-backdrop { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 1000; }
+    .modal-backdrop.active { display: flex; }
+    .modal-box { background: white; border-radius: 16px; width: 90%; max-width: 500px; padding: 1.75rem; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 1.25rem; }
+    .modal-header h3 { font-size: 1.15rem; color: var(--primary); font-weight: 700; }
+    .modal-header p { font-size: 0.85rem; color: var(--text-muted); margin-top: 2px; }
+    .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 0.5rem; }
+    .btn-secondary { background: #f1f5f9; color: var(--text-main); border: 1px solid var(--border-color); padding: 0.6rem 1rem; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
+    .btn-swap-req { background: #d97706; color: white; border: none; padding: 0.6rem 1rem; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
+    .btn-swap-req:hover { background: #b45309; }
   </style>
 </head>
 <body>
@@ -103,7 +114,6 @@
       </div>
       <div class="user-profile">
         <div class="sync-status"><span class="status-dot"></span> Live</div>
-        <!-- Logged In User Name Badge -->
         <div class="user-pill" id="logged-user-label">👤 Guest</div>
         <button class="btn-logout" onclick="handleLogout()">Logout</button>
       </div>
@@ -112,13 +122,11 @@
 
   <main class="dashboard">
 
-    <!-- Schedule Mode Switcher Buttons -->
     <div class="view-switchers">
       <button class="btn-tab active" id="btn-view-all" onclick="switchView('ALL')">🌐 All Events & Rotas</button>
       <button class="btn-tab" id="btn-view-mine" onclick="switchView('MY_SCHEDULE')">👤 My Personal Schedule</button>
     </div>
 
-    <!-- Personal Duties Banner -->
     <section class="duties-banner" id="duties-banner">
       <h2 id="my-duties-title">📋 My Upcoming Rota Duties</h2>
       <ul class="duties-list" id="my-duties-list">
@@ -126,7 +134,6 @@
       </ul>
     </section>
 
-    <!-- Controls Panel -->
     <section class="panel-card">
       <div class="search-row">
         <div class="form-group">
@@ -144,7 +151,6 @@
       </div>
     </section>
 
-    <!-- Rota Data Table -->
     <section class="table-card">
       <table>
         <thead>
@@ -165,10 +171,30 @@
     </section>
   </main>
 
-  <script>
-    // Get logged-in user name from localStorage
-    const currentUserName = localStorage.getItem('cbc_user_name') || localStorage.getItem('username') || localStorage.getItem('user') || 'Volunteer';
+  <!-- Edit & Swap Modal Dialog -->
+  <div class="modal-backdrop" id="edit-modal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>Edit Duty / Request Swap</h3>
+        <p id="modal-subtitle">Update assigned volunteer names below.</p>
+      </div>
+      <form id="edit-form" onsubmit="handleSaveEdit(event)">
+        <input type="hidden" id="edit-row-id">
+        <div class="form-group">
+          <label for="edit-assigned">Assigned Member(s)</label>
+          <input type="text" id="edit-assigned" required placeholder="e.g. Romona & James">
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-swap-req" onclick="markSwapRequested()">🔄 Flag as "Swap Needed"</button>
+          <button type="button" class="btn-secondary" onclick="closeEditModal()">Cancel</button>
+          <button type="submit" class="btn-action">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
+  <script>
+    const currentUserName = localStorage.getItem('cbc_user_name') || localStorage.getItem('username') || localStorage.getItem('user') || 'Volunteer';
     const SUPABASE_URL = "https://ojzwujpahfjmaeisnfez.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qend1anBhaGZqbWFlaXNuZmV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTA5NDMsImV4cCI6MjA5NDU4Njk0M30.VvszGR6MbUnBhKsmsXBikkrjok2-F1bnyS4zOwDX5hg";
 
@@ -296,22 +322,70 @@
         const tr = document.createElement('tr');
         const assigned = row.assigned_persons || row.person || 'Unassigned';
         const isUserAssigned = assigned.toLowerCase().includes(currentUserName.toLowerCase());
+        const hasSwapReq = assigned.toLowerCase().includes('swap needed') || assigned.toLowerCase().includes('swap requested');
 
         if (isUserAssigned) {
           tr.classList.add('highlight-row');
         }
 
+        const safeAssigned = assigned.replace(/'/g, "\\'");
+        const safeService = (row.rota_name || row.service || 'Service').replace(/'/g, "\\'");
+
         tr.innerHTML = `
           <td><strong>${row.date || 'N/A'}</strong></td>
           <td>${row.rota_name || row.service || 'Service'}</td>
           <td><span class="badge-role">${row.role || 'Volunteer'}</span></td>
-          <td>${assigned}</td>
+          <td>
+            ${assigned}
+            ${hasSwapReq ? '<span class="badge-swap">Swap Needed</span>' : ''}
+          </td>
           <td style="text-align: right;">
-            <button class="btn-edit" onclick="alert('Editing entry ID: ' + ${row.id})">Edit</button>
+            <button class="btn-edit" onclick="openEditModal(${row.id}, '${safeAssigned}', '${safeService}', '${row.date}')">Edit / Swap</button>
           </td>
         `;
         tbody.appendChild(tr);
       });
+    }
+
+    function openEditModal(id, currentAssigned, service, date) {
+      document.getElementById('edit-row-id').value = id;
+      document.getElementById('edit-assigned').value = currentAssigned;
+      document.getElementById('modal-subtitle').innerText = `${service} on ${date}`;
+      document.getElementById('edit-modal').classList.add('active');
+    }
+
+    function closeEditModal() {
+      document.getElementById('edit-modal').classList.remove('active');
+    }
+
+    function markSwapRequested() {
+      const input = document.getElementById('edit-assigned');
+      if (!input.value.toLowerCase().includes('swap needed')) {
+        input.value = `${input.value.trim()} (Swap Needed)`;
+      }
+    }
+
+    async function handleSaveEdit(event) {
+      event.preventDefault();
+      const rowId = document.getElementById('edit-row-id').value;
+      const updatedNames = document.getElementById('edit-assigned').value.trim();
+
+      const client = initSupabase();
+      if (!client) return;
+
+      try {
+        const { error } = await client
+          .from('rotas')
+          .update({ assigned_persons: updatedNames, person: updatedNames })
+          .eq('id', rowId);
+
+        if (error) throw error;
+
+        closeEditModal();
+        await loadRotas();
+      } catch (err) {
+        alert("Failed to update database: " + err.message);
+      }
     }
 
     function updatePersonalDuties() {
@@ -335,11 +409,8 @@
     }
 
     window.addEventListener('DOMContentLoaded', () => {
-      // Set Top Right Corner Username
       document.getElementById('logged-user-label').innerText = `👤 ${currentUserName}`;
-
       document.getElementById('search-input').addEventListener('input', renderTable);
-
       loadRotas();
     });
   </script>
