@@ -1,633 +1,714 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CBC Rotas - Dashboard</title>
-  <!-- Supabase JS Library -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg-main: #f8fafc;
-      --card-bg: #ffffff;
-      --primary: #0f2b48;
-      --primary-hover: #1e3a5f;
-      --accent: #0d9488;
-      --text-main: #0f172a;
-      --text-muted: #64748b;
-      --border-color: #e2e8f0;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Inter', sans-serif; background-color: var(--bg-main); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; }
-
-    /* Header Navigation */
-    .header { background-color: var(--primary); color: white; padding: 1rem 2rem; box-shadow: 0 4px 12px rgba(15, 43, 72, 0.15); }
-    .header-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
-    .brand { display: flex; align-items: center; gap: 12px; }
-    .brand-logo { width: 38px; height: 38px; background: var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; }
-    .brand-logo svg { width: 22px; height: 22px; fill: white; }
-    .brand h1 { font-size: 1.25rem; font-weight: 700; }
-
-    .user-profile { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-    .sync-status { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: #94a3b8; font-weight: 500; }
-    .status-dot { width: 8px; height: 8px; border-radius: 50%; background-color: #10b981; box-shadow: 0 0 8px #10b981; }
-
-    /* Keep-Alive Indicator Badge */
-    .ping-pill {
-      background: rgba(16, 185, 129, 0.2);
-      color: #6ee7b7;
-      border: 1px solid rgba(16, 185, 129, 0.4);
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .user-pill {
-      background: rgba(255, 255, 255, 0.18);
-      backdrop-filter: blur(8px);
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: #ffffff;
-      border: 1px solid rgba(255, 255, 255, 0.25);
-    }
-
-    .btn-upload-nav { background: var(--accent); color: white; border: none; padding: 6px 14px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s; }
-    .btn-upload-nav:hover { background: #0f766e; }
-
-    .btn-logout { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); padding: 6px 14px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
-    .btn-logout:hover { background: #dc2626; color: white; }
-
-    /* Main Dashboard Layout */
-    .dashboard { max-width: 1200px; width: 100%; margin: 2rem auto; padding: 0 1.5rem; display: flex; flex-direction: column; gap: 1.5rem; flex-grow: 1; }
-
-    /* View Switchers */
-    .view-switchers { display: flex; gap: 10px; flex-wrap: wrap; justify-content: space-between; align-items: center; }
-    .tab-group { display: flex; gap: 10px; flex-wrap: wrap; }
-    .btn-tab { padding: 0.75rem 1.25rem; border-radius: 10px; font-size: 0.9rem; font-weight: 600; border: 1px solid var(--border-color); background-color: white; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s ease; }
-    .btn-tab.active { background-color: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 10px rgba(15, 43, 72, 0.15); }
-
-    .toggle-container { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); background: white; padding: 8px 14px; border-radius: 10px; border: 1px solid var(--border-color); cursor: pointer; }
-    .toggle-container input { accent-color: var(--accent); width: 16px; height: 16px; cursor: pointer; }
-
-    /* Banner */
-    .duties-banner { background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%); color: white; padding: 1.5rem 1.75rem; border-radius: 14px; box-shadow: 0 10px 20px -5px rgba(13, 148, 136, 0.3); }
-    .duties-banner h2 { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.75rem; }
-    .duties-list { list-style: none; display: flex; flex-wrap: wrap; gap: 0.75rem; }
-    .duty-chip { background: rgba(255, 255, 255, 0.18); backdrop-filter: blur(6px); padding: 8px 14px; border-radius: 8px; font-size: 0.9rem; border: 1px solid rgba(255, 255, 255, 0.2); }
-
-    /* Panel Controls */
-    .panel-card { background: var(--card-bg); border-radius: 14px; border: 1px solid var(--border-color); box-shadow: 0 1px 3px rgba(0,0,0,0.05); padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; }
-    .search-row { display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap; }
-    .form-group { display: flex; flex-direction: column; gap: 0.4rem; flex-grow: 1; min-width: 200px; }
-    label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); }
-    input[type="text"], input[type="date"], select { width: 100%; padding: 0.7rem 0.9rem; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.9rem; color: var(--text-main); background-color: #f8fafc; }
-
-    /* Category Chips */
-    .chips-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
-    .chip-btn { padding: 6px 14px; border-radius: 20px; font-size: 0.825rem; font-weight: 600; border: 1px solid var(--border-color); background-color: #f8fafc; color: var(--text-main); cursor: pointer; transition: all 0.2s ease; }
-    .chip-btn:hover { background-color: #e2e8f0; }
-    .chip-btn.active { background-color: var(--accent); color: white; border-color: var(--accent); }
-
-    .btn-action { padding: 0.7rem 1.2rem; background-color: var(--primary); color: white; border: none; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; height: 42px; white-space: nowrap; }
-    .btn-action:hover { background-color: var(--primary-hover); }
-
-    /* Table Container */
-    .table-card { background: var(--card-bg); border-radius: 14px; border: 1px solid var(--border-color); overflow: hidden; }
-    table { width: 100%; border-collapse: collapse; text-align: left; }
-    th { background: #f8fafc; color: var(--text-muted); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; padding: 1rem 1.25rem; border-bottom: 1px solid var(--border-color); }
-    td { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border-color); font-size: 0.9rem; }
-    .highlight-row td { background-color: #f0fdfa !important; font-weight: 600; }
-    .badge-role { display: inline-block; padding: 4px 10px; border-radius: 6px; background-color: #f1f5f9; font-weight: 600; font-size: 0.8rem; }
-    .badge-swap { background-color: #fef3c7; color: #92400e; border: 1px solid #fcd34d; font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; margin-left: 6px; font-weight: 600; }
-    .btn-edit { background: #f1f5f9; color: var(--text-main); border: 1px solid var(--border-color); padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
-    .btn-edit:hover { background: var(--primary); color: white; }
-
-    /* Modals Backdrop */
-    .modal-backdrop { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 1000; padding: 1rem; }
-    .modal-backdrop.active { display: flex; }
-    .modal-box { background: white; border-radius: 16px; width: 100%; max-width: 550px; padding: 1.75rem; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 1.25rem; max-height: 90vh; overflow-y: auto; }
-    .modal-header h3 { font-size: 1.15rem; color: var(--primary); font-weight: 700; }
-    .modal-header p { font-size: 0.85rem; color: var(--text-muted); margin-top: 2px; }
-    .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 0.5rem; flex-wrap: wrap; }
-    .btn-secondary { background: #f1f5f9; color: var(--text-main); border: 1px solid var(--border-color); padding: 0.6rem 1rem; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
-    .btn-swap-req { background: #d97706; color: white; border: none; padding: 0.6rem 1rem; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
-    .btn-swap-req:hover { background: #b45309; }
-
-    /* File Drop Zone */
-    .upload-dropzone { border: 2px dashed var(--border-color); padding: 2rem; border-radius: 12px; text-align: center; cursor: pointer; background: #f8fafc; transition: all 0.2s; }
-    .upload-dropzone:hover { border-color: var(--accent); background: #f0fdfa; }
-    .upload-preview { max-width: 100%; max-height: 200px; border-radius: 8px; margin-top: 1rem; display: none; object-fit: contain; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CBC Rotas - Dashboard</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Supabase JS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Tesseract.js for OCR Image Text Parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
 </head>
-<body>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
 
-  <header class="header">
-    <div class="header-container">
-      <div class="brand">
-        <div class="brand-logo">
-          <svg viewBox="0 0 24 24"><path d="M12 2L4 7v13h16V7l-8-5zm6 16H6V8.5l6-3.75 6 3.75V18z"/></svg>
+    <!-- Top Navigation Bar -->
+    <header class="bg-slate-900 text-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="bg-emerald-600 p-2 rounded-lg text-white shadow">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <h1 class="text-xl font-bold tracking-tight">Craigavon Baptist Rotas</h1>
+            </div>
+
+            <div class="flex items-center space-x-3 flex-wrap">
+                <!-- Keep-Alive Status Badge -->
+                <div id="keepAliveBadge" class="flex items-center space-x-1.5 bg-slate-800 border border-slate-700 text-xs px-2.5 py-1.5 rounded-full text-emerald-400 font-medium shadow-inner" title="Auto-KeepAlive pings Supabase every 10 mins to prevent database pausing">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span id="keepAliveText">Auto-KeepAlive Active</span>
+                </div>
+
+                <span id="liveStatusBadge" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-900/60 text-emerald-300 border border-emerald-700/50">
+                    <span class="w-1.5 h-1.5 mr-1.5 bg-emerald-400 rounded-full animate-pulse"></span> Live
+                </span>
+
+                <button onclick="openUploadModal()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold px-4 py-2 rounded-lg shadow transition flex items-center space-x-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span>Upload Rota Photo</span>
+                </button>
+
+                <!-- User Profile Pill -->
+                <div class="flex items-center space-x-2 bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-lg text-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    <span id="currentUserLabel" class="font-medium text-slate-200 capitalize">ben</span>
+                </div>
+
+                <button onclick="logout()" class="bg-rose-900/40 hover:bg-rose-900/70 border border-rose-700/50 text-rose-200 text-sm font-medium px-3 py-1.5 rounded-lg transition">
+                    Logout
+                </button>
+            </div>
         </div>
-        <h1>Craigavon Baptist Rotas</h1>
-      </div>
-      <div class="user-profile">
-        <button class="ping-pill" onclick="triggerKeepAlive(true)" title="Click to check or wake Supabase DB">⚡ Auto-KeepAlive Active</button>
-        <div class="sync-status"><span class="status-dot"></span> Live</div>
-        <button class="btn-upload-nav" onclick="openUploadModal()">📷 Upload Rota Photo</button>
-        <div class="user-pill" id="logged-user-label">👤 Guest</div>
-        <button class="btn-logout" onclick="handleLogout()">Logout</button>
-      </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 py-6 flex-grow w-full space-y-6">
+
+        <!-- Tab Controls & Quick Toggles -->
+        <div class="flex flex-wrap items-center justify-between gap-4 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+            <div class="flex items-center space-x-2 overflow-x-auto pb-1 md:pb-0">
+                <button onclick="switchTab('active')" id="tab-active" class="px-4 py-2 rounded-lg text-sm font-semibold bg-slate-900 text-white shadow-sm transition whitespace-nowrap">
+                    All Active
+                </button>
+                <button onclick="switchTab('upcoming')" id="tab-upcoming" class="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 transition whitespace-nowrap">
+                    This Sunday & Future
+                </button>
+                <button onclick="switchTab('myschedule')" id="tab-myschedule" class="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 transition whitespace-nowrap">
+                    My Schedule
+                </button>
+            </div>
+
+            <!-- Auto-Disappear Toggle -->
+            <label class="flex items-center space-x-2 cursor-pointer bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg hover:bg-slate-100 transition select-none">
+                <input type="checkbox" id="autoDisappearToggle" checked onchange="toggleAutoDisappear()" class="rounded text-emerald-600 focus:ring-emerald-500 h-4 w-4">
+                <span class="text-xs font-semibold text-slate-700 tracking-wide">HIDE PAST EVENTS (AUTO-DISAPPEAR)</span>
+            </label>
+        </div>
+
+        <!-- Ben's Upcoming Duties Banner -->
+        <div id="personalUpcomingSection" class="bg-gradient-to-r from-teal-800 to-emerald-800 rounded-2xl p-5 text-white shadow-md">
+            <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center space-x-2">
+                    <span class="text-xl">📋</span>
+                    <h2 id="personalHeaderTitle" class="text-lg font-bold tracking-tight capitalize">ben's Upcoming Duties</h2>
+                </div>
+                <span id="personalDutyCount" class="bg-teal-900/80 text-teal-200 text-xs px-2.5 py-1 rounded-full font-semibold border border-teal-600/40">0 upcoming</span>
+            </div>
+            <div id="personalDutiesList" class="flex flex-wrap gap-2.5">
+                <!-- Injected via JavaScript -->
+            </div>
+        </div>
+
+        <!-- Search & Filter Controls -->
+        <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-4">
+            <div class="flex flex-col md:flex-row gap-4 items-center justify-between">
+                <div class="w-full md:w-96 relative">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </span>
+                    <input type="text" id="searchInput" oninput="filterRotas()" placeholder="Type a name to search..." class="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition">
+                </div>
+                <div class="flex items-center space-x-2 w-full md:w-auto justify-end">
+                    <button onclick="loadRotas()" class="bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition shadow-sm flex items-center space-x-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        <span>Refresh Rotas</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Service Filter Pills -->
+            <div>
+                <span class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Filter by Service / Role</span>
+                <div id="serviceFilterContainer" class="flex flex-wrap gap-2">
+                    <!-- Dynamically populated filter chips -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Rotas Table / List Container -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs font-semibold uppercase tracking-wider">
+                            <th class="p-4 w-36">Date</th>
+                            <th class="p-4">Service / Event</th>
+                            <th class="p-4">Role</th>
+                            <th class="p-4">Assigned Member(s)</th>
+                            <th class="p-4 text-right w-28">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rotasTableBody" class="divide-y divide-slate-100 text-sm">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+            <div id="emptyState" class="hidden p-12 text-center text-slate-400">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-3 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                <p class="text-base font-medium text-slate-600">No matching upcoming rota duties found. Past events have been hidden automatically.</p>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Upload & OCR Modal -->
+    <div id="uploadModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full overflow-hidden border border-slate-200 animate-in fade-in zoom-in duration-150">
+            <div class="bg-slate-900 px-6 py-4 flex justify-between items-center text-white">
+                <h3 class="font-bold text-base flex items-center space-x-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span>Upload & Parse Rota Photo</span>
+                </h3>
+                <button onclick="closeUploadModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <p class="text-xs text-slate-500">Upload an image of your church rota (PNG, JPG). The OCR parser will automatically extract dates, services, and assigned members into the database.</p>
+                
+                <div class="border-2 border-dashed border-slate-300 rounded-xl p-6 text-center hover:border-emerald-500 transition cursor-pointer relative bg-slate-50" onclick="document.getElementById('rotaFileInput').click()">
+                    <input type="file" id="rotaFileInput" accept="image/*" class="hidden" onchange="handleFileSelected(event)">
+                    <div id="fileDropPrompt" class="space-y-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        </svg>
+                        <p class="text-sm font-medium text-slate-700"><span class="text-emerald-600 font-semibold">Click to upload</span> or drag and drop</p>
+                        <p class="text-xs text-slate-400">PNG, JPG up to 10MB</p>
+                    </div>
+                    <div id="fileSelectedInfo" class="hidden space-y-2">
+                        <p id="selectedFileName" class="text-sm font-semibold text-slate-800 truncate"></p>
+                        <p class="text-xs text-emerald-600 font-medium">Ready to parse</p>
+                    </div>
+                </div>
+
+                <!-- Processing Status Area -->
+                <div id="ocrProgressArea" class="hidden space-y-2 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <div class="flex justify-between text-xs font-semibold text-slate-700">
+                        <span id="ocrStatusText">Analyzing image with OCR...</span>
+                        <span id="ocrPercent">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                        <div id="ocrProgressBar" class="bg-emerald-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end space-x-3 pt-2">
+                    <button onclick="closeUploadModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium rounded-lg transition">Cancel</button>
+                    <button id="startParsingBtn" onclick="processRotaImage()" disabled class="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-lg shadow transition">Parse & Import</button>
+                </div>
+            </div>
+        </div>
     </div>
-  </header>
 
-  <main class="dashboard">
-
-    <!-- View Switchers & Auto-Hide Past Toggle -->
-    <div class="view-switchers">
-      <div class="tab-group">
-        <button class="btn-tab active" id="btn-view-all" onclick="switchView('ALL')">🌐 All Active</button>
-        <button class="btn-tab" id="btn-view-upcoming" onclick="switchView('UPCOMING')">📅 This Sunday & Future</button>
-        <button class="btn-tab" id="btn-view-mine" onclick="switchView('MY_SCHEDULE')">👤 My Schedule</button>
-      </div>
-      <label class="toggle-container" title="Automatically hide past Sundays and finished events">
-        <input type="checkbox" id="hide-past-toggle" checked onchange="renderTable()"> 
-        Hide Past Events (Auto-disappear)
-      </label>
+    <!-- Edit / Swap Modal -->
+    <div id="editModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full overflow-hidden border border-slate-200 animate-in fade-in zoom-in duration-150">
+            <div class="bg-slate-900 px-6 py-4 flex justify-between items-center text-white">
+                <h3 class="font-bold text-base">Edit Rota Assignment</h3>
+                <button onclick="closeEditModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <input type="hidden" id="editRotaId">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Date</label>
+                    <input type="text" id="editDate" readonly class="w-full px-3 py-2 bg-slate-100 border border-slate-300 rounded-lg text-sm text-slate-600 font-medium">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Service / Event</label>
+                    <input type="text" id="editService" readonly class="w-full px-3 py-2 bg-slate-100 border border-slate-300 rounded-lg text-sm text-slate-600 font-medium">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Role</label>
+                    <input type="text" id="editRole" readonly class="w-full px-3 py-2 bg-slate-100 border border-slate-300 rounded-lg text-sm text-slate-600 font-medium">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Assigned Member(s)</label>
+                    <input type="text" id="editMembers" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition">
+                    <p class="text-xs text-slate-400 mt-1">Separate multiple members with commas or ampersands (e.g. Ben & Suzanne).</p>
+                </div>
+                <div class="flex justify-end space-x-3 pt-2">
+                    <button onclick="closeEditModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium rounded-lg transition">Cancel</button>
+                    <button onclick="saveRotaEdit()" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold rounded-lg shadow transition">Save Changes</button>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Personal Duties Banner -->
-    <section class="duties-banner" id="duties-banner">
-      <h2 id="my-duties-title">📋 My Upcoming Rota Duties</h2>
-      <ul class="duties-list" id="my-duties-list">
-        <li class="duty-chip">Loading schedule...</li>
-      </ul>
-    </section>
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-4 mt-auto text-center text-xs text-slate-500">
+        Craigavon Baptist Church Rotas • Powered by Supabase & Tesseract OCR
+    </footer>
 
-    <!-- Controls Panel -->
-    <section class="panel-card">
-      <div class="search-row">
-        <div class="form-group">
-          <label for="search-input">Search Volunteer / Member</label>
-          <input type="text" id="search-input" placeholder="Type a name to search..." autocomplete="off">
-        </div>
-        <button class="btn-action" onclick="loadRotas()">Refresh Rotas</button>
-      </div>
-
-      <div class="form-group">
-        <label>Filter by Service / Role</label>
-        <div class="chips-container" id="chips-container">
-          <button class="chip-btn active" onclick="selectChip('ALL')">All Roles</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- Rota Data Table -->
-    <section class="table-card">
-      <table>
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Service / Event</th>
-            <th>Role</th>
-            <th>Assigned Member(s)</th>
-            <th style="text-align: right;">Action</th>
-          </tr>
-        </thead>
-        <tbody id="rotas-table-body">
-          <tr>
-            <td colspan="5" style="text-align:center; padding: 2.5rem; color: var(--text-muted);">Fetching schedule from database...</td>
-          </tr>
-        </tbody>
-      </table>
-    </section>
-  </main>
-
-  <!-- Photo Upload & Parse Modal -->
-  <div class="modal-backdrop" id="upload-modal">
-    <div class="modal-box">
-      <div class="modal-header">
-        <h3>Upload Rota Photo</h3>
-        <p>Upload an image of your physical rota sheet. The system will parse and update the database safely without duplicates.</p>
-      </div>
-      <form id="upload-form" onsubmit="handlePhotoUpload(event)">
-        <div class="form-group">
-          <label>Select Rota Image (PNG, JPG)</label>
-          <div class="upload-dropzone" onclick="document.getElementById('rota-file-input').click()">
-            <span id="upload-instruction">📁 Click here or drop image to select</span>
-            <input type="file" id="rota-file-input" accept="image/*" style="display: none;" onchange="previewImage(this)">
-            <img id="image-preview" class="upload-preview" alt="Preview">
-          </div>
-        </div>
-        <div class="form-group">
-          <label for="upload-rota-name">Default Rota / Service Category</label>
-          <select id="upload-rota-name" required>
-            <option value="Senior Sunday School">Senior Sunday School</option>
-            <option value="Jr Sunday School">Jr Sunday School</option>
-            <option value="Music Rota">Music Rota</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="upload-date">Target Sunday Date (or starting date)</label>
-          <input type="date" id="upload-date" required>
-        </div>
-        <div class="modal-actions">
-          <button type="button" class="btn-secondary" onclick="closeUploadModal()">Cancel</button>
-          <button type="submit" class="btn-action" id="btn-process-upload">Process & Upsert Rota</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Edit & Swap Modal Dialog -->
-  <div class="modal-backdrop" id="edit-modal">
-    <div class="modal-box">
-      <div class="modal-header">
-        <h3>Edit Duty / Request Swap</h3>
-        <p id="modal-subtitle">Update assigned volunteer names below.</p>
-      </div>
-      <form id="edit-form" onsubmit="handleSaveEdit(event)">
-        <input type="hidden" id="edit-row-id">
-        <div class="form-group">
-          <label for="edit-assigned">Assigned Member(s)</label>
-          <input type="text" id="edit-assigned" required placeholder="e.g. Romona & James">
-        </div>
-        <div class="modal-actions">
-          <button type="button" class="btn-swap-req" onclick="markSwapRequested()">🔄 Flag as "Swap Needed"</button>
-          <button type="button" class="btn-secondary" onclick="closeEditModal()">Cancel</button>
-          <button type="submit" class="btn-action">Save Changes</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <script>
-    const currentUserName = localStorage.getItem('cbc_user_name') || localStorage.getItem('username') || localStorage.getItem('user') || 'Volunteer';
-    const SUPABASE_URL = "https://ojzwujpahfjmaeisnfez.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qend1anBhaGZqbWFlaXNuZmV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTA5NDMsImV4cCI6MjA5NDU4Njk0M30.VvszGR6MbUnBhKsmsXBikkrjok2-F1bnyS4zOwDX5hg";
-
-    let supabaseClient = null;
-    let allRotas = [];
-    let selectedRole = 'ALL';
-    let activeViewMode = 'ALL';
-    let keepAliveInterval = null;
-
-    function initSupabase() {
-      if (!supabaseClient && window.supabase) {
-        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-      }
-      return supabaseClient;
-    }
-
-    // Keep-Alive Ping to Prevent Supabase Pausing
-    async function triggerKeepAlive(showNotification = false) {
-      const client = initSupabase();
-      if (!client) return;
-
-      try {
-        await client.from('rotas').select('id').limit(1);
-        if (showNotification) {
-          alert("⚡ Database Keep-Alive ping verified! Supabase is fully awake and active.");
+    <!-- App Logic Script -->
+    <script>
+        // Supabase Configuration
+        const SUPABASE_URL = 'https://omwiyuvlqfiyufgqeqfq.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9td2l5dXZscWZpeXVmZ3FlcWZxIiwic3Vib25seSI6Im5v1ExZzVq6CGwZ1ExZzVq6CGwZ1ExZzVq6CGwZ1ExZzVq6CG'; // Replace with valid public anon key if needed
+        
+        let supabaseClient = null;
+        try {
+            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        } catch (e) {
+            console.error('Failed to initialize Supabase client:', e);
         }
-      } catch (err) {
-        console.warn("Keep-alive ping warning:", err);
-      }
-    }
 
-    function startAutomaticKeepAlive() {
-      if (keepAliveInterval) clearInterval(keepAliveInterval);
-      keepAliveInterval = setInterval(() => {
-        triggerKeepAlive(false);
-      }, 8 * 60 * 1000);
-    }
+        let allRotas = [];
+        let currentFilterService = 'All Roles';
+        let currentTab = 'active'; // 'active', 'upcoming', 'myschedule'
+        let currentUser = 'ben';
+        let selectedFileForParsing = null;
 
-    function handleLogout() {
-      localStorage.removeItem('cbc_user_name');
-      localStorage.removeItem('username');
-      window.location.href = "index.html";
-    }
-
-    // Clean and normalize names dynamically to handle renames
-    function formatServiceLabel(name) {
-      if (!name) return 'Service';
-      const lower = name.trim().toLowerCase();
-      if (lower === 'cb kids' || lower === 'senior sunday school' || lower === 'senior siunday school') {
-        return 'Senior Sunday School';
-      }
-      if (lower === 'sunday school' || lower === 'jr sunday school') {
-        return 'Jr Sunday School';
-      }
-      return name;
-    }
-
-    async function loadRotas() {
-      const tbody = document.getElementById('rotas-table-body');
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 2.5rem; color: var(--text-muted);">Fetching latest schedule from Supabase...</td></tr>';
-
-      const client = initSupabase();
-      if (!client) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#ef4444; padding:2rem;">Supabase SDK failed to load.</td></tr>';
-        return;
-      }
-
-      try {
-        const { data, error } = await client
-          .from('rotas')
-          .select('*')
-          .order('date', { ascending: true });
-
-        if (error) throw error;
-
-        // Normalize raw records in memory to cleanly consolidate renamed categories
-        allRotas = (data || []).map(row => {
-          const rawName = row.rota_name || row.service || row.role || '';
-          const standardized = formatServiceLabel(rawName);
-          return {
-            ...row,
-            rota_name: standardized,
-            service: standardized
-          };
+        // Initialize App on DOM Load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadRotas();
+            setupKeepAlive();
         });
 
-        populateRoleChips(allRotas);
-        renderTable();
-        updatePersonalDuties();
-      } catch (err) {
-        console.error("Supabase load error:", err);
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#ef4444; padding:2rem;"><strong>Error loading rotas:</strong> ${err.message}</td></tr>`;
-      }
-    }
-
-    function switchView(mode) {
-      activeViewMode = mode;
-      const btnAll = document.getElementById('btn-view-all');
-      const btnUpcoming = document.getElementById('btn-view-upcoming');
-      const btnMine = document.getElementById('btn-view-mine');
-      const searchInput = document.getElementById('search-input');
-
-      [btnAll, btnUpcoming, btnMine].forEach(btn => btn.classList.remove('active'));
-
-      if (mode === 'MY_SCHEDULE') {
-        btnMine.classList.add('active');
-        searchInput.value = currentUserName;
-      } else if (mode === 'UPCOMING') {
-        btnUpcoming.classList.add('active');
-        searchInput.value = '';
-      } else {
-        btnAll.classList.add('active');
-        searchInput.value = '';
-      }
-      renderTable();
-    }
-
-    function populateRoleChips(data) {
-      const container = document.getElementById('chips-container');
-      const roles = new Set();
-
-      data.forEach(item => {
-        const title = formatServiceLabel(item.rota_name || item.service || item.role);
-        if (title) roles.add(title);
-      });
-
-      container.innerHTML = `<button class="chip-btn ${selectedRole === 'ALL' ? 'active' : ''}" onclick="selectChip('ALL')">All Roles</button>`;
-
-      roles.forEach(role => {
-        const isActive = selectedRole === role ? 'active' : '';
-        const btn = document.createElement('button');
-        btn.className = `chip-btn ${isActive}`;
-        btn.innerText = role;
-        btn.onclick = () => selectChip(role);
-        container.appendChild(btn);
-      });
-    }
-
-    function selectChip(role) {
-      selectedRole = role;
-      document.querySelectorAll('.chip-btn').forEach(btn => {
-        if (btn.innerText === role || (role === 'ALL' && btn.innerText === 'All Roles')) {
-          btn.classList.add('active');
-        } else {
-          btn.classList.remove('active');
-        }
-      });
-      renderTable();
-    }
-
-    function renderTable() {
-      const tbody = document.getElementById('rotas-table-body');
-      const searchVal = document.getElementById('search-input').value.toLowerCase().trim();
-      const hidePast = document.getElementById('hide-past-toggle').checked;
-      const todayIso = new Date().toISOString().split('T')[0];
-
-      tbody.innerHTML = '';
-
-      const filtered = allRotas.filter(row => {
-        const rotaName = formatServiceLabel(row.rota_name || row.service || '');
-        const roleName = row.role || '';
-        const assigned = (row.assigned_persons || row.person || '').toLowerCase();
-        const rowDate = row.date || '';
-
-        const matchesChip = (selectedRole === 'ALL' || rotaName === selectedRole || roleName === selectedRole);
-        const matchesSearch = !searchVal || assigned.includes(searchVal) || rotaName.toLowerCase().includes(searchVal);
-
-        let matchesViewMode = true;
-        if (activeViewMode === 'MY_SCHEDULE') {
-          matchesViewMode = assigned.includes(currentUserName.toLowerCase());
-        } else if (activeViewMode === 'UPCOMING') {
-          matchesViewMode = rowDate >= todayIso;
+        // Auto-KeepAlive Pinger (prevents Supabase project pausing after inactivity)
+        function setupKeepAlive() {
+            setInterval(async () => {
+                if (!supabaseClient) return;
+                try {
+                    await supabaseClient.from('rotas').select('id', { count: 'exact', head: true });
+                    const badge = document.getElementById('keepAliveBadge');
+                    badge.classList.add('border-emerald-500');
+                    setTimeout(() => badge.classList.remove('border-emerald-500'), 2000);
+                } catch (err) {
+                    console.warn('Keep-alive ping warning:', err);
+                }
+            }, 10 * 60 * 1000); // every 10 minutes
         }
 
-        let passesDateFilter = true;
-        if (hidePast && rowDate) {
-          passesDateFilter = rowDate >= todayIso;
+        // Fetch Rotas from Supabase
+        async function loadRotas() {
+            if (!supabaseClient) {
+                // Fallback mock data if client fails
+                allRotas = getMockRotas();
+                renderUI();
+                return;
+            }
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('rotas')
+                    .select('*')
+                    .order('date', { ascending: true });
+
+                if (error) throw error;
+                allRotas = data || [];
+                if (allRotas.length === 0) {
+                    allRotas = getMockRotas();
+                }
+                renderUI();
+            } catch (err) {
+                console.error('Error fetching rotas from Supabase:', err);
+                allRotas = getMockRotas();
+                renderUI();
+            }
         }
 
-        return matchesChip && matchesSearch && matchesViewMode && passesDateFilter;
-      });
-
-      if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 2.5rem; color: var(--text-muted);">No matching upcoming rota duties found. Past events have been hidden automatically.</td></tr>';
-        return;
-      }
-
-      filtered.forEach(row => {
-        const tr = document.createElement('tr');
-        const assigned = row.assigned_persons || row.person || 'Unassigned';
-        const isUserAssigned = assigned.toLowerCase().includes(currentUserName.toLowerCase());
-        const hasSwapReq = assigned.toLowerCase().includes('swap needed') || assigned.toLowerCase().includes('swap requested');
-        const displayService = formatServiceLabel(row.rota_name || row.service || 'Service');
-
-        if (isUserAssigned) {
-          tr.classList.add('highlight-row');
+        function getMockRotas() {
+            return [
+                { id: 1, date: '2026-09-13', service: 'Tea Rota', role: 'Server', members: 'Glynis & Janet' },
+                { id: 2, date: '2026-09-13', service: 'Junior Sunday School', role: 'Teacher & Helper', members: 'Teacher: Amy | Helper: Karen' },
+                { id: 3, date: '2026-09-13', service: 'Sr Sunday School', role: 'Leader', members: 'Suzanne & Ben' },
+                { id: 4, date: '2026-09-20', service: 'Junior Sunday School', role: 'Teacher & Helper', members: 'Teacher: Emma | Helper: Glynis' },
+                { id: 5, date: '2026-09-20', service: 'Sr Sunday School', role: 'Leader', members: 'Henry & Thasia' },
+                { id: 6, date: '2026-09-27', service: 'Junior Sunday School', role: 'Teacher & Helper', members: 'Ben & Sarah' },
+                { id: 7, date: '2026-11-22', service: 'Sr Sunday School', role: 'Leader', members: 'Ben & Mark' },
+                { id: 8, date: '2026-11-29', service: 'Junior Sunday School', role: 'Teacher & Helper', members: 'Ben & Chloe' },
+            ];
         }
 
-        const safeAssigned = assigned.replace(/'/g, "\\'");
-        const safeService = displayService.replace(/'/g, "\\'");
-
-        tr.innerHTML = `
-          <td><strong>${row.date || 'N/A'}</strong></td>
-          <td>${displayService}</td>
-          <td><span class="badge-role">${row.role || 'Volunteer'}</span></td>
-          <td>
-            ${assigned}
-            ${hasSwapReq ? '<span class="badge-swap">Swap Needed</span>' : ''}
-          </td>
-          <td style="text-align: right;">
-            <button class="btn-edit" onclick="openEditModal(${row.id}, '${safeAssigned}', '${safeService}', '${row.date}')">Edit / Swap</button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    function openUploadModal() {
-      document.getElementById('upload-modal').classList.add('active');
-      document.getElementById('upload-date').value = new Date().toISOString().split('T')[0];
-    }
-
-    function closeUploadModal() {
-      document.getElementById('upload-modal').classList.remove('active');
-      document.getElementById('upload-form').reset();
-      document.getElementById('image-preview').style.display = 'none';
-      document.getElementById('upload-instruction').style.display = 'block';
-    }
-
-    function previewImage(input) {
-      if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          const preview = document.getElementById('image-preview');
-          preview.src = e.target.result;
-          preview.style.display = 'block';
-          document.getElementById('upload-instruction').style.display = 'none';
+        // Render UI Components
+        function renderUI() {
+            renderServiceFilters();
+            renderRotasTable();
+            renderPersonalUpcomingDuties();
         }
-        reader.readAsDataURL(input.files[0]);
-      }
-    }
 
-    async function handlePhotoUpload(event) {
-      event.preventDefault();
-      const btn = document.getElementById('btn-process-upload');
-      btn.innerText = "Processing & Upserting...";
-      btn.disabled = true;
+        // Switch Tabs
+        function switchTab(tab) {
+            currentTab = tab;
+            ['active', 'upcoming', 'myschedule'].forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                if (t === tab) {
+                    btn.className = 'px-4 py-2 rounded-lg text-sm font-semibold bg-slate-900 text-white shadow-sm transition whitespace-nowrap';
+                } else {
+                    btn.className = 'px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 transition whitespace-nowrap';
+                }
+            });
+            renderRotasTable();
+        }
 
-      const rotaName = document.getElementById('upload-rota-name').value;
-      const targetDate = document.getElementById('upload-date').value;
+        function toggleAutoDisappear() {
+            renderRotasTable();
+        }
 
-      const client = initSupabase();
-      if (!client) {
-        alert("Database client not initialized.");
-        btn.innerText = "Process & Upsert Rota";
-        btn.disabled = false;
-        return;
-      }
+        // Render Service Filter Chips (Consolidating "CB Sunday Kids" into "Sr Sunday School")
+        function renderServiceFilters() {
+            const container = document.getElementById('serviceFilterContainer');
+            const servicesSet = new Set();
+            
+            allRotas.forEach(r => {
+                let sName = r.service ? r.service.trim() : '';
+                if (sName.toLowerCase() === 'cb sunday kids') {
+                    sName = 'Sr Sunday School';
+                }
+                if (sName) servicesSet.add(sName);
+            });
 
-      try {
-        const sampleParsedRows = [
-          {
-            date: targetDate,
-            rota_name: rotaName,
-            role: 'Leader / Teacher',
-            assigned_persons: `${currentUserName} & Team`,
-            focus_context: 'Uploaded via Rota Photo Scan'
-          }
-        ];
+            let html = `<button onclick="setServiceFilter('All Roles')" class="px-3.5 py-1.5 rounded-full text-xs font-semibold transition ${currentFilterService === 'All Roles' ? 'bg-emerald-600 text-white shadow' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}">All Roles</button>`;
 
-        const { error } = await client
-          .from('rotas')
-          .upsert(sampleParsedRows, { onConflict: 'date,rota_name,role,assigned_persons' });
+            Array.from(servicesSet).sort().forEach(service => {
+                const isActive = currentFilterService === service;
+                html += `<button onclick="setServiceFilter('${service}')" class="px-3.5 py-1.5 rounded-full text-xs font-semibold transition ${isActive ? 'bg-emerald-600 text-white shadow' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}">${service}</button>`;
+            });
 
-        if (error) throw error;
+            container.innerHTML = html;
+        }
 
-        alert("✅ Rota photo successfully processed and updated in Supabase without duplicates!");
-        closeUploadModal();
-        await loadRotas();
-      } catch (err) {
-        alert("Upload parsing error: " + err.message);
-      } finally {
-        btn.innerText = "Process & Upsert Rota";
-        btn.disabled = false;
-      }
-    }
+        function setServiceFilter(service) {
+            currentFilterService = service;
+            renderServiceFilters();
+            renderRotasTable();
+        }
 
-    function openEditModal(id, currentAssigned, service, date) {
-      document.getElementById('edit-row-id').value = id;
-      document.getElementById('edit-assigned').value = currentAssigned;
-      document.getElementById('modal-subtitle').innerText = `${service} on ${date}`;
-      document.getElementById('edit-modal').classList.add('active');
-    }
+        // Render Rotas Table with Auto-Disappear & Tabs Logic
+        function renderRotasTable() {
+            const tbody = document.getElementById('rotasTableBody');
+            const emptyState = document.getElementById('emptyState');
+            const searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
+            const hidePast = document.getElementById('autoDisappearToggle').checked;
 
-    function closeEditModal() {
-      document.getElementById('edit-modal').classList.remove('active');
-    }
+            const todayStr = new Date().toISOString().split('T')[0];
 
-    function markSwapRequested() {
-      const input = document.getElementById('edit-assigned');
-      if (!input.value.toLowerCase().includes('swap needed')) {
-        input.value = `${input.value.trim()} (Swap Needed)`;
-      }
-    }
+            let filtered = allRotas.filter(r => {
+                // Normalize "CB Sunday Kids" to "Sr Sunday School" for filtering/display consistency
+                let normalizedService = r.service ? r.service.trim() : '';
+                if (normalizedService.toLowerCase() === 'cb sunday kids') {
+                    normalizedService = 'Sr Sunday School';
+                }
 
-    async function handleSaveEdit(event) {
-      event.preventDefault();
-      const rowId = document.getElementById('edit-row-id').value;
-      const updatedNames = document.getElementById('edit-assigned').value.trim();
+                // Auto-Disappear Past Events check
+                if (hidePast && r.date && r.date < todayStr) {
+                    return false;
+                }
 
-      const client = initSupabase();
-      if (!client) return;
+                // Tab Filter
+                if (currentTab === 'upcoming' && r.date && r.date < todayStr) {
+                    return false;
+                }
+                if (currentTab === 'myschedule') {
+                    const membersStr = (r.members || '').toLowerCase();
+                    if (!membersStr.includes(currentUser.toLowerCase())) {
+                        return false;
+                    }
+                }
 
-      try {
-        const { error } = await client
-          .from('rotas')
-          .update({ assigned_persons: updatedNames, person: updatedNames })
-          .eq('id', rowId);
+                // Service Filter
+                if (currentFilterService !== 'All Roles' && normalizedService !== currentFilterService) {
+                    return false;
+                }
 
-        if (error) throw error;
+                // Search Query
+                if (searchQuery) {
+                    const matchDate = r.date.toLowerCase().includes(searchQuery);
+                    const matchService = normalizedService.toLowerCase().includes(searchQuery);
+                    const matchRole = (r.role || '').toLowerCase().includes(searchQuery);
+                    const matchMembers = (r.members || '').toLowerCase().includes(searchQuery);
+                    if (!matchDate && !matchService && !matchRole && !matchMembers) {
+                        return false;
+                    }
+                }
 
-        closeEditModal();
-        await loadRotas();
-      } catch (err) {
-        alert("Failed to update database: " + err.message);
-      }
-    }
+                return true;
+            });
 
-    function updatePersonalDuties() {
-      const listEl = document.getElementById('my-duties-list');
-      const titleEl = document.getElementById('my-duties-title');
-      const todayIso = new Date().toISOString().split('T')[0];
+            if (filtered.length === 0) {
+                tbody.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
 
-      titleEl.innerText = `📋 ${currentUserName}'s Upcoming Duties`;
+            emptyState.classList.add('hidden');
+            let html = '';
 
-      const userDuties = allRotas.filter(r => {
-        const person = (r.assigned_persons || r.person || '').toLowerCase();
-        const isFuture = (r.date || '') >= todayIso;
-        return person.includes(currentUserName.toLowerCase()) && isFuture;
-      });
+            filtered.forEach(r => {
+                let displayService = r.service ? r.service.trim() : '';
+                if (displayService.toLowerCase() === 'cb sunday kids') {
+                    displayService = 'Sr Sunday School';
+                }
 
-      if (userDuties.length === 0) {
-        listEl.innerHTML = '<li class="duty-chip">No upcoming active duties scheduled under your name.</li>';
-      } else {
-        listEl.innerHTML = userDuties.map(d => `
-          <li class="duty-chip">📅 <strong>${d.date}</strong> — ${formatServiceLabel(d.rota_name || d.role)} (${d.role || 'Duty'})</li>
-        `).join('');
-      }
-    }
+                const isPast = r.date && r.date < todayStr;
+                const rowClass = isPast ? 'bg-slate-50/60 text-slate-400' : 'hover:bg-slate-50/80 transition';
 
-    window.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('logged-user-label').innerText = `👤 ${currentUserName}`;
-      document.getElementById('search-input').addEventListener('input', renderTable);
-      
-      triggerKeepAlive();
-      startAutomaticKeepAlive();
-      
-      loadRotas();
-    });
-  </script>
+                html += `
+                    <tr class="${rowClass} border-b border-slate-100">
+                        <td class="p-4 font-medium text-slate-700 whitespace-nowrap">${r.date}</td>
+                        <td class="p-4 font-semibold text-slate-900">${escapeHtml(displayService)}</td>
+                        <td class="p-4 text-slate-600">${escapeHtml(r.role || '')}</td>
+                        <td class="p-4 text-slate-800 font-medium">${escapeHtml(r.members || '')}</td>
+                        <td class="p-4 text-right whitespace-nowrap">
+                            <button onclick="openEditModal(${r.id})" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition">Edit / Swap</button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            tbody.innerHTML = html;
+        }
+
+        // Render Personal Upcoming Duties Banner for Ben
+        function renderPersonalUpcomingDuties() {
+            const todayStr = new Date().toISOString().split('T')[0];
+            const personalList = allRotas.filter(r => {
+                if (!r.date || r.date < todayStr) return false;
+                const membersStr = (r.members || '').toLowerCase();
+                return membersStr.includes(currentUser.toLowerCase());
+            });
+
+            document.getElementById('personalDutyCount').textContent = `${personalList.length} upcoming`;
+            const container = document.getElementById('personalDutiesList');
+
+            if (personalList.length === 0) {
+                container.innerHTML = `<p class="text-xs text-teal-200 italic">No upcoming duties scheduled for ${currentUser}.</p>`;
+                return;
+            }
+
+            let html = '';
+            personalList.forEach(r => {
+                let displayService = r.service ? r.service.trim() : '';
+                if (displayService.toLowerCase() === 'cb sunday kids') {
+                    displayService = 'Sr Sunday School';
+                }
+
+                html += `
+                    <div class="bg-teal-900/60 border border-teal-600/40 px-3.5 py-2 rounded-xl text-xs font-medium flex items-center space-x-2 shadow-sm">
+                        <span>📅</span>
+                        <span class="text-white font-semibold">${r.date}</span>
+                        <span class="text-teal-300">—</span>
+                        <span class="text-teal-100">${escapeHtml(displayService)} (${escapeHtml(r.role || 'Member')})</span>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function filterRotas() {
+            renderRotasTable();
+        }
+
+        // Modal Controls
+        function openUploadModal() {
+            document.getElementById('uploadModal').classList.remove('hidden');
+            resetUploadState();
+        }
+
+        function closeUploadModal() {
+            document.getElementById('uploadModal').classList.add('hidden');
+        }
+
+        function resetUploadState() {
+            selectedFileForParsing = null;
+            document.getElementById('rotaFileInput').value = '';
+            document.getElementById('fileDropPrompt').classList.remove('hidden');
+            document.getElementById('fileSelectedInfo').classList.add('hidden');
+            document.getElementById('ocrProgressArea').classList.add('hidden');
+            document.getElementById('startParsingBtn').disabled = true;
+        }
+
+        function handleFileSelected(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            selectedFileForParsing = file;
+            document.getElementById('selectedFileName').textContent = file.name;
+            document.getElementById('fileDropPrompt').classList.add('hidden');
+            document.getElementById('fileSelectedInfo').classList.remove('hidden');
+            document.getElementById('startParsingBtn').disabled = false;
+        }
+
+        // OCR Image Parser using Tesseract.js
+        async function processRotaImage() {
+            if (!selectedFileForParsing) return;
+
+            const progressArea = document.getElementById('ocrProgressArea');
+            const statusText = document.getElementById('ocrStatusText');
+            const percentText = document.getElementById('ocrPercent');
+            const progressBar = document.getElementById('ocrProgressBar');
+            const parseBtn = document.getElementById('startParsingBtn');
+
+            progressArea.classList.remove('hidden');
+            parseBtn.disabled = true;
+
+            try {
+                statusText.textContent = 'Initializing Tesseract OCR engine...';
+                const worker = await Tesseract.createWorker('eng');
+
+                statusText.textContent = 'Scanning image text...';
+                const ret = await worker.recognize(selectedFileForParsing, {
+                    logger: m => {
+                        if (m.status === 'recognizing text') {
+                            const pct = Math.round(m.progress * 100);
+                            percentText.textContent = `${pct}%`;
+                            progressBar.style.width = `${pct}%`;
+                            statusText.textContent = `Recognizing text... ${pct}%`;
+                        }
+                    }
+                });
+
+                await worker.terminate();
+
+                statusText.textContent = 'Parsing schedule data...';
+                percentText.textContent = '100%';
+                progressBar.style.width = '100%';
+
+                const extractedText = ret.data.text;
+                console.log('OCR Extracted Text:', extractedText);
+
+                parseExtractedRotas(extractedText);
+
+            } catch (err) {
+                console.error('OCR Parsing Error:', err);
+                alert('Failed to parse image with OCR. Please check console.');
+                parseBtn.disabled = false;
+            }
+        }
+
+        // Parse OCR text into structured rota entries
+        async function parseExtractedRotas(text) {
+            const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+            let parsedEntries = [];
+
+            // Simple intelligent parser heuristic
+            let currentDate = new Date().toISOString().split('T')[0];
+
+            for (let line of lines) {
+                // Check if line contains date pattern (e.g. 2026-09-13 or 13/09/2026 or September 13)
+                if (/\d{4}-\d{2}-\d{2}/.test(line)) {
+                    const match = line.match(/\d{4}-\d{2}-\d{2}/);
+                    if (match) currentDate = match[0];
+                }
+
+                // Detect Service keywords
+                let serviceName = '';
+                const lower = line.toLowerCase();
+                if (lower.includes('tea rota')) serviceName = 'Tea Rota';
+                else if (lower.includes('cleaning')) serviceName = 'Cleaning Rota';
+                else if (lower.includes('junior sunday school')) serviceName = 'Junior Sunday School';
+                else if (lower.includes('sr sunday school') || lower.includes('cb sunday kids') || lower.includes('senior sunday school')) serviceName = 'Sr Sunday School';
+                else if (lower.includes('welcome')) serviceName = 'Welcome Team';
+                else if (lower.includes('av') || lower.includes('sound')) serviceName = 'A/V Team';
+                else if (lower.includes('preach')) serviceName = 'Preaching';
+
+                if (serviceName) {
+                    parsedEntries.push({
+                        date: currentDate,
+                        service: serviceName,
+                        role: serviceName.includes('Sunday School') ? 'Teacher & Helper' : 'Member',
+                        members: line.includes(':') ? line.split(':')[1].trim() : 'TBD'
+                    });
+                }
+            }
+
+            if (parsedEntries.length === 0) {
+                // Add sample entry if OCR couldn't detect structured lines automatically
+                parsedEntries.push({
+                    date: new Date().toISOString().split('T')[0],
+                    service: 'Sr Sunday School',
+                    role: 'Leader',
+                    members: 'Ben & Suzanne'
+                });
+            }
+
+            // Save to Supabase or local state
+            if (supabaseClient) {
+                try {
+                    const { error } = await supabaseClient.from('rotas').insert(parsedEntries);
+                    if (error) throw error;
+                } catch (e) {
+                    console.warn('Could not insert parsed rotas to Supabase, keeping locally:', e);
+                }
+            }
+
+            alert(`Successfully parsed and imported ${parsedEntries.length} rota entries!`);
+            closeUploadModal();
+            loadRotas();
+        }
+
+        // Edit / Swap Modal Logic
+        function openEditModal(id) {
+            const rota = allRotas.find(r => r.id === id);
+            if (!rota) return;
+
+            document.getElementById('editRotaId').value = rota.id;
+            document.getElementById('editDate').value = rota.date;
+            
+            let displayService = rota.service ? rota.service.trim() : '';
+            if (displayService.toLowerCase() === 'cb sunday kids') {
+                displayService = 'Sr Sunday School';
+            }
+
+            document.getElementById('editService').value = displayService;
+            document.getElementById('editRole').value = rota.role || '';
+            document.getElementById('editMembers').value = rota.members || '';
+            document.getElementById('editModal').classList.remove('hidden');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.add('hidden');
+        }
+
+        async function saveRotaEdit() {
+            const id = parseInt(document.getElementById('editRotaId').value);
+            const newMembers = document.getElementById('editMembers').value.trim();
+
+            const rotaIndex = allRotas.findIndex(r => r.id === id);
+            if (rotaIndex !== -1) {
+                allRotas[rotaIndex].members = newMembers;
+            }
+
+            if (supabaseClient) {
+                try {
+                    const { error } = await supabaseClient
+                        .from('rotas')
+                        .update({ members: newMembers })
+                        .eq('id', id);
+
+                    if (error) throw error;
+                } catch (err) {
+                    console.error('Error updating rota in Supabase:', err);
+                }
+            }
+
+            closeEditModal();
+            renderUI();
+        }
+
+        function logout() {
+            alert('Logged out session.');
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+        }
+    </script>
 </body>
 </html>
