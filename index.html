@@ -343,7 +343,8 @@
       <h1>CBC Rotas</h1>
       <p class="subtitle">Craigavon Baptist Church Rota Management</p>
 
-      <form id="login-form" autocomplete="off">
+      <!-- Explicit inline submit trigger so it CANNOT fail to respond -->
+      <form id="login-form" onsubmit="handleLogin(event)" autocomplete="off">
         <div class="form-group">
           <label for="user-name">Your Name</label>
           <input type="text" id="user-name" name="visitor_name" autocomplete="off" placeholder="Enter your full name" required>
@@ -375,7 +376,7 @@
       <div class="user-badge">
         <span><span class="status-ping"></span>Live Sync</span>
         <div class="user-name-tag" id="logged-user-label">Logged In</div>
-        <button class="btn-logout" id="logout-btn">Logout</button>
+        <button class="btn-logout" id="logout-btn" onclick="handleLogout()">Logout</button>
       </div>
     </div>
 
@@ -400,7 +401,7 @@
         </select>
       </div>
       <div>
-        <button class="btn btn-accent" id="refresh-btn">Refresh Schedule</button>
+        <button class="btn btn-accent" id="refresh-btn" onclick="loadRotas()">Refresh Schedule</button>
       </div>
     </div>
 
@@ -431,14 +432,14 @@
       <h3 style="margin-bottom:1rem; color:var(--primary);">Edit Assignment</h3>
       <p id="modal-details" style="font-size:0.9rem; color:var(--text-muted); margin-bottom:1rem;"></p>
       
-      <form id="edit-form">
+      <form id="edit-form" onsubmit="handleEditSubmit(event)">
         <input type="hidden" id="modal-rota-id">
         <div class="form-group">
           <label for="modal-assigned">Assigned Member(s)</label>
           <input type="text" id="modal-assigned" required>
         </div>
         <div class="modal-actions">
-          <button type="button" class="btn" style="background:#cbd5e0; color:#2d3748;" id="modal-cancel">Cancel</button>
+          <button type="button" class="btn" style="background:#cbd5e0; color:#2d3748;" id="modal-cancel" onclick="closeEditModal()">Cancel</button>
           <button type="submit" class="btn">Save Assignment</button>
         </div>
       </form>
@@ -472,11 +473,25 @@
       
       // Ping database every 4 minutes to prevent cold starts
       setInterval(pingDatabase, 240000);
+
+      // Attach search listeners
+      const searchInput = document.getElementById('search-input');
+      if (searchInput) {
+        searchInput.addEventListener('input', () => {
+          renderTable();
+          updatePersonalDuties();
+        });
+      }
+
+      const roleFilter = document.getElementById('role-filter');
+      if (roleFilter) {
+        roleFilter.addEventListener('change', renderTable);
+      }
     });
 
-    // --- AUTHENTICATION HANDLERS ---
-    document.getElementById('login-form').addEventListener('submit', function(e) {
-      e.preventDefault();
+    // --- DIRECT LOGIN HANDLER ---
+    function handleLogin(event) {
+      if (event) event.preventDefault();
 
       const userName = document.getElementById('user-name').value.trim();
       const enteredPasscode = document.getElementById('passcode').value.trim();
@@ -488,7 +503,7 @@
         return;
       }
 
-      // Verify Secret Passcode
+      // Verify Passcode
       if (enteredPasscode !== SECRET_PASSCODE) {
         errorBox.innerText = "Incorrect passcode. Please try again.";
         errorBox.style.display = "block";
@@ -498,14 +513,14 @@
       errorBox.style.display = "none";
       sessionStorage.setItem('cbc_user_name', userName);
       showDashboard(userName);
-    });
+    }
 
-    document.getElementById('logout-btn').addEventListener('click', () => {
+    function handleLogout() {
       sessionStorage.removeItem('cbc_user_name');
       document.getElementById('app-container').style.display = 'none';
       document.getElementById('login-container').style.display = 'flex';
       document.getElementById('passcode').value = '';
-    });
+    }
 
     function showDashboard(userName) {
       document.getElementById('login-container').style.display = 'none';
@@ -522,7 +537,7 @@
 
       const client = getSupabase();
       if (!client) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:red; padding:20px;">Database connection library failed to load. Please refresh the page or check your internet connection.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:red; padding:20px;">Database library is initializing or blocked by browser extensions. Try reloading page.</td></tr>';
         return;
       }
 
@@ -637,12 +652,12 @@
       document.getElementById('edit-modal').style.display = 'flex';
     };
 
-    document.getElementById('modal-cancel').addEventListener('click', () => {
+    function closeEditModal() {
       document.getElementById('edit-modal').style.display = 'none';
-    });
+    }
 
-    document.getElementById('edit-form').addEventListener('submit', async function(e) {
-      e.preventDefault();
+    async function handleEditSubmit(event) {
+      if (event) event.preventDefault();
       const id = document.getElementById('modal-rota-id').value;
       const newAssigned = document.getElementById('modal-assigned').value.trim();
 
@@ -657,19 +672,10 @@
       if (error) {
         alert("Failed to update assignment: " + error.message);
       } else {
-        document.getElementById('edit-modal').style.display = 'none';
+        closeEditModal();
         loadRotas();
       }
-    });
-
-    // --- CONTROLS LISTENERS ---
-    document.getElementById('search-input').addEventListener('input', () => {
-      renderTable();
-      updatePersonalDuties();
-    });
-
-    document.getElementById('role-filter').addEventListener('change', renderTable);
-    document.getElementById('refresh-btn').addEventListener('click', loadRotas);
+    }
 
     // --- BACKGROUND CONNECTION PINGER ---
     async function pingDatabase() {
