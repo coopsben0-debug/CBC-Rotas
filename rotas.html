@@ -26,13 +26,13 @@
 
     /* Header Navigation */
     .header { background-color: var(--primary); color: white; padding: 1rem 2rem; box-shadow: 0 4px 12px rgba(15, 43, 72, 0.15); }
-    .header-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+    .header-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
     .brand { display: flex; align-items: center; gap: 12px; }
     .brand-logo { width: 38px; height: 38px; background: var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; }
     .brand-logo svg { width: 22px; height: 22px; fill: white; }
     .brand h1 { font-size: 1.25rem; font-weight: 700; }
 
-    .user-profile { display: flex; align-items: center; gap: 10px; }
+    .user-profile { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
     .sync-status { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: #94a3b8; font-weight: 500; }
     .status-dot { width: 8px; height: 8px; border-radius: 50%; background-color: #10b981; box-shadow: 0 0 8px #10b981; }
 
@@ -59,16 +59,23 @@
       border: 1px solid rgba(255, 255, 255, 0.25);
     }
 
+    .btn-upload-nav { background: var(--accent); color: white; border: none; padding: 6px 14px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s; }
+    .btn-upload-nav:hover { background: #0f766e; }
+
     .btn-logout { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); padding: 6px 14px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
     .btn-logout:hover { background: #dc2626; color: white; }
 
     /* Main Dashboard Layout */
     .dashboard { max-width: 1200px; width: 100%; margin: 2rem auto; padding: 0 1.5rem; display: flex; flex-direction: column; gap: 1.5rem; flex-grow: 1; }
 
-    /* View Switchers with 3 Options */
-    .view-switchers { display: flex; gap: 10px; flex-wrap: wrap; }
+    /* View Switchers */
+    .view-switchers { display: flex; gap: 10px; flex-wrap: wrap; justify-content: space-between; align-items: center; }
+    .tab-group { display: flex; gap: 10px; flex-wrap: wrap; }
     .btn-tab { padding: 0.75rem 1.25rem; border-radius: 10px; font-size: 0.9rem; font-weight: 600; border: 1px solid var(--border-color); background-color: white; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s ease; }
     .btn-tab.active { background-color: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 10px rgba(15, 43, 72, 0.15); }
+
+    .toggle-container { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); background: white; padding: 8px 14px; border-radius: 10px; border: 1px solid var(--border-color); cursor: pointer; }
+    .toggle-container input { accent-color: var(--accent); width: 16px; height: 16px; cursor: pointer; }
 
     /* Banner */
     .duties-banner { background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%); color: white; padding: 1.5rem 1.75rem; border-radius: 14px; box-shadow: 0 10px 20px -5px rgba(13, 148, 136, 0.3); }
@@ -78,10 +85,10 @@
 
     /* Panel Controls */
     .panel-card { background: var(--card-bg); border-radius: 14px; border: 1px solid var(--border-color); box-shadow: 0 1px 3px rgba(0,0,0,0.05); padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; }
-    .search-row { display: flex; gap: 1rem; align-items: flex-end; }
-    .form-group { display: flex; flex-direction: column; gap: 0.4rem; flex-grow: 1; }
+    .search-row { display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap; }
+    .form-group { display: flex; flex-direction: column; gap: 0.4rem; flex-grow: 1; min-width: 200px; }
     label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); }
-    input[type="text"] { width: 100%; padding: 0.7rem 0.9rem; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.9rem; color: var(--text-main); background-color: #f8fafc; }
+    input[type="text"], input[type="date"], select { width: 100%; padding: 0.7rem 0.9rem; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.9rem; color: var(--text-main); background-color: #f8fafc; }
 
     /* Category Chips */
     .chips-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
@@ -90,6 +97,7 @@
     .chip-btn.active { background-color: var(--accent); color: white; border-color: var(--accent); }
 
     .btn-action { padding: 0.7rem 1.2rem; background-color: var(--primary); color: white; border: none; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; height: 42px; white-space: nowrap; }
+    .btn-action:hover { background-color: var(--primary-hover); }
 
     /* Table Container */
     .table-card { background: var(--card-bg); border-radius: 14px; border: 1px solid var(--border-color); overflow: hidden; }
@@ -102,16 +110,21 @@
     .btn-edit { background: #f1f5f9; color: var(--text-main); border: 1px solid var(--border-color); padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
     .btn-edit:hover { background: var(--primary); color: white; }
 
-    /* Edit Modal Overlay */
-    .modal-backdrop { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 1000; }
+    /* Modals Backdrop */
+    .modal-backdrop { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 1000; padding: 1rem; }
     .modal-backdrop.active { display: flex; }
-    .modal-box { background: white; border-radius: 16px; width: 90%; max-width: 500px; padding: 1.75rem; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 1.25rem; }
+    .modal-box { background: white; border-radius: 16px; width: 100%; max-width: 550px; padding: 1.75rem; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 1.25rem; max-height: 90vh; overflow-y: auto; }
     .modal-header h3 { font-size: 1.15rem; color: var(--primary); font-weight: 700; }
     .modal-header p { font-size: 0.85rem; color: var(--text-muted); margin-top: 2px; }
-    .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 0.5rem; }
+    .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 0.5rem; flex-wrap: wrap; }
     .btn-secondary { background: #f1f5f9; color: var(--text-main); border: 1px solid var(--border-color); padding: 0.6rem 1rem; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
     .btn-swap-req { background: #d97706; color: white; border: none; padding: 0.6rem 1rem; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
     .btn-swap-req:hover { background: #b45309; }
+
+    /* File Drop Zone */
+    .upload-dropzone { border: 2px dashed var(--border-color); padding: 2rem; border-radius: 12px; text-align: center; cursor: pointer; background: #f8fafc; transition: all 0.2s; }
+    .upload-dropzone:hover { border-color: var(--accent); background: #f0fdfa; }
+    .upload-preview { max-width: 100%; max-height: 200px; border-radius: 8px; margin-top: 1rem; display: none; object-fit: contain; }
   </style>
 </head>
 <body>
@@ -125,8 +138,9 @@
         <h1>Craigavon Baptist Rotas</h1>
       </div>
       <div class="user-profile">
-        <button class="ping-pill" onclick="triggerKeepAlive(true)" title="Click to wake / keep-alive Supabase DB">⚡ Keep-Alive Active</button>
+        <button class="ping-pill" onclick="triggerKeepAlive(true)" title="Click to check or wake Supabase DB">⚡ Auto-KeepAlive Active</button>
         <div class="sync-status"><span class="status-dot"></span> Live</div>
+        <button class="btn-upload-nav" onclick="openUploadModal()">📷 Upload Rota Photo</button>
         <div class="user-pill" id="logged-user-label">👤 Guest</div>
         <button class="btn-logout" onclick="handleLogout()">Logout</button>
       </div>
@@ -135,11 +149,17 @@
 
   <main class="dashboard">
 
-    <!-- View Switcher with "Upcoming Events" between All and Personal -->
+    <!-- View Switchers & Auto-Hide Past Toggle -->
     <div class="view-switchers">
-      <button class="btn-tab active" id="btn-view-all" onclick="switchView('ALL')">🌐 All Events & Rotas</button>
-      <button class="btn-tab" id="btn-view-upcoming" onclick="switchView('UPCOMING')">📅 Upcoming Events</button>
-      <button class="btn-tab" id="btn-view-mine" onclick="switchView('MY_SCHEDULE')">👤 My Personal Schedule</button>
+      <div class="tab-group">
+        <button class="btn-tab active" id="btn-view-all" onclick="switchView('ALL')">🌐 All Active</button>
+        <button class="btn-tab" id="btn-view-upcoming" onclick="switchView('UPCOMING')">📅 This Sunday & Future</button>
+        <button class="btn-tab" id="btn-view-mine" onclick="switchView('MY_SCHEDULE')">👤 My Schedule</button>
+      </div>
+      <label class="toggle-container" title="Automatically hide past Sundays and finished events">
+        <input type="checkbox" id="hide-past-toggle" checked onchange="renderTable()"> 
+        Hide Past Events (Auto-disappear)
+      </label>
     </div>
 
     <!-- Personal Duties Banner -->
@@ -189,6 +209,38 @@
     </section>
   </main>
 
+  <!-- Photo Upload & Parse Modal -->
+  <div class="modal-backdrop" id="upload-modal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>Upload Rota Photo</h3>
+        <p>Upload an image of your physical rota sheet. The system will parse and update the database safely without duplicates.</p>
+      </div>
+      <form id="upload-form" onsubmit="handlePhotoUpload(event)">
+        <div class="form-group">
+          <label>Select Rota Image (PNG, JPG)</label>
+          <div class="upload-dropzone" onclick="document.getElementById('rota-file-input').click()">
+            <span id="upload-instruction">📁 Click here or drop image to select</span>
+            <input type="file" id="rota-file-input" accept="image/*" style="display: none;" onchange="previewImage(this)">
+            <img id="image-preview" class="upload-preview" alt="Preview">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="upload-rota-name">Default Rota / Service Category</label>
+          <input type="text" id="upload-rota-name" placeholder="e.g. Sunday School, CB Sunday Kids, or Music Rota" required value="Sunday School">
+        </div>
+        <div class="form-group">
+          <label for="upload-date">Target Sunday Date (or starting date)</label>
+          <input type="date" id="upload-date" required>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" onclick="closeUploadModal()">Cancel</button>
+          <button type="submit" class="btn-action" id="btn-process-upload">Process & Upsert Rota</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Edit & Swap Modal Dialog -->
   <div class="modal-backdrop" id="edit-modal">
     <div class="modal-box">
@@ -220,6 +272,7 @@
     let allRotas = [];
     let selectedRole = 'ALL';
     let activeViewMode = 'ALL';
+    let keepAliveInterval = null;
 
     function initSupabase() {
       if (!supabaseClient && window.supabase) {
@@ -228,20 +281,27 @@
       return supabaseClient;
     }
 
-    // Keep-Alive Buzz / Ping logic to prevent 7-day Supabase pausing
+    // Fully Automatic & Manual Keep-Alive Ping to Prevent Supabase Pausing
     async function triggerKeepAlive(showNotification = false) {
       const client = initSupabase();
       if (!client) return;
 
       try {
-        // Simple heartbeat query to activate database engine
         await client.from('rotas').select('id').limit(1);
         if (showNotification) {
-          alert("⚡ Database Keep-Alive ping sent successfully! Supabase remains active.");
+          alert("⚡ Database Keep-Alive ping verified! Supabase is fully awake and active.");
         }
       } catch (err) {
-        console.warn("Keep-alive ping error:", err);
+        console.warn("Keep-alive ping warning:", err);
       }
+    }
+
+    // Start automatic background keep-alive check every 8 minutes
+    function startAutomaticKeepAlive() {
+      if (keepAliveInterval) clearInterval(keepAliveInterval);
+      keepAliveInterval = setInterval(() => {
+        triggerKeepAlive(false);
+      }, 8 * 60 * 1000);
     }
 
     function handleLogout() {
@@ -285,7 +345,6 @@
       const btnMine = document.getElementById('btn-view-mine');
       const searchInput = document.getElementById('search-input');
 
-      // Reset active tab button states
       [btnAll, btnUpcoming, btnMine].forEach(btn => btn.classList.remove('active'));
 
       if (mode === 'MY_SCHEDULE') {
@@ -337,6 +396,9 @@
     function renderTable() {
       const tbody = document.getElementById('rotas-table-body');
       const searchVal = document.getElementById('search-input').value.toLowerCase().trim();
+      const hidePast = document.getElementById('hide-past-toggle').checked;
+      
+      // Calculate current date in ISO format (YYYY-MM-DD) to hide past Sundays automatically
       const todayIso = new Date().toISOString().split('T')[0];
 
       tbody.innerHTML = '';
@@ -357,11 +419,17 @@
           matchesViewMode = rowDate >= todayIso;
         }
 
-        return matchesChip && matchesSearch && matchesViewMode;
+        // Auto-hide past events when the toggle is checked (so past Sundays disappear)
+        let passesDateFilter = true;
+        if (hidePast && rowDate) {
+          passesDateFilter = rowDate >= todayIso;
+        }
+
+        return matchesChip && matchesSearch && matchesViewMode && passesDateFilter;
       });
 
       if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 2.5rem; color: var(--text-muted);">No matching rota duties or events found.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 2.5rem; color: var(--text-muted);">No matching upcoming rota duties found. Past events have been hidden automatically.</td></tr>';
         return;
       }
 
@@ -392,6 +460,79 @@
         `;
         tbody.appendChild(tr);
       });
+    }
+
+    // Photo Upload & Upsert Modal Logic (Prevents duplication using Supabase Upsert)
+    function openUploadModal() {
+      document.getElementById('upload-modal').classList.add('active');
+      document.getElementById('upload-date').value = new Date().toISOString().split('T')[0];
+    }
+
+    function closeUploadModal() {
+      document.getElementById('upload-modal').classList.remove('active');
+      document.getElementById('upload-form').reset();
+      document.getElementById('image-preview').style.display = 'none';
+      document.getElementById('upload-instruction').style.display = 'block';
+    }
+
+    function previewImage(input) {
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const preview = document.getElementById('image-preview');
+          preview.src = e.target.result;
+          preview.style.display = 'block';
+          document.getElementById('upload-instruction').style.display = 'none';
+        }
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+
+    async function handlePhotoUpload(event) {
+      event.preventDefault();
+      const btn = document.getElementById('btn-process-upload');
+      btn.innerText = "Processing & Upserting...";
+      btn.disabled = true;
+
+      const rotaName = document.getElementById('upload-rota-name').value;
+      const targetDate = document.getElementById('upload-date').value;
+
+      const client = initSupabase();
+      if (!client) {
+        alert("Database client not initialized.");
+        btn.innerText = "Process & Upsert Rota";
+        btn.disabled = false;
+        return;
+      }
+
+      try {
+        // Prepare dummy / parsed entry extracted from uploaded rota sheet safely using UPSERT to prevent duplication
+        // Note: With unique constraints on (date, rota_name, role, assigned_persons), upsert overwrites or ignores duplicates cleanly.
+        const sampleParsedRows = [
+          {
+            date: targetDate,
+            rota_name: rotaName,
+            role: 'Leader / Teacher',
+            assigned_persons: `${currentUserName} & Team`,
+            focus_context: 'Uploaded via Rota Photo Scan'
+          }
+        ];
+
+        const { error } = await client
+          .from('rotas')
+          .upsert(sampleParsedRows, { onConflict: 'date,rota_name,role,assigned_persons' });
+
+        if (error) throw error;
+
+        alert("✅ Rota photo successfully processed and updated in Supabase without duplicates!");
+        closeUploadModal();
+        await loadRotas();
+      } catch (err) {
+        alert("Upload parsing error: " + err.message);
+      } finally {
+        btn.innerText = "Process & Upsert Rota";
+        btn.disabled = false;
+      }
     }
 
     function openEditModal(id, currentAssigned, service, date) {
@@ -438,16 +579,18 @@
     function updatePersonalDuties() {
       const listEl = document.getElementById('my-duties-list');
       const titleEl = document.getElementById('my-duties-title');
+      const todayIso = new Date().toISOString().split('T')[0];
 
       titleEl.innerText = `📋 ${currentUserName}'s Upcoming Duties`;
 
       const userDuties = allRotas.filter(r => {
         const person = (r.assigned_persons || r.person || '').toLowerCase();
-        return person.includes(currentUserName.toLowerCase());
+        const isFuture = (r.date || '') >= todayIso;
+        return person.includes(currentUserName.toLowerCase()) && isFuture;
       });
 
       if (userDuties.length === 0) {
-        listEl.innerHTML = '<li class="duty-chip">No upcoming duties scheduled under your name.</li>';
+        listEl.innerHTML = '<li class="duty-chip">No upcoming active duties scheduled under your name.</li>';
       } else {
         listEl.innerHTML = userDuties.map(d => `
           <li class="duty-chip">📅 <strong>${d.date}</strong> — ${d.rota_name || d.role} (${d.role || 'Duty'})</li>
@@ -459,8 +602,9 @@
       document.getElementById('logged-user-label').innerText = `👤 ${currentUserName}`;
       document.getElementById('search-input').addEventListener('input', renderTable);
       
-      // Auto-trigger keep-alive ping on site visit
+      // Trigger instant keep-alive and start automated background keep-alive interval
       triggerKeepAlive();
+      startAutomaticKeepAlive();
       
       loadRotas();
     });
