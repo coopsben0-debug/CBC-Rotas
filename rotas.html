@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CBC Rotas - Schedule</title>
+  <!-- Supabase Client Library -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --bg-dark: #0f2b48;
+      --card-bg: #ffffff;
+      --primary: #0f2b48;
+      --primary-hover: #1a365d;
+      --accent: #38b2ac;
+      --accent-hover: #319795;
+      --text-main: #2d3748;
+      --text-muted: #718096;
+      --border-color: #e2e8f0;
+      --light-blue: #ebf8ff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .app-container {
+      max-width: 1100px;
+      width: 95%;
+      margin: 20px auto;
+      flex-grow: 1;
+    }
+
+    .navbar {
+      background: white;
+      padding: 1rem 1.5rem;
+      border-radius: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .navbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .navbar-brand h2 {
+      font-size: 1.25rem;
+      color: var(--primary);
+    }
+
+    .logo-badge {
+      width: 36px;
+      height: 36px;
+      background: var(--accent);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-badge svg {
+      width: 20px;
+      height: 20px;
+      fill: white;
+    }
+
+    .user-badge {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .user-name-tag {
+      background: var(--light-blue);
+      color: var(--primary);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+
+    .btn-logout {
+      background: #e53e3e;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    .controls-panel {
+      background: white;
+      padding: 1.25rem;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      align-items: end;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .form-group {
+      text-align: left;
+    }
+
+    label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #4a5568;
+      margin-bottom: 0.4rem;
+    }
+
+    input[type="text"], select {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #cbd5e0;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      background-color: var(--light-blue);
+      color: #2d3748;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 0.75rem;
+      background-color: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background-color: var(--accent-hover);
+    }
+
+    .my-duties-card {
+      background: #e6fffa;
+      border-left: 5px solid var(--accent);
+      padding: 1.25rem;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      color: #234e52;
+    }
+
+    .my-duties-card h3 {
+      font-size: 1.1rem;
+      margin-bottom: 8px;
+    }
+
+    .duties-list {
+      list-style-type: none;
+    }
+
+    .duties-list li {
+      padding: 4px 0;
+      font-size: 0.95rem;
+    }
+
+    .table-container {
+      background: white;
+      border-radius: 10px;
+      overflow-x: auto;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      margin-bottom: 30px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th {
+      background: #f7fafc;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 14px 16px;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.95rem;
+    }
+
+    tr:hover {
+      background-color: #f8fafc;
+    }
+
+    .highlight-row {
+      background-color: #e6fffa !important;
+      font-weight: 600;
+    }
+
+    .action-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    .status-ping {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: #48bb78;
+      margin-right: 6px;
+    }
+
+    /* Modal Styling */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 2rem;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 450px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    <div class="navbar">
+      <div class="navbar-brand">
+        <div class="logo-badge">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 2L4 7v13h16V7l-8-5zm6 16H6V8.5l6-3.75 6 3.75V18z"/>
+          </svg>
+        </div>
+        <h2>Craigavon Baptist Rotas</h2>
+      </div>
+      <div class="user-badge">
+        <span><span class="status-ping"></span>Live Sync</span>
+        <div class="user-name-tag" id="logged-user-label">Logged In</div>
+        <button class="btn-logout" onclick="handleLogout()">Logout</button>
+      </div>
+    </div>
+
+    <div class="my-duties-card">
+      <h3 id="my-duties-title">My Upcoming Rota Duties</h3>
+      <ul class="duties-list" id="my-duties-list">
+        <li>Loading schedule...</li>
+      </ul>
+    </div>
+
+    <div class="controls-panel">
+      <div class="form-group">
+        <label for="search-input">Search Volunteer / Name</label>
+        <input type="text" id="search-input" placeholder="Type a name to highlight..." autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label for="role-filter">Filter by Service / Role</label>
+        <select id="role-filter">
+          <option value="ALL">All Roles & Services</option>
+        </select>
+      </div>
+      <div>
+        <button class="btn" onclick="loadRotas()">Refresh Schedule</button>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Service / Time</th>
+            <th>Role</th>
+            <th>Assigned Person(s)</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="rotas-table-body">
+          <tr>
+            <td colspan="5" style="text-align:center; padding: 20px;">Fetching schedule from database...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Edit Assignment Modal -->
+  <div class="modal-overlay" id="edit-modal">
+    <div class="modal-content">
+      <h3 style="margin-bottom:1rem; color:var(--primary);">Edit Assignment</h3>
+      <p id="modal-details" style="font-size:0.9rem; color:var(--text-muted); margin-bottom:1rem;"></p>
+      
+      <form id="edit-form" onsubmit="handleEditSubmit(event); return false;">
+        <input type="hidden" id="modal-rota-id">
+        <div class="form-group">
+          <label for="modal-assigned">Assigned Member(s)</label>
+          <input type="text" id="modal-assigned" required>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn" style="background:#cbd5e0; color:#2d3748;" onclick="closeEditModal()">Cancel</button>
+          <button type="submit" class="btn" style="background:var(--primary);">Save Assignment</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Authentication Check
+    const currentUserName = localStorage.getItem('cbc_user_name');
+    if (!currentUserName) {
+      window.location.href = "index.html";
+    }
+
+    const SUPABASE_URL = "https://ojzwujpahfjmaeisnfez.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_87n6hxMnH7uZENhXmNaikw_fCVVQWqZ";
+
+    let supabase = null;
+    let allRotas = [];
+
+    function getSupabase() {
+      if (!supabase && window.supabase) {
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      }
+      return supabase;
+    }
+
+    function handleLogout() {
+      localStorage.removeItem('cbc_user_name');
+      window.location.href = "index.html";
+    }
+
+    async function loadRotas() {
+      const tbody = document.getElementById('rotas-table-body');
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 20px;">Fetching latest schedule...</td></tr>';
+
+      const client = getSupabase();
+      if (!client) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:red; padding:20px;">Database library initialization failed. Refresh page.</td></tr>';
+        return;
+      }
+
+      try {
+        const { data, error } = await client
+          .from('rotas')
+          .select('*')
+          .order('date', { ascending: true });
+
+        if (error) throw error;
+
+        allRotas = data || [];
+        populateRoleFilter(allRotas);
+        renderTable();
+        updatePersonalDuties();
+      } catch (err) {
+        console.error("Error loading rotas:", err);
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:red; padding:20px;">Unable to fetch rotas: ${err.message}</td></tr>`;
+      }
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('rotas-table-body');
+      const searchVal = document.getElementById('search-input').value.toLowerCase().trim();
+      const roleVal = document.getElementById('role-filter').value;
+
+      tbody.innerHTML = '';
+
+      const filtered = allRotas.filter(row => {
+        return (roleVal === 'ALL' || row.role === roleVal || row.service === roleVal);
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 20px;">No rota assignments found.</td></tr>';
+        return;
+      }
+
+      filtered.forEach(row => {
+        const tr = document.createElement('tr');
+        const assigned = row.assigned_persons || row.person || 'Unassigned';
+        
+        if (searchVal && assigned.toLowerCase().includes(searchVal)) {
+          tr.classList.add('highlight-row');
+        }
+
+        tr.innerHTML = `
+          <td><strong>${row.date || 'N/A'}</strong></td>
+          <td>${row.service || row.time || 'Sunday Service'}</td>
+          <td>${row.role || 'Volunteer'}</td>
+          <td>${assigned}</td>
+          <td>
+            <button class="action-btn" onclick="openEditModal(${row.id}, '${escapeHtml(row.role || '')}', '${escapeHtml(assigned)}')">Edit</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function updatePersonalDuties() {
+      const listEl = document.getElementById('my-duties-list');
+      const titleEl = document.getElementById('my-duties-title');
+
+      titleEl.innerText = `${currentUserName}'s Upcoming Duties`;
+
+      const userDuties = allRotas.filter(r => {
+        const person = (r.assigned_persons || r.person || '').toLowerCase();
+        return person.includes(currentUserName.toLowerCase());
+      });
+
+      if (userDuties.length === 0) {
+        listEl.innerHTML = '<li>No upcoming scheduled duties found for your name.</li>';
+      } else {
+        listEl.innerHTML = userDuties.map(d => `
+          <li>📅 <strong>${d.date}</strong> - ${d.role || 'Duty'} (${d.service || 'Service'})</li>
+        `).join('');
+      }
+    }
+
+    function populateRoleFilter(data) {
+      const roleFilter = document.getElementById('role-filter');
+      const roles = new Set();
+      
+      data.forEach(item => {
+        if (item.role) roles.add(item.role);
+      });
+
+      roleFilter.innerHTML = '<option value="ALL">All Roles & Services</option>';
+      roles.forEach(role => {
+        const opt = document.createElement('option');
+        opt.value = role;
+        opt.textContent = role;
+        roleFilter.appendChild(opt);
+      });
+    }
+
+    function openEditModal(id, role, currentAssigned) {
+      document.getElementById('modal-rota-id').value = id;
+      document.getElementById('modal-details').innerText = `Role: ${role}`;
+      document.getElementById('modal-assigned').value = currentAssigned;
+      document.getElementById('edit-modal').style.display = 'flex';
+    }
+
+    function closeEditModal() {
+      document.getElementById('edit-modal').style.display = 'none';
+    }
+
+    async function handleEditSubmit(event) {
+      event.preventDefault();
+      const id = document.getElementById('modal-rota-id').value;
+      const newAssigned = document.getElementById('modal-assigned').value.trim();
+
+      const client = getSupabase();
+      if (!client) return;
+
+      const { error } = await client
+        .from('rotas')
+        .update({ assigned_persons: newAssigned })
+        .eq('id', id);
+
+      if (error) {
+        alert("Failed to update assignment: " + error.message);
+      } else {
+        closeEditModal();
+        loadRotas();
+      }
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+    }
+
+    // Initialization
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('logged-user-label').innerText = currentUserName;
+      document.getElementById('search-input').value = currentUserName;
+
+      document.getElementById('search-input').addEventListener('input', () => {
+        renderTable();
+        updatePersonalDuties();
+      });
+
+      document.getElementById('role-filter').addEventListener('change', renderTable);
+
+      loadRotas();
+    });
+  </script>
+</body>
+</html>
