@@ -24,7 +24,7 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Inter', sans-serif; background-color: var(--bg-main); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; }
 
-    /* Top Navigation Bar */
+    /* Header Navigation */
     .header { background-color: var(--primary); color: white; padding: 1rem 2rem; box-shadow: 0 4px 12px rgba(15, 43, 72, 0.15); }
     .header-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
     .brand { display: flex; align-items: center; gap: 12px; }
@@ -32,14 +32,26 @@
     .brand-logo svg { width: 22px; height: 22px; fill: white; }
     .brand h1 { font-size: 1.25rem; font-weight: 700; }
 
-    .user-profile { display: flex; align-items: center; gap: 12px; }
+    .user-profile { display: flex; align-items: center; gap: 10px; }
     .sync-status { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: #94a3b8; font-weight: 500; }
     .status-dot { width: 8px; height: 8px; border-radius: 50%; background-color: #10b981; box-shadow: 0 0 8px #10b981; }
+
+    /* Keep-Alive Indicator Badge */
+    .ping-pill {
+      background: rgba(16, 185, 129, 0.2);
+      color: #6ee7b7;
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
 
     .user-pill {
       background: rgba(255, 255, 255, 0.18);
       backdrop-filter: blur(8px);
-      padding: 6px 16px;
+      padding: 6px 14px;
       border-radius: 20px;
       font-size: 0.85rem;
       font-weight: 600;
@@ -50,11 +62,11 @@
     .btn-logout { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); padding: 6px 14px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
     .btn-logout:hover { background: #dc2626; color: white; }
 
-    /* Dashboard Layout */
+    /* Main Dashboard Layout */
     .dashboard { max-width: 1200px; width: 100%; margin: 2rem auto; padding: 0 1.5rem; display: flex; flex-direction: column; gap: 1.5rem; flex-grow: 1; }
 
-    /* View Switcher Buttons */
-    .view-switchers { display: flex; gap: 10px; }
+    /* View Switchers with 3 Options */
+    .view-switchers { display: flex; gap: 10px; flex-wrap: wrap; }
     .btn-tab { padding: 0.75rem 1.25rem; border-radius: 10px; font-size: 0.9rem; font-weight: 600; border: 1px solid var(--border-color); background-color: white; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s ease; }
     .btn-tab.active { background-color: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 10px rgba(15, 43, 72, 0.15); }
 
@@ -64,7 +76,7 @@
     .duties-list { list-style: none; display: flex; flex-wrap: wrap; gap: 0.75rem; }
     .duty-chip { background: rgba(255, 255, 255, 0.18); backdrop-filter: blur(6px); padding: 8px 14px; border-radius: 8px; font-size: 0.9rem; border: 1px solid rgba(255, 255, 255, 0.2); }
 
-    /* Filter Controls Card */
+    /* Panel Controls */
     .panel-card { background: var(--card-bg); border-radius: 14px; border: 1px solid var(--border-color); box-shadow: 0 1px 3px rgba(0,0,0,0.05); padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; }
     .search-row { display: flex; gap: 1rem; align-items: flex-end; }
     .form-group { display: flex; flex-direction: column; gap: 0.4rem; flex-grow: 1; }
@@ -113,6 +125,7 @@
         <h1>Craigavon Baptist Rotas</h1>
       </div>
       <div class="user-profile">
+        <button class="ping-pill" onclick="triggerKeepAlive(true)" title="Click to wake / keep-alive Supabase DB">⚡ Keep-Alive Active</button>
         <div class="sync-status"><span class="status-dot"></span> Live</div>
         <div class="user-pill" id="logged-user-label">👤 Guest</div>
         <button class="btn-logout" onclick="handleLogout()">Logout</button>
@@ -122,11 +135,14 @@
 
   <main class="dashboard">
 
+    <!-- View Switcher with "Upcoming Events" between All and Personal -->
     <div class="view-switchers">
       <button class="btn-tab active" id="btn-view-all" onclick="switchView('ALL')">🌐 All Events & Rotas</button>
+      <button class="btn-tab" id="btn-view-upcoming" onclick="switchView('UPCOMING')">📅 Upcoming Events</button>
       <button class="btn-tab" id="btn-view-mine" onclick="switchView('MY_SCHEDULE')">👤 My Personal Schedule</button>
     </div>
 
+    <!-- Personal Duties Banner -->
     <section class="duties-banner" id="duties-banner">
       <h2 id="my-duties-title">📋 My Upcoming Rota Duties</h2>
       <ul class="duties-list" id="my-duties-list">
@@ -134,6 +150,7 @@
       </ul>
     </section>
 
+    <!-- Controls Panel -->
     <section class="panel-card">
       <div class="search-row">
         <div class="form-group">
@@ -151,6 +168,7 @@
       </div>
     </section>
 
+    <!-- Rota Data Table -->
     <section class="table-card">
       <table>
         <thead>
@@ -210,6 +228,22 @@
       return supabaseClient;
     }
 
+    // Keep-Alive Buzz / Ping logic to prevent 7-day Supabase pausing
+    async function triggerKeepAlive(showNotification = false) {
+      const client = initSupabase();
+      if (!client) return;
+
+      try {
+        // Simple heartbeat query to activate database engine
+        await client.from('rotas').select('id').limit(1);
+        if (showNotification) {
+          alert("⚡ Database Keep-Alive ping sent successfully! Supabase remains active.");
+        }
+      } catch (err) {
+        console.warn("Keep-alive ping error:", err);
+      }
+    }
+
     function handleLogout() {
       localStorage.removeItem('cbc_user_name');
       localStorage.removeItem('username');
@@ -247,16 +281,21 @@
     function switchView(mode) {
       activeViewMode = mode;
       const btnAll = document.getElementById('btn-view-all');
+      const btnUpcoming = document.getElementById('btn-view-upcoming');
       const btnMine = document.getElementById('btn-view-mine');
       const searchInput = document.getElementById('search-input');
 
+      // Reset active tab button states
+      [btnAll, btnUpcoming, btnMine].forEach(btn => btn.classList.remove('active'));
+
       if (mode === 'MY_SCHEDULE') {
         btnMine.classList.add('active');
-        btnAll.classList.remove('active');
         searchInput.value = currentUserName;
+      } else if (mode === 'UPCOMING') {
+        btnUpcoming.classList.add('active');
+        searchInput.value = '';
       } else {
         btnAll.classList.add('active');
-        btnMine.classList.remove('active');
         searchInput.value = '';
       }
       renderTable();
@@ -298,6 +337,7 @@
     function renderTable() {
       const tbody = document.getElementById('rotas-table-body');
       const searchVal = document.getElementById('search-input').value.toLowerCase().trim();
+      const todayIso = new Date().toISOString().split('T')[0];
 
       tbody.innerHTML = '';
 
@@ -305,16 +345,23 @@
         const rotaName = row.rota_name || row.service || '';
         const roleName = row.role || '';
         const assigned = (row.assigned_persons || row.person || '').toLowerCase();
+        const rowDate = row.date || '';
 
         const matchesChip = (selectedRole === 'ALL' || rotaName === selectedRole || roleName === selectedRole);
         const matchesSearch = !searchVal || assigned.includes(searchVal) || rotaName.toLowerCase().includes(searchVal);
-        const matchesViewMode = (activeViewMode === 'ALL') || assigned.includes(currentUserName.toLowerCase());
+
+        let matchesViewMode = true;
+        if (activeViewMode === 'MY_SCHEDULE') {
+          matchesViewMode = assigned.includes(currentUserName.toLowerCase());
+        } else if (activeViewMode === 'UPCOMING') {
+          matchesViewMode = rowDate >= todayIso;
+        }
 
         return matchesChip && matchesSearch && matchesViewMode;
       });
 
       if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 2.5rem; color: var(--text-muted);">No matching rota duties found.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 2.5rem; color: var(--text-muted);">No matching rota duties or events found.</td></tr>';
         return;
       }
 
@@ -411,6 +458,10 @@
     window.addEventListener('DOMContentLoaded', () => {
       document.getElementById('logged-user-label').innerText = `👤 ${currentUserName}`;
       document.getElementById('search-input').addEventListener('input', renderTable);
+      
+      // Auto-trigger keep-alive ping on site visit
+      triggerKeepAlive();
+      
       loadRotas();
     });
   </script>
