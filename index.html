@@ -1,1708 +1,193 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CBC Rotas - Craigavon Baptist Church</title>
-    <!-- Supabase JS Client -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        /* ==========================================================================
-           1. DESIGN SYSTEM & CRAIGAVON BAPTIST COLOR PALETTE
-           ========================================================================== */
-        :root {
-            /* Brand Colors */
-            --cbc-navy-dark: #091e36;
-            --cbc-navy: #0e2a47;
-            --cbc-navy-light: #183b61;
-            --cbc-blue: #0284c7;
-            --cbc-blue-hover: #0369a1;
-            --cbc-gold: #f59e0b;
-            --cbc-gold-hover: #d97706;
-            --cbc-teal: #0d9488;
-            
-            /* Neutral Tones */
-            --bg-main: #f1f5f9;
-            --card-bg: #ffffff;
-            --text-dark: #0f172a;
-            --text-medium: #334155;
-            --text-muted: #64748b;
-            --border-light: #e2e8f0;
-            --border-medium: #cbd5e1;
-
-            /* Utility / State Colors */
-            --danger: #ef4444;
-            --danger-bg: #fef2f2;
-            --success: #10b981;
-            --success-bg: #ecfdf5;
-            --warning: #f59e0b;
-            --warning-bg: #fffbebf;
-
-            /* Elevation & Shadows */
-            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            
-            /* Typography & Border Radius */
-            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            --radius-sm: 6px;
-            --radius-md: 8px;
-            --radius-lg: 12px;
-            --radius-full: 9999px;
-        }
-
-        /* ==========================================================================
-           2. GLOBAL RESETS & BASE STYLES
-           ========================================================================== */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: var(--font-family);
-        }
-
-        body {
-            background-color: var(--bg-main);
-            color: var(--text-dark);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            line-height: 1.5;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        button, input, select, textarea {
-            font-family: inherit;
-            font-size: inherit;
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f5f9;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-
-        /* ==========================================================================
-           3. AUTHENTICATION / LOGIN SCREEN
-           ========================================================================== */
-        .login-wrapper {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            padding: 24px;
-            background: linear-gradient(135deg, var(--cbc-navy-dark) 0%, var(--cbc-navy) 60%, var(--cbc-navy-light) 100%);
-        }
-
-        .login-card {
-            background: var(--card-bg);
-            border-radius: var(--radius-lg);
-            padding: 40px;
-            width: 100%;
-            max-width: 460px;
-            box-shadow: var(--shadow-xl);
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .login-logo {
-            width: 96px;
-            height: 96px;
-            object-fit: contain;
-            margin-bottom: 20px;
-            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
-        }
-
-        .login-title {
-            font-size: 1.75rem;
-            font-weight: 800;
-            color: var(--cbc-navy);
-            letter-spacing: -0.025em;
-            margin-bottom: 4px;
-        }
-
-        .login-subtitle {
-            color: var(--text-muted);
-            font-size: 0.95rem;
-            margin-bottom: 28px;
-            font-weight: 500;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-            text-align: left;
-        }
-
-        .form-label {
-            display: block;
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin-bottom: 6px;
-            color: var(--text-medium);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 12px 16px;
-            border: 1px solid var(--border-medium);
-            border-radius: var(--radius-sm);
-            font-size: 0.95rem;
-            color: var(--text-dark);
-            background-color: #f8fafc;
-            transition: all 0.2s ease;
-        }
-
-        .form-control:focus {
-            outline: none;
-            border-color: var(--cbc-blue);
-            background-color: #ffffff;
-            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
-        }
-
-        textarea.form-control {
-            min-height: 140px;
-            resize: vertical;
-            line-height: 1.4;
-        }
-
-        /* ==========================================================================
-           4. BUTTONS & UI INTERACTIVES
-           ========================================================================== */
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            padding: 10px 20px;
-            border-radius: var(--radius-sm);
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            border: none;
-            transition: all 0.2s ease;
-            text-decoration: none;
-            white-space: nowrap;
-        }
-
-        .btn-block {
-            width: 100%;
-        }
-
-        .btn-primary {
-            background-color: var(--cbc-navy);
-            color: #ffffff;
-        }
-        .btn-primary:hover {
-            background-color: var(--cbc-navy-light);
-            box-shadow: var(--shadow-md);
-        }
-
-        .btn-accent {
-            background-color: var(--cbc-blue);
-            color: #ffffff;
-        }
-        .btn-accent:hover {
-            background-color: var(--cbc-blue-hover);
-            box-shadow: var(--shadow-md);
-        }
-
-        .btn-gold {
-            background-color: var(--cbc-gold);
-            color: #ffffff;
-        }
-        .btn-gold:hover {
-            background-color: var(--cbc-gold-hover);
-        }
-
-        .btn-secondary {
-            background-color: #e2e8f0;
-            color: var(--text-medium);
-        }
-        .btn-secondary:hover {
-            background-color: #cbd5e1;
-            color: var(--text-dark);
-        }
-
-        .btn-outline {
-            background-color: transparent;
-            border: 1px solid var(--border-medium);
-            color: var(--text-medium);
-        }
-        .btn-outline:hover {
-            background-color: #f8fafc;
-            border-color: var(--text-muted);
-            color: var(--text-dark);
-        }
-
-        .btn-danger {
-            background-color: var(--danger);
-            color: #ffffff;
-        }
-        .btn-danger:hover {
-            background-color: #dc2626;
-        }
-
-        .btn-sm {
-            padding: 6px 12px;
-            font-size: 0.85rem;
-        }
-
-        /* ==========================================================================
-           5. APP LAYOUT & HEADER (TOP LEFT LOGO)
-           ========================================================================== */
-        header.app-header {
-            background-color: var(--cbc-navy);
-            color: #ffffff;
-            padding: 14px 28px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: var(--shadow-md);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .header-brand {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .header-logo {
-            width: 48px;
-            height: 48px;
-            object-fit: contain;
-            background: #ffffff;
-            padding: 4px;
-            border-radius: var(--radius-sm);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-
-        .header-titles {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .header-app-title {
-            font-size: 1.35rem;
-            font-weight: 800;
-            letter-spacing: -0.02em;
-            line-height: 1.1;
-            color: #ffffff;
-        }
-
-        .header-church-name {
-            font-size: 0.825rem;
-            color: #94a3b8;
-            font-weight: 500;
-        }
-
-        .header-controls {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        /* Connection Pinger Badge */
-        .ping-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 6px 12px;
-            border-radius: var(--radius-full);
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: #e2e8f0;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-        }
-
-        .ping-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background-color: #64748b;
-            transition: background-color 0.3s ease;
-        }
-
-        .ping-dot.active {
-            background-color: var(--success);
-            box-shadow: 0 0 8px var(--success);
-            animation: pulse-ring 2s infinite;
-        }
-
-        .ping-dot.error {
-            background-color: var(--danger);
-            box-shadow: 0 0 8px var(--danger);
-        }
-
-        @keyframes pulse-ring {
-            0% { transform: scale(0.95); opacity: 0.8; }
-            50% { transform: scale(1.15); opacity: 1; }
-            100% { transform: scale(0.95); opacity: 0.8; }
-        }
-
-        /* ==========================================================================
-           6. NAVIGATION TABS BAR
-           ========================================================================== */
-        nav.nav-bar {
-            background-color: var(--card-bg);
-            border-bottom: 1px solid var(--border-light);
-            padding: 0 28px;
-            display: flex;
-            gap: 4px;
-            box-shadow: var(--shadow-sm);
-        }
-
-        .nav-tab {
-            padding: 14px 20px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            color: var(--text-muted);
-            border: none;
-            background: transparent;
-            cursor: pointer;
-            border-bottom: 3px solid transparent;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .nav-tab:hover {
-            color: var(--cbc-navy);
-            background-color: #f8fafc;
-        }
-
-        .nav-tab.active {
-            color: var(--cbc-blue);
-            border-bottom-color: var(--cbc-blue);
-            background-color: #ffffff;
-        }
-
-        /* ==========================================================================
-           7. MAIN CONTENT AREA & FILTER CONTROLS
-           ========================================================================== */
-        main.main-container {
-            max-width: 1280px;
-            margin: 0 auto;
-            padding: 28px;
-            width: 100%;
-            flex: 1;
-        }
-
-        .filter-panel {
-            background: var(--card-bg);
-            border: 1px solid var(--border-light);
-            border-radius: var(--radius-md);
-            padding: 20px;
-            margin-bottom: 24px;
-            box-shadow: var(--shadow-sm);
-            display: flex;
-            flex-wrap: wrap;
-            gap: 16px;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .search-group {
-            display: flex;
-            gap: 12px;
-            flex: 1;
-            min-width: 280px;
-        }
-
-        .filter-actions {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .badge-count {
-            background-color: #e0f2fe;
-            color: #0369a1;
-            font-size: 0.8rem;
-            font-weight: 700;
-            padding: 2px 8px;
-            border-radius: var(--radius-full);
-            margin-left: 6px;
-        }
-
-        /* View Toggle Switches */
-        .view-switch {
-            display: inline-flex;
-            background: #e2e8f0;
-            padding: 3px;
-            border-radius: var(--radius-sm);
-        }
-
-        .view-btn {
-            padding: 6px 12px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            border: none;
-            background: transparent;
-            color: var(--text-muted);
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .view-btn.active {
-            background: #ffffff;
-            color: var(--text-dark);
-            box-shadow: var(--shadow-sm);
-        }
-
-        /* ==========================================================================
-           8. ROTA CARDS & GRID SYSTEM
-           ========================================================================== */
-        .rota-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-            gap: 20px;
-        }
-
-        .rota-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-light);
-            border-radius: var(--radius-md);
-            box-shadow: var(--shadow-sm);
-            overflow: hidden;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .rota-card:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-            border-color: var(--border-medium);
-        }
-
-        .rota-card-header {
-            background: linear-gradient(to right, #f8fafc, #f1f5f9);
-            padding: 16px 20px;
-            border-bottom: 1px solid var(--border-light);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .rota-date-badge {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .rota-date-main {
-            font-size: 1.1rem;
-            font-weight: 800;
-            color: var(--cbc-navy);
-        }
-
-        .rota-date-sub {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            font-weight: 500;
-        }
-
-        .service-pill {
-            background-color: #e0f2fe;
-            color: #0369a1;
-            font-size: 0.75rem;
-            font-weight: 700;
-            padding: 4px 10px;
-            border-radius: var(--radius-full);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .service-pill.evening {
-            background-color: #fef3c7;
-            color: #b45309;
-        }
-
-        .service-pill.midweek {
-            background-color: #f3e8ff;
-            color: #6b21a8;
-        }
-
-        .rota-card-body {
-            padding: 20px;
-            flex: 1;
-        }
-
-        .role-list {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .role-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.9rem;
-            padding-bottom: 8px;
-            border-bottom: 1px dashed var(--border-light);
-        }
-
-        .role-item:last-child {
-            border-bottom: none;
-            padding-bottom: 0;
-        }
-
-        .role-title {
-            color: var(--text-muted);
-            font-weight: 600;
-            font-size: 0.85rem;
-        }
-
-        .role-assignee {
-            font-weight: 700;
-            color: var(--text-dark);
-            background: #f8fafc;
-            padding: 2px 8px;
-            border-radius: 4px;
-            border: 1px solid #f1f5f9;
-        }
-
-        .rota-card-footer {
-            padding: 12px 20px;
-            background-color: #fafafa;
-            border-top: 1px solid var(--border-light);
-            display: flex;
-            justify-content: flex-end;
-            gap: 8px;
-        }
-
-        /* Table View Display */
-        .table-wrapper {
-            background: var(--card-bg);
-            border: 1px solid var(--border-light);
-            border-radius: var(--radius-md);
-            overflow-x: auto;
-            box-shadow: var(--shadow-sm);
-        }
-
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-            font-size: 0.9rem;
-        }
-
-        .data-table th {
-            background: #f8fafc;
-            padding: 14px 18px;
-            font-weight: 700;
-            color: var(--text-medium);
-            border-bottom: 1px solid var(--border-medium);
-            white-space: nowrap;
-        }
-
-        .data-table td {
-            padding: 14px 18px;
-            border-bottom: 1px solid var(--border-light);
-            color: var(--text-dark);
-        }
-
-        .data-table tr:hover td {
-            background-color: #f8fafc;
-        }
-
-        /* ==========================================================================
-           9. MODALS & OVERLAYS (AI UPLOAD & EDIT)
-           ========================================================================== */
-        .modal-backdrop {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background-color: rgba(9, 30, 54, 0.65);
-            backdrop-filter: blur(4px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            padding: 20px;
-            opacity: 1;
-            transition: opacity 0.2s ease;
-        }
-
-        .modal-box {
-            background: var(--card-bg);
-            border-radius: var(--radius-lg);
-            width: 100%;
-            max-width: 640px;
-            box-shadow: var(--shadow-xl);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            max-height: 90vh;
-            border: 1px solid var(--border-light);
-        }
-
-        .modal-header {
-            padding: 20px 24px;
-            background: var(--cbc-navy);
-            color: #ffffff;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .modal-title {
-            font-size: 1.25rem;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .modal-close {
-            background: transparent;
-            border: none;
-            color: #cbd5e1;
-            font-size: 1.5rem;
-            cursor: pointer;
-            line-height: 1;
-            padding: 4px;
-            border-radius: var(--radius-sm);
-        }
-
-        .modal-close:hover {
-            color: #ffffff;
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .modal-body {
-            padding: 24px;
-            overflow-y: auto;
-            flex: 1;
-        }
-
-        .modal-footer {
-            padding: 16px 24px;
-            background: #f8fafc;
-            border-top: 1px solid var(--border-light);
-            display: flex;
-            justify-content: flex-end;
-            gap: 12px;
-        }
-
-        /* Status & Alert Alerts */
-        .alert {
-            padding: 12px 16px;
-            border-radius: var(--radius-sm);
-            font-size: 0.875rem;
-            font-weight: 500;
-            margin-top: 12px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .alert-error {
-            background-color: var(--danger-bg);
-            color: #991b1b;
-            border: 1px solid #fca5a5;
-        }
-
-        .alert-success {
-            background-color: var(--success-bg);
-            color: #065f46;
-            border: 1px solid #6ee7b7;
-        }
-
-        .alert-info {
-            background-color: #eff6ff;
-            color: #1e40af;
-            border: 1px solid #bfdbfe;
-        }
-
-        /* Dynamic Role Builder Rows */
-        .dynamic-role-row {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 10px;
-            align-items: center;
-        }
-
-        /* Empty State Graphic */
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            background: var(--card-bg);
-            border: 2px dashed var(--border-medium);
-            border-radius: var(--radius-md);
-            margin: 20px 0;
-        }
-
-        .empty-state-icon {
-            font-size: 3rem;
-            margin-bottom: 12px;
-            color: var(--text-muted);
-        }
-
-        .empty-state-title {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: var(--text-medium);
-            margin-bottom: 6px;
-        }
-
-        .empty-state-desc {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            max-width: 400px;
-            margin: 0 auto 20px auto;
-        }
-
-        /* ==========================================================================
-           10. PRINT STYLESHEET
-           ========================================================================== */
-        @media print {
-            header.app-header, nav.nav-bar, .filter-panel, .btn, .rota-card-footer, .modal-backdrop {
-                display: none !important;
-            }
-            body {
-                background: white;
-                color: black;
-            }
-            main.main-container {
-                padding: 0;
-                max-width: 100%;
-            }
-            .rota-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 15px;
-            }
-            .rota-card {
-                border: 1px solid #ccc;
-                box-shadow: none;
-                page-break-inside: avoid;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CBC Rotas - Craigavon Baptist Church</title>
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #0f2b48;
+      color: #333;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .card {
+      background: #ffffff;
+      padding: 2.5rem;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+    .logo-container {
+      width: 70px;
+      height: 70px;
+      background: #38b2ac;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem auto;
+    }
+    .logo-container svg {
+      width: 36px;
+      height: 36px;
+      fill: white;
+    }
+    h1 {
+      font-size: 1.5rem;
+      color: #0f2b48;
+      margin: 0 0 0.25rem 0;
+    }
+    p.subtitle {
+      color: #666;
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+    }
+    .form-group {
+      text-align: left;
+      margin-bottom: 1.25rem;
+    }
+    label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #4a5568;
+      margin-bottom: 0.4rem;
+    }
+    input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #cbd5e0;
+      border-radius: 6px;
+      box-sizing: border-box;
+      font-size: 0.95rem;
+      background-color: #ebf8ff;
+    }
+    input:focus {
+      outline: none;
+      border-color: #3182ce;
+      box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+    }
+    button.btn-submit {
+      width: 100%;
+      padding: 0.85rem;
+      background-color: #0f2b48;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    button.btn-submit:hover {
+      background-color: #1a365d;
+    }
+    .error-box {
+      display: none;
+      margin-top: 1.25rem;
+      padding: 0.75rem;
+      background-color: #fff5f5;
+      border: 1px solid #feb2b2;
+      border-radius: 6px;
+      color: #c53030;
+      font-size: 0.85rem;
+    }
+  </style>
 </head>
 <body>
 
-    <!-- ==========================================================================
-       SECTION 1: AUTHENTICATION / LOGIN VIEW
-       ========================================================================== -->
-    <div id="view-login" class="login-wrapper">
-        <div class="login-card">
-            <img src="https://raw.githubusercontent.com/coopsben0-debug/CBC-Rotas/main/cbc%20logo.webp" alt="Craigavon Baptist Church Logo" class="login-logo">
-            <h1 class="login-title">CBC Rotas</h1>
-            <p class="login-subtitle">Craigavon Baptist Church Rota Management</p>
-
-            <form id="form-login" onsubmit="handleLoginSubmit(event)">
-                <div class="form-group">
-                    <label for="input-url" class="form-label">Supabase Project URL</label>
-                    <input type="text" id="input-url" class="form-control" placeholder="https://xyz.supabase.co" required>
-                </div>
-                <div class="form-group">
-                    <label for="input-key" class="form-label">Supabase Anon Key</label>
-                    <input type="password" id="input-key" class="form-control" placeholder="your-anon-key" required>
-                </div>
-                <button type="submit" class="btn btn-primary btn-block">Connect & Access Rotas</button>
-            </form>
-
-            <div id="login-error" class="alert alert-error hidden"></div>
-        </div>
+  <!-- LOGIN CARD -->
+  <div id="login-container" class="card">
+    <div class="logo-container">
+      <svg viewBox="0 0 24 24">
+        <path d="M12 2L4 7v13h16V7l-8-5zm6 16H6V8.5l6-3.75 6 3.75V18z"/>
+      </svg>
     </div>
-
-    <!-- ==========================================================================
-       SECTION 2: MAIN APPLICATION VIEW
-       ========================================================================== -->
-    <div id="view-app" class="hidden">
-        
-        <!-- App Header with Top-Left Logo -->
-        <header class="app-header">
-            <div class="header-brand">
-                <img src="https://raw.githubusercontent.com/coopsben0-debug/CBC-Rotas/main/cbc%20logo.webp" alt="CBC Logo" class="header-logo">
-                <div class="header-titles">
-                    <span class="header-app-title">CBC Rotas</span>
-                    <span class="header-church-name">Craigavon Baptist Church</span>
-                </div>
-            </div>
-
-            <div class="header-controls">
-                <!-- Background Connection Pinger Status Badge -->
-                <div class="ping-badge" title="Connection status with Supabase backend">
-                    <span id="ping-indicator" class="ping-dot"></span>
-                    <span id="ping-text">Connecting...</span>
-                </div>
-
-                <button onclick="handleLogout()" class="btn btn-outline btn-sm" style="color: #ffffff; border-color: rgba(255,255,255,0.3);">
-                    Logout
-                </button>
-            </div>
-        </header>
-
-        <!-- Navigation Tabs Bar -->
-        <nav class="nav-bar">
-            <button class="nav-tab active" onclick="switchTab('dashboard')">
-                📅 Rota Dashboard
-            </button>
-            <button class="nav-tab" onclick="switchTab('members')">
-                👥 Volunteer Directory
-            </button>
-            <button class="nav-tab" onclick="switchTab('settings')">
-                ⚙️ Database Setup & SQL
-            </button>
-        </nav>
-
-        <!-- Main Workspace -->
-        <main class="main-container">
-
-            <!-- TAB 1: ROTA DASHBOARD VIEW -->
-            <section id="tab-dashboard">
-                
-                <!-- Filter & Actions Bar -->
-                <div class="filter-panel">
-                    <div class="search-group">
-                        <input type="text" id="search-input" class="form-control" placeholder="Search by name, role or date..." oninput="filterRotas()">
-                        <select id="filter-service" class="form-control" style="max-width: 180px;" onchange="filterRotas()">
-                            <option value="ALL">All Services</option>
-                            <option value="Morning">Morning Service</option>
-                            <option value="Evening">Evening Service</option>
-                            <option value="Midweek">Midweek / Special</option>
-                        </select>
-                    </div>
-
-                    <div class="filter-actions">
-                        <select id="filter-timeline" class="form-control" style="max-width: 160px;" onchange="filterRotas()">
-                            <option value="UPCOMING">Upcoming Only</option>
-                            <option value="ALL">All Dates</option>
-                            <option value="PAST">Past Rotas</option>
-                        </select>
-
-                        <div class="view-switch">
-                            <button id="btn-view-grid" class="view-btn active" onclick="setViewMode('grid')">Grid</button>
-                            <button id="btn-view-table" class="view-btn" onclick="setViewMode('table')">Table</button>
-                        </div>
-
-                        <button onclick="openAiModal()" class="btn btn-gold">
-                            ✨ AI Import
-                        </button>
-                        <button onclick="openCreateModal()" class="btn btn-accent">
-                            ➕ New Rota Entry
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Display Cards Grid -->
-                <div id="rota-cards-container" class="rota-grid"></div>
-
-                <!-- Display Data Table (Alternative View) -->
-                <div id="rota-table-container" class="table-wrapper hidden">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Service Type</th>
-                                <th>Role Assignments</th>
-                                <th style="text-align: right;">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="rota-table-body"></tbody>
-                    </table>
-                </div>
-
-                <!-- Empty State -->
-                <div id="empty-state" class="empty-state hidden">
-                    <div class="empty-state-icon">🗓️</div>
-                    <h3 class="empty-state-title">No Rota Records Found</h3>
-                    <p class="empty-state-desc">There are no schedule entries matching your search criteria. Add a new entry manually or use the AI importer.</p>
-                    <button onclick="openAiModal()" class="btn btn-primary">✨ Import Text Schedule with AI</button>
-                </div>
-            </section>
-
-            <!-- TAB 2: VOLUNTEER DIRECTORY VIEW -->
-            <section id="tab-members" class="hidden">
-                <div class="filter-panel">
-                    <h2 style="font-size: 1.2rem; font-weight: 700; color: var(--cbc-navy);">Volunteer Roster</h2>
-                    <button onclick="openAddMemberModal()" class="btn btn-accent">➕ Add Volunteer</button>
-                </div>
-
-                <div class="table-wrapper">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Preferred Roles</th>
-                                <th>Email / Contact</th>
-                                <th>Status</th>
-                                <th style="text-align: right;">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="members-table-body">
-                            <!-- Members populated via JavaScript -->
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
-            <!-- TAB 3: SETTINGS & DATABASE SETUP -->
-            <section id="tab-settings" class="hidden">
-                <div style="background: var(--card-bg); padding: 32px; border-radius: var(--radius-md); border: 1px solid var(--border-light);">
-                    <h2 style="font-size: 1.3rem; font-weight: 700; color: var(--cbc-navy); margin-bottom: 12px;">Supabase Database Schema Setup</h2>
-                    <p style="color: var(--text-muted); margin-bottom: 20px;">If this is a new database instance, run the following SQL query inside your Supabase SQL Editor to create the required tables and permissions.</p>
-
-                    <textarea readonly class="form-control" style="font-family: monospace; font-size: 0.85rem; height: 260px; background: #0f172a; color: #38bdf8;">
--- Create 'rotas' table
-CREATE TABLE IF NOT EXISTS public.rotas (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    date DATE NOT NULL,
-    service_type TEXT DEFAULT 'Sunday Service',
-    roles JSONB DEFAULT '{}'::jsonb,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
-);
-
--- Enable Row Level Security (RLS)
-ALTER TABLE public.rotas ENABLE ROW LEVEL SECURITY;
-
--- Create open access policies for public API key usage
-CREATE POLICY "Enable read access for all users" ON public.rotas FOR SELECT USING (true);
-CREATE POLICY "Enable insert access for all users" ON public.rotas FOR INSERT WITH CHECK (true);
-CREATE POLICY "Enable update access for all users" ON public.rotas FOR UPDATE USING (true);
-CREATE POLICY "Enable delete access for all users" ON public.rotas FOR DELETE USING (true);
-                    </textarea>
-
-                    <div style="margin-top: 24px; display: flex; gap: 12px;">
-                        <button onclick="copySqlSchema()" class="btn btn-secondary">📋 Copy SQL to Clipboard</button>
-                        <button onclick="testConnection()" class="btn btn-outline">🔄 Test Connection Now</button>
-                    </div>
-                </div>
-            </section>
-
-        </main>
-    </div>
-
-    <!-- ==========================================================================
-       SECTION 3: MODAL OVERLAYS
-       ========================================================================== -->
-
-    <!-- AI TEXT UPLOAD MODAL -->
-    <div id="modal-ai" class="modal-backdrop hidden">
-        <div class="modal-box">
-            <div class="modal-header">
-                <h3 class="modal-title">✨ AI Rota Schedule Importer</h3>
-                <button onclick="closeAiModal()" class="modal-close">&times;</button>
-            </div>
-            <div class="modal-body">
-                <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 16px;">
-                    Paste unformatted rota text, emails, or WhatsApp messages below. The AI parser extracts dates, services, and role assignments automatically.
-                </p>
-
-                <div class="form-group">
-                    <label class="form-label">Raw Rota Schedule Text</label>
-                    <textarea id="ai-text-input" class="form-control" placeholder="Example:
-Sunday 13th September 2026 - Morning Service
-Preacher: Rev. John Smith
-Worship Leader: Sarah Jenkins
-Sound: Mark Wilson
-Visuals: Paul Davis
-Welcome: Mary & Tom
-
-Sunday 20th September 2026
-Preacher: Guest Speaker
-Worship Leader: Alan Brown"></textarea>
-                </div>
-
-                <div id="ai-status-alert" class="alert alert-info hidden"></div>
-            </div>
-            <div class="modal-footer">
-                <button onclick="closeAiModal()" class="btn btn-secondary">Cancel</button>
-                <button id="ai-submit-btn" onclick="processAIUpload()" class="btn btn-gold">Parse & Save to Supabase</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MANUAL CREATE / EDIT ROTA MODAL -->
-    <div id="modal-edit" class="modal-backdrop hidden">
-        <div class="modal-box">
-            <div class="modal-header">
-                <h3 id="edit-modal-title" class="modal-title">➕ Create Rota Schedule</h3>
-                <button onclick="closeEditModal()" class="modal-close">&times;</button>
-            </div>
-            <div class="modal-body">
-                <input type="hidden" id="edit-rota-id">
-                
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
-                    <div class="form-group" style="margin: 0;">
-                        <label class="form-label">Date</label>
-                        <input type="date" id="edit-date" class="form-control" required>
-                    </div>
-                    <div class="form-group" style="margin: 0;">
-                        <label class="form-label">Service Type</label>
-                        <select id="edit-service-type" class="form-control">
-                            <option value="Sunday Morning">Sunday Morning</option>
-                            <option value="Sunday Evening">Sunday Evening</option>
-                            <option value="Midweek Prayer">Midweek Prayer</option>
-                            <option value="Special Service">Special Service</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div style="border-top: 1px solid var(--border-light); padding-top: 16px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                        <label class="form-label" style="margin: 0;">Role Assignments</label>
-                        <button type="button" onclick="addRoleRow()" class="btn btn-secondary btn-sm">+ Add Role Row</button>
-                    </div>
-
-                    <div id="role-rows-container">
-                        <!-- Dynamic role input rows -->
-                    </div>
-                </div>
-
-                <div id="edit-status-alert" class="alert alert-error hidden"></div>
-            </div>
-            <div class="modal-footer">
-                <button onclick="closeEditModal()" class="btn btn-secondary">Cancel</button>
-                <button onclick="saveRotaRecord()" class="btn btn-accent">Save Rota Entry</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ==========================================================================
-       SECTION 4: JAVASCRIPT LOGIC & SUPABASE INTEGRATION
-       ========================================================================== -->
-    <script>
-        // ----------------------------------------------------------------------
-        // GLOBAL STATE & VARIABLES
-        // ----------------------------------------------------------------------
-        let db = null;
-        let pingInterval = null;
-        let rotasData = [];
-        let membersData = [
-            { name: "John Smith", role: "Preacher", email: "john@craigavonbaptist.org" },
-            { name: "Sarah Jenkins", role: "Worship Leader", email: "sarah@gmail.com" },
-            { name: "Mark Wilson", role: "Sound Tech", email: "mark@tech.co.uk" }
-        ];
-        let activeViewMode = 'grid'; // 'grid' or 'table'
-        
-        // Secret Anon Key fallback prefill for easy access
-        const DEFAULT_KEY = "sb_secret_tfCM94xaKIRWSgb1aOdX5Q_qe8Z9sDk";
-
-        // ----------------------------------------------------------------------
-        // INITIALIZATION & AUTHENTICATION
-        // ----------------------------------------------------------------------
-        window.addEventListener('DOMContentLoaded', () => {
-            const savedUrl = localStorage.getItem('cbc_sb_url') || '';
-            const savedKey = localStorage.getItem('cbc_sb_key') || DEFAULT_KEY;
-
-            document.getElementById('input-url').value = savedUrl;
-            document.getElementById('input-key').value = savedKey;
-
-            if (savedUrl && savedKey) {
-                initSupabase(savedUrl, savedKey);
-            }
-        });
-
-        function handleLoginSubmit(e) {
-            e.preventDefault();
-            const url = document.getElementById('input-url').value.trim();
-            const key = document.getElementById('input-key').value.trim();
-
-            if (!url || !key) {
-                showLoginError("Please enter both the Supabase URL and Anon Key.");
-                return;
-            }
-
-            initSupabase(url, key);
-        }
-
-        function initSupabase(url, key) {
-            try {
-                db = supabase.createClient(url, key);
-                localStorage.setItem('cbc_sb_url', url);
-                localStorage.setItem('cbc_sb_key', key);
-
-                document.getElementById('view-login').classList.add('hidden');
-                document.getElementById('view-app').classList.remove('hidden');
-
-                // Load initial data and kick off background ping
-                loadAllRotas();
-                renderMembersTable();
-                startBackgroundPing();
-
-            } catch (err) {
-                console.error("Initialization Error:", err);
-                showLoginError("Failed to connect to Supabase: " + err.message);
-            }
-        }
-
-        function handleLogout() {
-            stopBackgroundPing();
-            localStorage.removeItem('cbc_sb_url');
-            localStorage.removeItem('cbc_sb_key');
-            db = null;
-
-            document.getElementById('view-app').classList.add('hidden');
-            document.getElementById('view-login').classList.remove('hidden');
-        }
-
-        function showLoginError(msg) {
-            const errDiv = document.getElementById('login-error');
-            errDiv.textContent = msg;
-            errDiv.classList.remove('hidden');
-        }
-
-        // ----------------------------------------------------------------------
-        // BACKGROUND CONNECTION PINGER
-        // ----------------------------------------------------------------------
-        function startBackgroundPing() {
-            stopBackgroundPing();
-            pingSupabase(); // Run immediately
-            
-            // Ping every 3 minutes (180,000 ms) to prevent Supabase connection timeout
-            pingInterval = setInterval(pingSupabase, 180000);
-        }
-
-        function stopBackgroundPing() {
-            if (pingInterval) clearInterval(pingInterval);
-            pingInterval = null;
-        }
-
-        async function pingSupabase() {
-            const dot = document.getElementById('ping-indicator');
-            const text = document.getElementById('ping-text');
-
-            if (!db) {
-                dot.className = "ping-dot error";
-                text.textContent = "Offline";
-                return;
-            }
-
-            try {
-                const { data, error } = await db.from('rotas').select('id').limit(1);
-                
-                if (error && error.code !== 'PGRST116') {
-                    console.warn("Ping response warning:", error);
-                    dot.className = "ping-dot error";
-                    text.textContent = "Error";
-                } else {
-                    dot.className = "ping-dot active";
-                    text.textContent = "Connected";
-                }
-            } catch (err) {
-                console.error("Ping failure:", err);
-                dot.className = "ping-dot error";
-                text.textContent = "Disconnected";
-            }
-        }
-
-        function testConnection() {
-            pingSupabase().then(() => {
-                alert("Supabase ping test completed. Check top-right status indicator.");
-            });
-        }
-
-        // ----------------------------------------------------------------------
-        // DATA FETCHING & RENDERING
-        // ----------------------------------------------------------------------
-        async function loadAllRotas() {
-            if (!db) return;
-
-            try {
-                const { data, error } = await db
-                    .from('rotas')
-                    .select('*')
-                    .order('date', { ascending: true });
-
-                if (error) throw error;
-
-                rotasData = data || [];
-                filterRotas();
-
-            } catch (err) {
-                console.error("Error loading rotas:", err);
-                alert("Failed to load rota schedules from database: " + err.message);
-            }
-        }
-
-        function filterRotas() {
-            const searchTerm = document.getElementById('search-input').value.toLowerCase();
-            const serviceFilter = document.getElementById('filter-service').value;
-            const timelineFilter = document.getElementById('filter-timeline').value;
-            const todayStr = new Date().toISOString().split('T')[0];
-
-            let filtered = rotasData.filter(item => {
-                // Search match
-                const dateMatch = item.date.toLowerCase().includes(searchTerm);
-                const serviceMatch = (item.service_type || '').toLowerCase().includes(searchTerm);
-                
-                const rolesObj = typeof item.roles === 'string' ? JSON.parse(item.roles || '{}') : (item.roles || {});
-                const rolesMatch = Object.entries(rolesObj).some(([role, name]) => 
-                    role.toLowerCase().includes(searchTerm) || String(name).toLowerCase().includes(searchTerm)
-                );
-
-                const matchesSearch = dateMatch || serviceMatch || rolesMatch;
-
-                // Service category match
-                let matchesService = true;
-                if (serviceFilter !== 'ALL') {
-                    matchesService = (item.service_type || '').toLowerCase().includes(serviceFilter.toLowerCase());
-                }
-
-                // Timeline match
-                let matchesTimeline = true;
-                if (timelineFilter === 'UPCOMING') {
-                    matchesTimeline = item.date >= todayStr;
-                } else if (timelineFilter === 'PAST') {
-                    matchesTimeline = item.date < todayStr;
-                }
-
-                return matchesSearch && matchesService && matchesTimeline;
-            });
-
-            renderRotas(filtered);
-        }
-
-        function renderRotas(data) {
-            const gridContainer = document.getElementById('rota-cards-container');
-            const tableBody = document.getElementById('rota-table-body');
-            const emptyState = document.getElementById('empty-state');
-
-            gridContainer.innerHTML = '';
-            tableBody.innerHTML = '';
-
-            if (!data || data.length === 0) {
-                emptyState.classList.remove('hidden');
-                return;
-            }
-
-            emptyState.classList.add('hidden');
-
-            data.forEach(item => {
-                const rolesObj = typeof item.roles === 'string' ? JSON.parse(item.roles || '{}') : (item.roles || {});
-                
-                // Format Date nicely
-                const dateObj = new Date(item.date + 'T00:00:00');
-                const formattedDate = dateObj.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
-                
-                // Determine Service Pill Class
-                let pillClass = 'service-pill';
-                const sType = (item.service_type || '').toLowerCase();
-                if (sType.includes('evening')) pillClass += ' evening';
-                else if (sType.includes('midweek') || sType.includes('prayer')) pillClass += ' midweek';
-
-                // Render Grid Card
-                let rolesListHTML = '';
-                for (const [role, assignee] of Object.entries(rolesObj)) {
-                    rolesListHTML += `
-                        <li class="role-item">
-                            <span class="role-title">${escapeHtml(role)}</span>
-                            <span class="role-assignee">${escapeHtml(String(assignee))}</span>
-                        </li>`;
-                }
-
-                const card = document.createElement('div');
-                card.className = 'rota-card';
-                card.innerHTML = `
-                    <div class="rota-card-header">
-                        <div class="rota-date-badge">
-                            <span class="rota-date-main">${formattedDate}</span>
-                            <span class="rota-date-sub">${item.date}</span>
-                        </div>
-                        <span class="${pillClass}">${escapeHtml(item.service_type || 'Sunday Service')}</span>
-                    </div>
-                    <div class="rota-card-body">
-                        <ul class="role-list">
-                            ${rolesListHTML || '<li class="role-item"><span class="role-title">No roles assigned</span></li>'}
-                        </ul>
-                    </div>
-                    <div class="rota-card-footer">
-                        <button onclick="openEditModal('${item.id}')" class="btn btn-outline btn-sm">✏️ Edit</button>
-                        <button onclick="deleteRotaRecord('${item.id}')" class="btn btn-danger btn-sm">🗑️ Delete</button>
-                    </div>
-                `;
-                gridContainer.appendChild(card);
-
-                // Render Table Row
-                const tr = document.createElement('tr');
-                let tableRolesHTML = Object.entries(rolesObj)
-                    .map(([r, a]) => `<strong>${escapeHtml(r)}:</strong> ${escapeHtml(String(a))}`)
-                    .join(' | ');
-
-                tr.innerHTML = `
-                    <td><strong>${formattedDate}</strong><br><small style="color:var(--text-muted);">${item.date}</small></td>
-                    <td><span class="${pillClass}">${escapeHtml(item.service_type || 'Sunday Service')}</span></td>
-                    <td>${tableRolesHTML || '<em>None</em>'}</td>
-                    <td style="text-align: right;">
-                        <button onclick="openEditModal('${item.id}')" class="btn btn-outline btn-sm">Edit</button>
-                        <button onclick="deleteRotaRecord('${item.id}')" class="btn btn-danger btn-sm">Delete</button>
-                    </td>
-                `;
-                tableBody.appendChild(tr);
-            });
-        }
-
-        // ----------------------------------------------------------------------
-        // FIXED AI TEXT PARSER & BULK UPLOADER
-        // ----------------------------------------------------------------------
-        function openAiModal() {
-            document.getElementById('modal-ai').classList.remove('hidden');
-            document.getElementById('ai-text-input').value = '';
-            document.getElementById('ai-status-alert').classList.add('hidden');
-        }
-
-        function closeAiModal() {
-            document.getElementById('modal-ai').classList.add('hidden');
-        }
-
-        function parseRawTextToRotas(rawText) {
-            const lines = rawText.split('\n').map(l => l.trim()).filter(Boolean);
-            const parsedRotas = [];
-
-            let currentDate = new Date().toISOString().split('T')[0];
-            let currentService = 'Sunday Morning';
-            let currentRoles = {};
-
-            const datePattern = /\b(\d{1,2})(?:st|nd|rd|th)?\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s*(\d{4})?\b/i;
-            const isoPattern = /\b(\d{4}-\d{2}-\d{2})\b/;
-
-            lines.forEach(line => {
-                // Check ISO Date Format
-                const isoMatch = line.match(isoPattern);
-                if (isoMatch) {
-                    if (Object.keys(currentRoles).length > 0) {
-                        parsedRotas.push({ date: currentDate, service_type: currentService, roles: { ...currentRoles } });
-                        currentRoles = {};
-                    }
-                    currentDate = isoMatch[0];
-                } 
-                // Check Written Date Format (e.g., 13th Sept 2026)
-                else {
-                    const dateMatch = line.match(datePattern);
-                    if (dateMatch) {
-                        if (Object.keys(currentRoles).length > 0) {
-                            parsedRotas.push({ date: currentDate, service_type: currentService, roles: { ...currentRoles } });
-                            currentRoles = {};
-                        }
-                        
-                        const day = dateMatch[1].padStart(2, '0');
-                        const monthStr = dateMatch[2];
-                        const year = dateMatch[3] || new Date().getFullYear();
-                        
-                        const mIndex = new Date(`${monthStr} 1, 2000`).getMonth() + 1;
-                        const formattedMonth = String(mIndex).padStart(2, '0');
-                        currentDate = `${year}-${formattedMonth}-${day}`;
-                    }
-                }
-
-                // Check Service Type Tags
-                if (line.toLowerCase().includes('evening')) {
-                    currentService = 'Sunday Evening';
-                } else if (line.toLowerCase().includes('midweek') || line.toLowerCase().includes('prayer')) {
-                    currentService = 'Midweek Prayer';
-                } else if (line.toLowerCase().includes('morning')) {
-                    currentService = 'Sunday Morning';
-                }
-
-                // Extract Role Key-Values (Preacher: John Smith or Worship - Sarah)
-                if (line.includes(':') || line.includes('-')) {
-                    const parts = line.split(/[:\-]/);
-                    if (parts.length >= 2) {
-                        const key = parts[0].replace(/^(Sunday|Morning|Evening|Service|Date)/i, '').trim();
-                        const val = parts.slice(1).join(' ').trim();
-                        if (key && val && key.length < 30) {
-                            currentRoles[key] = val;
-                        }
-                    }
-                }
-            });
-
-            if (Object.keys(currentRoles).length > 0) {
-                parsedRotas.push({ date: currentDate, service_type: currentService, roles: currentRoles });
-            }
-
-            return parsedRotas;
-        }
-
-        async function processAIUpload() {
-            const textInput = document.getElementById('ai-text-input').value.trim();
-            const alertBox = document.getElementById('ai-status-alert');
-            const submitBtn = document.getElementById('ai-submit-btn');
-
-            if (!textInput) {
-                alertBox.textContent = "Please paste schedule text before attempting to parse.";
-                alertBox.className = "alert alert-error";
-                alertBox.classList.remove('hidden');
-                return;
-            }
-
-            submitBtn.disabled = true;
-            alertBox.textContent = "Parsing schedule text and saving to database...";
-            alertBox.className = "alert alert-info";
-            alertBox.classList.remove('hidden');
-
-            try {
-                const parsedRecords = parseRawTextToRotas(textInput);
-
-                if (parsedRecords.length === 0) {
-                    parsedRecords.push({
-                        date: new Date().toISOString().split('T')[0],
-                        service_type: 'Parsed Schedule',
-                        roles: { "Raw Schedule Note": textInput }
-                    });
-                }
-
-                const { error } = await db.from('rotas').insert(parsedRecords);
-
-                if (error) throw error;
-
-                alertBox.textContent = `Success! Parsed and added ${parsedRecords.length} rota record(s).`;
-                alertBox.className = "alert alert-success";
-
-                setTimeout(() => {
-                    closeAiModal();
-                    submitBtn.disabled = false;
-                    loadAllRotas();
-                }, 1200);
-
-            } catch (err) {
-                console.error("AI Upload Error:", err);
-                alertBox.textContent = "Error saving parsed rotas: " + err.message;
-                alertBox.className = "alert alert-error";
-                submitBtn.disabled = false;
-            }
-        }
-
-        // ----------------------------------------------------------------------
-        // MANUAL CREATE & EDIT ROTA FUNCTIONS
-        // ----------------------------------------------------------------------
-        function openCreateModal() {
-            document.getElementById('edit-rota-id').value = '';
-            document.getElementById('edit-modal-title').textContent = '➕ Create Rota Entry';
-            document.getElementById('edit-date').value = new Date().toISOString().split('T')[0];
-            document.getElementById('edit-service-type').value = 'Sunday Morning';
-            
-            const container = document.getElementById('role-rows-container');
-            container.innerHTML = '';
-            
-            // Add default template rows
-            addRoleRow('Preacher', '');
-            addRoleRow('Worship Leader', '');
-            addRoleRow('Sound Tech', '');
-
-            document.getElementById('modal-edit').classList.remove('hidden');
-        }
-
-        function openEditModal(id) {
-            const item = rotasData.find(r => r.id === id);
-            if (!item) return;
-
-            document.getElementById('edit-rota-id').value = item.id;
-            document.getElementById('edit-modal-title').textContent = '✏️ Edit Rota Entry';
-            document.getElementById('edit-date').value = item.date;
-            document.getElementById('edit-service-type').value = item.service_type || 'Sunday Morning';
-
-            const container = document.getElementById('role-rows-container');
-            container.innerHTML = '';
-
-            const rolesObj = typeof item.roles === 'string' ? JSON.parse(item.roles || '{}') : (item.roles || {});
-            for (const [role, assignee] of Object.entries(rolesObj)) {
-                addRoleRow(role, assignee);
-            }
-
-            document.getElementById('modal-edit').classList.remove('hidden');
-        }
-
-        function closeEditModal() {
-            document.getElementById('modal-edit').classList.add('hidden');
-        }
-
-        function addRoleRow(roleName = '', assigneeName = '') {
-            const container = document.getElementById('role-rows-container');
-            const row = document.createElement('div');
-            row.className = 'dynamic-role-row';
-            row.innerHTML = `
-                <input type="text" class="form-control role-key-input" placeholder="Role (e.g. Sound)" value="${escapeHtml(roleName)}">
-                <input type="text" class="form-control role-val-input" placeholder="Volunteer Name" value="${escapeHtml(String(assigneeName))}">
-                <button type="button" onclick="this.parentElement.remove()" class="btn btn-danger btn-sm">&times;</button>
-            `;
-            container.appendChild(row);
-        }
-
-        async function saveRotaRecord() {
-            const id = document.getElementById('edit-rota-id').value;
-            const date = document.getElementById('edit-date').value;
-            const serviceType = document.getElementById('edit-service-type').value;
-
-            if (!date) {
-                alert('Please select a valid date.');
-                return;
-            }
-
-            const roleKeys = document.querySelectorAll('.role-key-input');
-            const roleVals = document.querySelectorAll('.role-val-input');
-            const rolesObj = {};
-
-            roleKeys.forEach((keyEl, idx) => {
-                const k = keyEl.value.trim();
-                const v = roleVals[idx].value.trim();
-                if (k && v) {
-                    rolesObj[k] = v;
-                }
-            });
-
-            const payload = {
-                date: date,
-                service_type: serviceType,
-                roles: rolesObj
-            };
-
-            try {
-                if (id) {
-                    // Update existing
-                    const { error } = await db.from('rotas').update(payload).eq('id', id);
-                    if (error) throw error;
-                } else {
-                    // Insert new
-                    const { error } = await db.from('rotas').insert([payload]);
-                    if (error) throw error;
-                }
-
-                closeEditModal();
-                loadAllRotas();
-
-            } catch (err) {
-                alert("Failed to save rota record: " + err.message);
-            }
-        }
-
-        async function deleteRotaRecord(id) {
-            if (!confirm("Are you sure you want to delete this rota entry?")) return;
-
-            try {
-                const { error } = await db.from('rotas').delete().eq('id', id);
-                if (error) throw error;
-                loadAllRotas();
-            } catch (err) {
-                alert("Error deleting entry: " + err.message);
-            }
-        }
-
-        // ----------------------------------------------------------------------
-        // VOLUNTEER DIRECTORY FUNCTIONS
-        // ----------------------------------------------------------------------
-        function renderMembersTable() {
-            const tbody = document.getElementById('members-table-body');
-            tbody.innerHTML = '';
-
-            membersData.forEach((m, i) => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td><strong>${escapeHtml(m.name)}</strong></td>
-                    <td><span class="service-pill">${escapeHtml(m.role)}</span></td>
-                    <td>${escapeHtml(m.email)}</td>
-                    <td><span style="color:var(--success); font-weight:700;">● Active</span></td>
-                    <td style="text-align: right;">
-                        <button onclick="deleteMember(${i})" class="btn btn-danger btn-sm">Remove</button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        function openAddMemberModal() {
-            const name = prompt("Enter Volunteer Name:");
-            if (!name) return;
-            const role = prompt("Enter Primary Role (e.g., Preacher, Sound, Welcome):") || "Volunteer";
-            const email = prompt("Enter Contact Email:") || "N/A";
-
-            membersData.push({ name, role, email });
-            renderMembersTable();
-        }
-
-        function deleteMember(index) {
-            if (confirm("Remove volunteer from directory?")) {
-                membersData.splice(index, 1);
-                renderMembersTable();
-            }
-        }
-
-        // ----------------------------------------------------------------------
-        // UI SWITCHERS & HELPERS
-        // ----------------------------------------------------------------------
-        function switchTab(tabName) {
-            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-            document.getElementById('tab-dashboard').classList.add('hidden');
-            document.getElementById('tab-members').classList.add('hidden');
-            document.getElementById('tab-settings').classList.add('hidden');
-
-            if (tabName === 'dashboard') {
-                document.getElementById('tab-dashboard').classList.remove('hidden');
-                event.currentTarget.classList.add('active');
-            } else if (tabName === 'members') {
-                document.getElementById('tab-members').classList.remove('hidden');
-                event.currentTarget.classList.add('active');
-            } else if (tabName === 'settings') {
-                document.getElementById('tab-settings').classList.remove('hidden');
-                event.currentTarget.classList.add('active');
-            }
-        }
-
-        function setViewMode(mode) {
-            activeViewMode = mode;
-            const grid = document.getElementById('rota-cards-container');
-            const table = document.getElementById('rota-table-container');
-            const btnGrid = document.getElementById('btn-view-grid');
-            const btnTable = document.getElementById('btn-view-table');
-
-            if (mode === 'grid') {
-                grid.classList.remove('hidden');
-                table.classList.add('hidden');
-                btnGrid.classList.add('active');
-                btnTable.classList.remove('active');
-            } else {
-                grid.classList.add('hidden');
-                table.classList.remove('hidden');
-                btnGrid.classList.remove('active');
-                btnTable.classList.add('active');
-            }
-        }
-
-        function copySqlSchema() {
-            const textarea = document.querySelector('#tab-settings textarea');
-            textarea.select();
-            document.execCommand('copy');
-            alert("SQL Query copied to clipboard! Paste it into your Supabase SQL Editor.");
-        }
-
-        function escapeHtml(str) {
-            if (!str) return '';
-            return String(str)
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
-        }
-    </script>
+    <h1>CBC Rotas</h1>
+    <p class="subtitle">Craigavon Baptist Church Rota Management</p>
+
+    <form id="login-form">
+      <div class="form-group">
+        <label for="user-name">Your Name</label>
+        <input type="text" id="user-name" placeholder="Enter your full name" required>
+      </div>
+
+      <div class="form-group">
+        <label for="passcode">Passcode</label>
+        <input type="password" id="passcode" placeholder="Enter secret passcode" required>
+      </div>
+
+      <button type="submit" class="btn-submit">Access Rotas</button>
+      <div id="error-message" class="error-box"></div>
+    </form>
+  </div>
+
+  <!-- DASHBOARD CONTAINER (Hidden until login) -->
+  <div id="app-container" style="display: none; padding: 20px; color: white;">
+    <h2>Welcome to CBC Rotas</h2>
+    <div id="user-display"></div>
+  </div>
+
+  <script>
+    // 1. Hardcoded Supabase Configuration
+    const SUPABASE_URL = "https://ojzwujpahfjmaeisnfez.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_87n6hxMnH7uZENhXmNaikw_fCVVQWqZ";
+
+    // Initialize Supabase Client
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // 2. Secret Passcode Definition
+    const SECRET_PASSCODE = "1234";
+
+    // Handle Login Submit
+    document.getElementById('login-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const userName = document.getElementById('user-name').value.trim();
+      const enteredPasscode = document.getElementById('passcode').value.trim();
+      const errorBox = document.getElementById('error-message');
+
+      // Verify Passcode
+      if (enteredPasscode !== SECRET_PASSCODE) {
+        errorBox.innerText = "Incorrect passcode. Please try again.";
+        errorBox.style.display = "block";
+        return;
+      }
+
+      // Clear any errors
+      errorBox.style.display = "none";
+
+      // Save user session
+      sessionStorage.setItem('cbc_user_name', userName);
+
+      // Hide login, show app
+      document.getElementById('login-container').style.display = 'none';
+      document.getElementById('app-container').style.display = 'block';
+      document.getElementById('user-display').innerText = `Logged in as: ${userName}`;
+
+      // Load database rotas
+      loadRotas(userName);
+    });
+
+    async function loadRotas(userName) {
+      const { data, error } = await supabase.from('rotas').select('*');
+      if (error) {
+        console.error('Error fetching rotas:', error);
+      } else {
+        console.log('Rotas data loaded:', data);
+      }
+    }
+  </script>
 </body>
 </html>
