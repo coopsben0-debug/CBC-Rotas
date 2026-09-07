@@ -18,8 +18,6 @@
       --primary-hover: #1e3a5f;
       --accent: #0d9488;
       --accent-hover: #0f766e;
-      --accent-light: #ccfbf1;
-      --accent-text: #115e59;
       --text-main: #0f172a;
       --text-muted: #64748b;
       --border-color: #e2e8f0;
@@ -87,7 +85,7 @@
     .user-profile {
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 12px;
     }
 
     .sync-status {
@@ -147,6 +145,39 @@
       flex-grow: 1;
     }
 
+    /* Schedule View Switcher Buttons */
+    .view-switchers {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-tab {
+      padding: 0.75rem 1.25rem;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border: 1px solid var(--border-color);
+      background-color: white;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-tab.active {
+      background-color: var(--primary);
+      color: white;
+      border-color: var(--primary);
+      box-shadow: 0 4px 10px rgba(15, 43, 72, 0.15);
+    }
+
+    .btn-tab:hover:not(.active) {
+      background-color: #f1f5f9;
+      color: var(--text-main);
+    }
+
     /* Banner / My Duties Section */
     .duties-banner {
       background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
@@ -189,25 +220,22 @@
       border: 1px solid var(--border-color);
       box-shadow: 0 1px 3px rgba(0,0,0,0.05);
       padding: 1.25rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
     }
 
-    .controls-grid {
-      display: grid;
-      grid-template-columns: 2fr 2fr 1fr;
+    .search-row {
+      display: flex;
       gap: 1rem;
-      align-items: end;
-    }
-
-    @media (max-width: 768px) {
-      .controls-grid {
-        grid-template-columns: 1fr;
-      }
+      align-items: flex-end;
     }
 
     .form-group {
       display: flex;
       flex-direction: column;
       gap: 0.4rem;
+      flex-grow: 1;
     }
 
     label {
@@ -218,7 +246,7 @@
       color: var(--text-muted);
     }
 
-    input[type="text"], select {
+    input[type="text"] {
       width: 100%;
       padding: 0.7rem 0.9rem;
       border: 1px solid var(--border-color);
@@ -229,11 +257,42 @@
       transition: all 0.2s;
     }
 
-    input[type="text"]:focus, select:focus {
+    input[type="text"]:focus {
       outline: none;
       border-color: var(--accent);
       background-color: #ffffff;
       box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+    }
+
+    /* Clickable Category Chips */
+    .chips-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .chip-btn {
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.825rem;
+      font-weight: 600;
+      border: 1px solid var(--border-color);
+      background-color: #f8fafc;
+      color: var(--text-main);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .chip-btn:hover {
+      background-color: #e2e8f0;
+    }
+
+    .chip-btn.active {
+      background-color: var(--accent);
+      color: white;
+      border-color: var(--accent);
+      box-shadow: 0 2px 6px rgba(13, 148, 136, 0.25);
     }
 
     .btn-action {
@@ -247,9 +306,7 @@
       cursor: pointer;
       transition: background-color 0.2s;
       height: 42px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      white-space: nowrap;
     }
 
     .btn-action:hover {
@@ -388,28 +445,39 @@
   <!-- Main Dashboard View -->
   <main class="dashboard">
 
+    <!-- Primary Schedule Mode Buttons -->
+    <div class="view-switchers">
+      <button class="btn-tab active" id="btn-view-all" onclick="switchView('ALL')">
+        🌐 All Events & Rotas
+      </button>
+      <button class="btn-tab" id="btn-view-mine" onclick="switchView('MY_SCHEDULE')">
+        👤 My Personal Schedule
+      </button>
+    </div>
+
     <!-- My Upcoming Duties Banner -->
-    <section class="duties-banner">
+    <section class="duties-banner" id="duties-banner">
       <h2 id="my-duties-title">📋 My Upcoming Rota Duties</h2>
       <ul class="duties-list" id="my-duties-list">
         <li class="duty-chip">Loading schedule...</li>
       </ul>
     </section>
 
-    <!-- Controls & Filters -->
+    <!-- Controls & Clickable Filters Panel -->
     <section class="panel-card">
-      <div class="controls-grid">
+      <div class="search-row">
         <div class="form-group">
-          <label for="search-input">Search Member / Volunteer</label>
-          <input type="text" id="search-input" placeholder="Search by name to highlight..." autocomplete="off">
-        </div>
-        <div class="form-group">
-          <label for="role-filter">Filter by Role / Service</label>
-          <select id="role-filter">
-            <option value="ALL">All Roles & Services</option>
-          </select>
+          <label for="search-input">Search Volunteer / Member</label>
+          <input type="text" id="search-input" placeholder="Type a name to search..." autocomplete="off">
         </div>
         <button class="btn-action" onclick="loadRotas()">Refresh Rotas</button>
+      </div>
+
+      <div class="form-group">
+        <label>Filter by Service / Role</label>
+        <div class="chips-container" id="chips-container">
+          <button class="chip-btn active" data-role="ALL" onclick="selectChip('ALL')">All Roles</button>
+        </div>
       </div>
     </section>
 
@@ -419,7 +487,7 @@
         <thead>
           <tr>
             <th>Date</th>
-            <th>Service / Time</th>
+            <th>Service / Event</th>
             <th>Role</th>
             <th>Assigned Member(s)</th>
             <th style="text-align: right;">Action</th>
@@ -465,6 +533,8 @@
 
     let supabase = null;
     let allRotas = [];
+    let selectedRole = 'ALL';
+    let activeViewMode = 'ALL'; // 'ALL' or 'MY_SCHEDULE'
 
     function getSupabase() {
       if (!supabase && window.supabase) {
@@ -497,7 +567,7 @@
         if (error) throw error;
 
         allRotas = data || [];
-        populateRoleFilter(allRotas);
+        populateRoleChips(allRotas);
         renderTable();
         updatePersonalDuties();
       } catch (err) {
@@ -506,37 +576,107 @@
       }
     }
 
+    function switchView(mode) {
+      activeViewMode = mode;
+      
+      const btnAll = document.getElementById('btn-view-all');
+      const btnMine = document.getElementById('btn-view-mine');
+      const banner = document.getElementById('duties-banner');
+      const searchInput = document.getElementById('search-input');
+
+      if (mode === 'MY_SCHEDULE') {
+        btnMine.classList.add('active');
+        btnAll.classList.remove('active');
+        searchInput.value = currentUserName;
+        banner.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        btnAll.classList.add('active');
+        btnMine.classList.remove('active');
+        searchInput.value = '';
+      }
+
+      renderTable();
+    }
+
+    function populateRoleChips(data) {
+      const container = document.getElementById('chips-container');
+      const roles = new Set();
+
+      data.forEach(item => {
+        const title = item.rota_name || item.role;
+        if (title) roles.add(title);
+      });
+
+      container.innerHTML = `<button class="chip-btn ${selectedRole === 'ALL' ? 'active' : ''}" onclick="selectChip('ALL')">All Roles</button>`;
+
+      roles.forEach(role => {
+        const isActive = selectedRole === role ? 'active' : '';
+        const btn = document.createElement('button');
+        btn.className = `chip-btn ${isActive}`;
+        btn.innerText = role;
+        btn.onclick = () => selectChip(role);
+        container.appendChild(btn);
+      });
+    }
+
+    function selectChip(role) {
+      selectedRole = role;
+      
+      document.querySelectorAll('.chip-btn').forEach(btn => {
+        if (btn.innerText === role || (role === 'ALL' && btn.innerText === 'All Roles')) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+
+      renderTable();
+    }
+
     function renderTable() {
       const tbody = document.getElementById('rotas-table-body');
       const searchVal = document.getElementById('search-input').value.toLowerCase().trim();
-      const roleVal = document.getElementById('role-filter').value;
 
       tbody.innerHTML = '';
 
       const filtered = allRotas.filter(row => {
-        return (roleVal === 'ALL' || row.role === roleVal || row.service === roleVal);
+        const rotaName = row.rota_name || row.service || '';
+        const roleName = row.role || '';
+        const assigned = (row.assigned_persons || row.person || '').toLowerCase();
+
+        // Role chip filter logic
+        const matchesChip = (selectedRole === 'ALL' || rotaName === selectedRole || roleName === selectedRole);
+
+        // Search bar filter logic
+        const matchesSearch = !searchVal || assigned.includes(searchVal) || rotaName.toLowerCase().includes(searchVal);
+
+        // My Schedule Mode logic
+        const matchesViewMode = (activeViewMode === 'ALL') || assigned.includes(currentUserName.toLowerCase());
+
+        return matchesChip && matchesSearch && matchesViewMode;
       });
 
       if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 2.5rem; color: var(--text-muted);">No rota assignments found.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 2.5rem; color: var(--text-muted);">No matching rota assignments found.</td></tr>';
         return;
       }
 
       filtered.forEach(row => {
         const tr = document.createElement('tr');
         const assigned = row.assigned_persons || row.person || 'Unassigned';
-        
-        if (searchVal && assigned.toLowerCase().includes(searchVal)) {
+        const isUserAssigned = assigned.toLowerCase().includes(currentUserName.toLowerCase());
+
+        if (isUserAssigned) {
           tr.classList.add('highlight-row');
         }
 
         tr.innerHTML = `
           <td><strong>${row.date || 'N/A'}</strong></td>
-          <td>${row.service || row.time || 'Sunday Service'}</td>
+          <td>${row.rota_name || row.service || 'Service'}</td>
           <td><span class="badge-role">${row.role || 'Volunteer'}</span></td>
           <td>${assigned}</td>
           <td style="text-align: right;">
-            <button class="btn-edit" onclick="openEditModal(${row.id}, '${escapeHtml(row.role || '')}', '${escapeHtml(assigned)}')">Edit</button>
+            <button class="btn-edit" onclick="openEditModal(${row.id}, '${escapeHtml(row.rota_name || row.role || '')}', '${escapeHtml(assigned)}')">Edit</button>
           </td>
         `;
         tbody.appendChild(tr);
@@ -558,31 +698,14 @@
         listEl.innerHTML = '<li class="duty-chip">No upcoming duties scheduled for your name.</li>';
       } else {
         listEl.innerHTML = userDuties.map(d => `
-          <li class="duty-chip">📅 <strong>${d.date}</strong> — ${d.role || 'Duty'} (${d.service || 'Service'})</li>
+          <li class="duty-chip">📅 <strong>${d.date}</strong> — ${d.rota_name || d.role} (${d.role || 'Duty'})</li>
         `).join('');
       }
     }
 
-    function populateRoleFilter(data) {
-      const roleFilter = document.getElementById('role-filter');
-      const roles = new Set();
-      
-      data.forEach(item => {
-        if (item.role) roles.add(item.role);
-      });
-
-      roleFilter.innerHTML = '<option value="ALL">All Roles & Services</option>';
-      roles.forEach(role => {
-        const opt = document.createElement('option');
-        opt.value = role;
-        opt.textContent = role;
-        roleFilter.appendChild(opt);
-      });
-    }
-
     function openEditModal(id, role, currentAssigned) {
       document.getElementById('modal-rota-id').value = id;
-      document.getElementById('modal-details').innerText = `Role: ${role}`;
+      document.getElementById('modal-details').innerText = `Role / Event: ${role}`;
       document.getElementById('modal-assigned').value = currentAssigned;
       document.getElementById('edit-modal').style.display = 'flex';
     }
@@ -618,14 +741,10 @@
 
     window.addEventListener('DOMContentLoaded', () => {
       document.getElementById('logged-user-label').innerText = currentUserName;
-      document.getElementById('search-input').value = currentUserName;
 
       document.getElementById('search-input').addEventListener('input', () => {
         renderTable();
-        updatePersonalDuties();
       });
-
-      document.getElementById('role-filter').addEventListener('change', renderTable);
 
       loadRotas();
     });
