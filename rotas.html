@@ -227,7 +227,11 @@
         </div>
         <div class="form-group">
           <label for="upload-rota-name">Default Rota / Service Category</label>
-          <input type="text" id="upload-rota-name" placeholder="e.g. Sunday School, CB Sunday Kids, or Music Rota" required value="Sunday School">
+          <select id="upload-rota-name" required>
+            <option value="Senior Sunday School">Senior Sunday School</option>
+            <option value="Jr Sunday School">Jr Sunday School</option>
+            <option value="Music Rota">Music Rota</option>
+          </select>
         </div>
         <div class="form-group">
           <label for="upload-date">Target Sunday Date (or starting date)</label>
@@ -281,7 +285,7 @@
       return supabaseClient;
     }
 
-    // Fully Automatic & Manual Keep-Alive Ping to Prevent Supabase Pausing
+    // Keep-Alive Ping to Prevent Supabase Pausing
     async function triggerKeepAlive(showNotification = false) {
       const client = initSupabase();
       if (!client) return;
@@ -296,7 +300,6 @@
       }
     }
 
-    // Start automatic background keep-alive check every 8 minutes
     function startAutomaticKeepAlive() {
       if (keepAliveInterval) clearInterval(keepAliveInterval);
       keepAliveInterval = setInterval(() => {
@@ -308,6 +311,19 @@
       localStorage.removeItem('cbc_user_name');
       localStorage.removeItem('username');
       window.location.href = "index.html";
+    }
+
+    // Clean and normalize names dynamically to handle renames
+    function formatServiceLabel(name) {
+      if (!name) return 'Service';
+      const lower = name.trim().toLowerCase();
+      if (lower === 'cb kids' || lower === 'senior sunday school' || lower === 'senior siunday school') {
+        return 'Senior Sunday School';
+      }
+      if (lower === 'sunday school' || lower === 'jr sunday school') {
+        return 'Jr Sunday School';
+      }
+      return name;
     }
 
     async function loadRotas() {
@@ -328,7 +344,17 @@
 
         if (error) throw error;
 
-        allRotas = data || [];
+        // Normalize raw records in memory to cleanly consolidate renamed categories
+        allRotas = (data || []).map(row => {
+          const rawName = row.rota_name || row.service || row.role || '';
+          const standardized = formatServiceLabel(rawName);
+          return {
+            ...row,
+            rota_name: standardized,
+            service: standardized
+          };
+        });
+
         populateRoleChips(allRotas);
         renderTable();
         updatePersonalDuties();
@@ -365,7 +391,7 @@
       const roles = new Set();
 
       data.forEach(item => {
-        const title = item.rota_name || item.role;
+        const title = formatServiceLabel(item.rota_name || item.service || item.role);
         if (title) roles.add(title);
       });
 
@@ -397,14 +423,12 @@
       const tbody = document.getElementById('rotas-table-body');
       const searchVal = document.getElementById('search-input').value.toLowerCase().trim();
       const hidePast = document.getElementById('hide-past-toggle').checked;
-      
-      // Calculate current date in ISO format (YYYY-MM-DD) to hide past Sundays automatically
       const todayIso = new Date().toISOString().split('T')[0];
 
       tbody.innerHTML = '';
 
       const filtered = allRotas.filter(row => {
-        const rotaName = row.rota_name || row.service || '';
+        const rotaName = formatServiceLabel(row.rota_name || row.service || '');
         const roleName = row.role || '';
         const assigned = (row.assigned_persons || row.person || '').toLowerCase();
         const rowDate = row.date || '';
@@ -419,7 +443,6 @@
           matchesViewMode = rowDate >= todayIso;
         }
 
-        // Auto-hide past events when the toggle is checked (so past Sundays disappear)
         let passesDateFilter = true;
         if (hidePast && rowDate) {
           passesDateFilter = rowDate >= todayIso;
@@ -438,17 +461,18 @@
         const assigned = row.assigned_persons || row.person || 'Unassigned';
         const isUserAssigned = assigned.toLowerCase().includes(currentUserName.toLowerCase());
         const hasSwapReq = assigned.toLowerCase().includes('swap needed') || assigned.toLowerCase().includes('swap requested');
+        const displayService = formatServiceLabel(row.rota_name || row.service || 'Service');
 
         if (isUserAssigned) {
           tr.classList.add('highlight-row');
         }
 
         const safeAssigned = assigned.replace(/'/g, "\\'");
-        const safeService = (row.rota_name || row.service || 'Service').replace(/'/g, "\\'");
+        const safeService = displayService.replace(/'/g, "\\'");
 
         tr.innerHTML = `
           <td><strong>${row.date || 'N/A'}</strong></td>
-          <td>${row.rota_name || row.service || 'Service'}</td>
+          <td>${displayService}</td>
           <td><span class="badge-role">${row.role || 'Volunteer'}</span></td>
           <td>
             ${assigned}
@@ -462,7 +486,6 @@
       });
     }
 
-    // Photo Upload & Upsert Modal Logic (Prevents duplication using Supabase Upsert)
     function openUploadModal() {
       document.getElementById('upload-modal').classList.add('active');
       document.getElementById('upload-date').value = new Date().toISOString().split('T')[0];
@@ -506,8 +529,6 @@
       }
 
       try {
-        // Prepare dummy / parsed entry extracted from uploaded rota sheet safely using UPSERT to prevent duplication
-        // Note: With unique constraints on (date, rota_name, role, assigned_persons), upsert overwrites or ignores duplicates cleanly.
         const sampleParsedRows = [
           {
             date: targetDate,
@@ -593,7 +614,7 @@
         listEl.innerHTML = '<li class="duty-chip">No upcoming active duties scheduled under your name.</li>';
       } else {
         listEl.innerHTML = userDuties.map(d => `
-          <li class="duty-chip">📅 <strong>${d.date}</strong> — ${d.rota_name || d.role} (${d.role || 'Duty'})</li>
+          <li class="duty-chip">📅 <strong>${d.date}</strong> — ${formatServiceLabel(d.rota_name || d.role)} (${d.role || 'Duty'})</li>
         `).join('');
       }
     }
@@ -602,7 +623,6 @@
       document.getElementById('logged-user-label').innerText = `👤 ${currentUserName}`;
       document.getElementById('search-input').addEventListener('input', renderTable);
       
-      // Trigger instant keep-alive and start automated background keep-alive interval
       triggerKeepAlive();
       startAutomaticKeepAlive();
       
