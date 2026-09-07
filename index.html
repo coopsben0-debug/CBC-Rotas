@@ -35,7 +35,7 @@
       flex-direction: column;
     }
 
-    /* --- LOGIN SECTION STYLES --- */
+    /* --- LOGIN CARD STYLES --- */
     .login-wrapper {
       display: flex;
       justify-content: center;
@@ -151,7 +151,7 @@
       font-size: 0.85rem;
     }
 
-    /* --- DASHBOARD APP STYLES --- */
+    /* --- DASHBOARD STYLES --- */
     #app-container {
       display: none;
       max-width: 1100px;
@@ -425,7 +425,7 @@
     </div>
   </div>
 
-  <!-- EDIT ASSIGNMENT MODAL -->
+  <!-- 3. EDIT ASSIGNMENT MODAL -->
   <div class="modal-overlay" id="edit-modal">
     <div class="modal-content">
       <h3 style="margin-bottom:1rem; color:var(--primary);">Edit Assignment</h3>
@@ -446,12 +446,20 @@
   </div>
 
   <script>
-    // --- SUPABASE CONFIGURATION ---
+    // --- SUPABASE & AUTH CONFIGURATION ---
     const SUPABASE_URL = "https://ojzwujpahfjmaeisnfez.supabase.co";
     const SUPABASE_KEY = "sb_publishable_87n6hxMnH7uZENhXmNaikw_fCVVQWqZ";
     const SECRET_PASSCODE = "1234";
 
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    let supabase = null;
+
+    // Safely get Supabase client
+    function getSupabase() {
+      if (!supabase && window.supabase) {
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      }
+      return supabase;
+    }
 
     let allRotas = [];
 
@@ -462,7 +470,7 @@
         showDashboard(savedUser);
       }
       
-      // Start connection pinger every 4 minutes to keep session warm
+      // Ping database every 4 minutes to prevent cold starts
       setInterval(pingDatabase, 240000);
     });
 
@@ -474,6 +482,13 @@
       const enteredPasscode = document.getElementById('passcode').value.trim();
       const errorBox = document.getElementById('error-message');
 
+      if (!userName) {
+        errorBox.innerText = "Please enter your name.";
+        errorBox.style.display = "block";
+        return;
+      }
+
+      // Verify Secret Passcode
       if (enteredPasscode !== SECRET_PASSCODE) {
         errorBox.innerText = "Incorrect passcode. Please try again.";
         errorBox.style.display = "block";
@@ -500,13 +515,19 @@
       loadRotas();
     }
 
-    // --- FETCH DATA FROM SUPABASE ---
+    // --- FETCH ROTAS FROM SUPABASE ---
     async function loadRotas() {
       const tbody = document.getElementById('rotas-table-body');
       tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 20px;">Fetching latest schedule...</td></tr>';
 
+      const client = getSupabase();
+      if (!client) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:red; padding:20px;">Database connection library failed to load. Please refresh the page or check your internet connection.</td></tr>';
+        return;
+      }
+
       try {
-        const { data, error } = await supabase
+        const { data, error } = await client
           .from('rotas')
           .select('*')
           .order('date', { ascending: true });
@@ -546,7 +567,6 @@
         const tr = document.createElement('tr');
         const assigned = row.assigned_persons || row.person || 'Unassigned';
         
-        // Highlight row if searching for a specific name
         if (searchVal && assigned.toLowerCase().includes(searchVal)) {
           tr.classList.add('highlight-row');
         }
@@ -591,7 +611,7 @@
       }
     }
 
-    // --- POPULATE ROLE FILTER DROPDOWN ---
+    // --- POPULATE ROLE FILTER ---
     function populateRoleFilter(data) {
       const roleFilter = document.getElementById('role-filter');
       const roles = new Set();
@@ -626,20 +646,23 @@
       const id = document.getElementById('modal-rota-id').value;
       const newAssigned = document.getElementById('modal-assigned').value.trim();
 
-      const { error } = await supabase
+      const client = getSupabase();
+      if (!client) return;
+
+      const { error } = await client
         .from('rotas')
         .update({ assigned_persons: newAssigned })
         .eq('id', id);
 
       if (error) {
-        alert("Failed to update: " + error.message);
+        alert("Failed to update assignment: " + error.message);
       } else {
         document.getElementById('edit-modal').style.display = 'none';
         loadRotas();
       }
     });
 
-    // --- EVENT LISTENERS FOR SEARCH & REFRESH ---
+    // --- CONTROLS LISTENERS ---
     document.getElementById('search-input').addEventListener('input', () => {
       renderTable();
       updatePersonalDuties();
@@ -648,9 +671,12 @@
     document.getElementById('role-filter').addEventListener('change', renderTable);
     document.getElementById('refresh-btn').addEventListener('click', loadRotas);
 
-    // --- PING DATABASE TO KEEP CONNECTION ALIVE ---
+    // --- BACKGROUND CONNECTION PINGER ---
     async function pingDatabase() {
-      await supabase.from('rotas').select('id').limit(1);
+      const client = getSupabase();
+      if (client) {
+        await client.from('rotas').select('id').limit(1);
+      }
     }
 
     function escapeHtml(str) {
