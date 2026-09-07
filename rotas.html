@@ -170,9 +170,7 @@
     const currentUserName = localStorage.getItem('cbc_user_name') || localStorage.getItem('username') || localStorage.getItem('user') || 'Volunteer';
 
     const SUPABASE_URL = "https://ojzwujpahfjmaeisnfez.supabase.co";
-    
-    // PASTE YOUR COPIED "anon public" KEY BELOW (The top key from your screenshot starting with eyJhbGci...)
-    const SUPABASE_KEY = "PASTE_YOUR_ANON_PUBLIC_KEY_HERE";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9qend1anBhaGZqbWFlaXNuZmV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMTA5NDMsImV4cCI6MjA5NDU4Njk0M30.VvszGR6MbUnBhKsmsXBikkrjok2-F1bnyS4zOwDX5hg";
 
     let supabaseClient = null;
     let allRotas = [];
