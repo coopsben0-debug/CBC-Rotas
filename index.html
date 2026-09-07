@@ -343,19 +343,19 @@
       <h1>CBC Rotas</h1>
       <p class="subtitle">Craigavon Baptist Church Rota Management</p>
 
-      <!-- Explicit inline submit trigger so it CANNOT fail to respond -->
-      <form id="login-form" onsubmit="handleLogin(event)" autocomplete="off">
+      <!-- Prevent standard HTML reloads -->
+      <form id="login-form" action="javascript:void(0);" onsubmit="handleLogin(event)" autocomplete="off">
         <div class="form-group">
           <label for="user-name">Your Name</label>
-          <input type="text" id="user-name" name="visitor_name" autocomplete="off" placeholder="Enter your full name" required>
+          <input type="text" id="user-name" name="visitor_name" autocomplete="off" placeholder="Enter your full name">
         </div>
 
         <div class="form-group">
           <label for="passcode">Passcode</label>
-          <input type="password" id="passcode" name="secret_code" autocomplete="new-password" placeholder="Enter secret passcode" required>
+          <input type="password" id="passcode" name="secret_code" autocomplete="new-password" placeholder="Enter secret passcode">
         </div>
 
-        <button type="submit" class="btn">Access Rotas</button>
+        <button type="button" class="btn" onclick="handleLogin(event)">Access Rotas</button>
         <div id="error-message" class="error-box"></div>
       </form>
     </div>
@@ -432,7 +432,7 @@
       <h3 style="margin-bottom:1rem; color:var(--primary);">Edit Assignment</h3>
       <p id="modal-details" style="font-size:0.9rem; color:var(--text-muted); margin-bottom:1rem;"></p>
       
-      <form id="edit-form" onsubmit="handleEditSubmit(event)">
+      <form id="edit-form" action="javascript:void(0);" onsubmit="handleEditSubmit(event)">
         <input type="hidden" id="modal-rota-id">
         <div class="form-group">
           <label for="modal-assigned">Assigned Member(s)</label>
@@ -454,7 +454,6 @@
 
     let supabase = null;
 
-    // Safely get Supabase client
     function getSupabase() {
       if (!supabase && window.supabase) {
         supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -466,15 +465,25 @@
 
     // --- INITIALIZATION ---
     window.addEventListener('DOMContentLoaded', () => {
+      // 1. Check URL search parameters fallback
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlName = urlParams.get('visitor_name');
+      const urlPass = urlParams.get('secret_code');
+
+      if (urlName && urlPass === SECRET_PASSCODE) {
+        sessionStorage.setItem('cbc_user_name', urlName);
+        showDashboard(urlName);
+        return;
+      }
+
+      // 2. Check session storage
       const savedUser = sessionStorage.getItem('cbc_user_name');
       if (savedUser) {
         showDashboard(savedUser);
       }
       
-      // Ping database every 4 minutes to prevent cold starts
       setInterval(pingDatabase, 240000);
 
-      // Attach search listeners
       const searchInput = document.getElementById('search-input');
       if (searchInput) {
         searchInput.addEventListener('input', () => {
@@ -489,13 +498,21 @@
       }
     });
 
-    // --- DIRECT LOGIN HANDLER ---
+    // --- AUTHENTICATION HANDLERS ---
     function handleLogin(event) {
-      if (event) event.preventDefault();
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
 
-      const userName = document.getElementById('user-name').value.trim();
-      const enteredPasscode = document.getElementById('passcode').value.trim();
+      const userNameInput = document.getElementById('user-name');
+      const passcodeInput = document.getElementById('passcode');
       const errorBox = document.getElementById('error-message');
+
+      // Fall back to URL params if inputs are empty
+      const urlParams = new URLSearchParams(window.location.search);
+      const userName = userNameInput.value.trim() || urlParams.get('visitor_name') || '';
+      const enteredPasscode = passcodeInput.value.trim() || urlParams.get('secret_code') || '';
 
       if (!userName) {
         errorBox.innerText = "Please enter your name.";
@@ -503,7 +520,6 @@
         return;
       }
 
-      // Verify Passcode
       if (enteredPasscode !== SECRET_PASSCODE) {
         errorBox.innerText = "Incorrect passcode. Please try again.";
         errorBox.style.display = "block";
@@ -517,6 +533,7 @@
 
     function handleLogout() {
       sessionStorage.removeItem('cbc_user_name');
+      window.history.replaceState({}, document.title, window.location.pathname);
       document.getElementById('app-container').style.display = 'none';
       document.getElementById('login-container').style.display = 'flex';
       document.getElementById('passcode').value = '';
@@ -677,7 +694,6 @@
       }
     }
 
-    // --- BACKGROUND CONNECTION PINGER ---
     async function pingDatabase() {
       const client = getSupabase();
       if (client) {
