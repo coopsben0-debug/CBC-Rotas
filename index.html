@@ -3,9 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CBC Rotas - Craigavon Baptist Church</title>
-  <!-- Supabase JS Client -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <title>CBC Rotas - Login</title>
   <style>
     :root {
       --bg-dark: #0f2b48;
@@ -13,10 +11,8 @@
       --primary: #0f2b48;
       --primary-hover: #1a365d;
       --accent: #38b2ac;
-      --accent-hover: #319795;
       --text-main: #2d3748;
       --text-muted: #718096;
-      --border-color: #e2e8f0;
       --light-blue: #ebf8ff;
     }
 
@@ -32,15 +28,8 @@
       color: var(--text-main);
       min-height: 100vh;
       display: flex;
-      flex-direction: column;
-    }
-
-    /* --- LOGIN CARD STYLES --- */
-    .login-wrapper {
-      display: flex;
       justify-content: center;
       align-items: center;
-      flex-grow: 1;
       padding: 20px;
     }
 
@@ -99,8 +88,7 @@
     }
 
     input[type="text"],
-    input[type="password"],
-    select {
+    input[type="password"] {
       width: 100%;
       padding: 0.75rem;
       border: 1px solid #cbd5e0;
@@ -110,7 +98,7 @@
       color: #2d3748;
     }
 
-    input:focus, select:focus {
+    input:focus {
       outline: none;
       border-color: #3182ce;
       box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
@@ -133,13 +121,6 @@
       background-color: var(--primary-hover);
     }
 
-    .btn-accent {
-      background-color: var(--accent);
-    }
-    .btn-accent:hover {
-      background-color: var(--accent-hover);
-    }
-
     .error-box {
       display: none;
       margin-top: 1.25rem;
@@ -150,369 +131,48 @@
       color: #c53030;
       font-size: 0.85rem;
     }
-
-    /* --- DASHBOARD STYLES --- */
-    #app-container {
-      display: none;
-      max-width: 1100px;
-      width: 95%;
-      margin: 20px auto;
-      flex-grow: 1;
-    }
-
-    .navbar {
-      background: white;
-      padding: 1rem 1.5rem;
-      border-radius: 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-
-    .navbar-brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .navbar-brand h2 {
-      font-size: 1.25rem;
-      color: var(--primary);
-    }
-
-    .user-badge {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
-
-    .user-name-tag {
-      background: var(--light-blue);
-      color: var(--primary);
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-weight: 600;
-      font-size: 0.85rem;
-    }
-
-    .btn-logout {
-      background: #e53e3e;
-      color: white;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-size: 0.85rem;
-      cursor: pointer;
-    }
-
-    .controls-panel {
-      background: white;
-      padding: 1.25rem;
-      border-radius: 10px;
-      margin-bottom: 20px;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 15px;
-      align-items: end;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-
-    .my-duties-card {
-      background: #e6fffa;
-      border-left: 5px solid var(--accent);
-      padding: 1.25rem;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      color: #234e52;
-    }
-
-    .my-duties-card h3 {
-      font-size: 1.1rem;
-      margin-bottom: 8px;
-    }
-
-    .duties-list {
-      list-style-type: none;
-    }
-
-    .duties-list li {
-      padding: 4px 0;
-      font-size: 0.95rem;
-    }
-
-    /* Table Styles */
-    .table-container {
-      background: white;
-      border-radius: 10px;
-      overflow-x: auto;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-      margin-bottom: 30px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: left;
-    }
-
-    th {
-      background: #f7fafc;
-      color: var(--text-muted);
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      padding: 14px 16px;
-      border-bottom: 2px solid var(--border-color);
-    }
-
-    td {
-      padding: 14px 16px;
-      border-bottom: 1px solid var(--border-color);
-      font-size: 0.95rem;
-    }
-
-    tr:hover {
-      background-color: #f8fafc;
-    }
-
-    .highlight-row {
-      background-color: #e6fffa !important;
-      font-weight: 600;
-    }
-
-    .action-btn {
-      background: var(--primary);
-      color: white;
-      border: none;
-      padding: 6px 10px;
-      border-radius: 4px;
-      font-size: 0.8rem;
-      cursor: pointer;
-    }
-
-    .status-ping {
-      display: inline-block;
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background-color: #48bb78;
-      margin-right: 6px;
-    }
-
-    /* Modal Styles */
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.5);
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-    }
-
-    .modal-content {
-      background: white;
-      padding: 2rem;
-      border-radius: 10px;
-      width: 90%;
-      max-width: 450px;
-    }
-
-    .modal-actions {
-      display: flex;
-      gap: 10px;
-      margin-top: 20px;
-    }
   </style>
 </head>
 <body>
 
-  <!-- 1. LOGIN CONTAINER -->
-  <div id="login-container" class="login-wrapper">
-    <div class="card">
-      <div class="logo-container">
-        <svg viewBox="0 0 24 24">
-          <path d="M12 2L4 7v13h16V7l-8-5zm6 16H6V8.5l6-3.75 6 3.75V18z"/>
-        </svg>
-      </div>
-      <h1>CBC Rotas</h1>
-      <p class="subtitle">Craigavon Baptist Church Rota Management</p>
-
-      <!-- Prevent standard HTML reloads -->
-      <form id="login-form" action="javascript:void(0);" onsubmit="handleLogin(event)" autocomplete="off">
-        <div class="form-group">
-          <label for="user-name">Your Name</label>
-          <input type="text" id="user-name" name="visitor_name" autocomplete="off" placeholder="Enter your full name">
-        </div>
-
-        <div class="form-group">
-          <label for="passcode">Passcode</label>
-          <input type="password" id="passcode" name="secret_code" autocomplete="new-password" placeholder="Enter secret passcode">
-        </div>
-
-        <button type="button" class="btn" onclick="handleLogin(event)">Access Rotas</button>
-        <div id="error-message" class="error-box"></div>
-      </form>
+  <div class="card">
+    <div class="logo-container">
+      <svg viewBox="0 0 24 24">
+        <path d="M12 2L4 7v13h16V7l-8-5zm6 16H6V8.5l6-3.75 6 3.75V18z"/>
+      </svg>
     </div>
-  </div>
+    <h1>CBC Rotas</h1>
+    <p class="subtitle">Craigavon Baptist Church Rota Management</p>
 
-  <!-- 2. MAIN DASHBOARD CONTAINER -->
-  <div id="app-container">
-    <!-- Navbar -->
-    <div class="navbar">
-      <div class="navbar-brand">
-        <div class="logo-container" style="width:40px; height:40px; margin:0;">
-          <svg viewBox="0 0 24 24" style="width:20px; height:20px;">
-            <path d="M12 2L4 7v13h16V7l-8-5zm6 16H6V8.5l6-3.75 6 3.75V18z"/>
-          </svg>
-        </div>
-        <h2>Craigavon Baptist Rotas</h2>
+    <form id="login-form" onsubmit="handleLogin(event); return false;">
+      <div class="form-group">
+        <label for="user-name">Your Name</label>
+        <input type="text" id="user-name" autocomplete="off" placeholder="Enter your full name" required>
       </div>
-      <div class="user-badge">
-        <span><span class="status-ping"></span>Live Sync</span>
-        <div class="user-name-tag" id="logged-user-label">Logged In</div>
-        <button class="btn-logout" id="logout-btn" onclick="handleLogout()">Logout</button>
-      </div>
-    </div>
 
-    <!-- Personal Duties Box -->
-    <div class="my-duties-card" id="my-duties-section">
-      <h3 id="my-duties-title">My Upcoming Rota Duties</h3>
-      <ul class="duties-list" id="my-duties-list">
-        <li>Loading your schedule...</li>
-      </ul>
-    </div>
-
-    <!-- Controls & Filters -->
-    <div class="controls-panel">
-      <div class="form-group" style="margin:0;">
-        <label for="search-input">Search Volunteer / Name</label>
-        <input type="text" id="search-input" placeholder="Type a name to highlight..." autocomplete="off">
+      <div class="form-group">
+        <label for="passcode">Passcode</label>
+        <input type="password" id="passcode" autocomplete="current-password" placeholder="Enter secret passcode" required>
       </div>
-      <div class="form-group" style="margin:0;">
-        <label for="role-filter">Filter by Service / Role</label>
-        <select id="role-filter">
-          <option value="ALL">All Roles & Services</option>
-        </select>
-      </div>
-      <div>
-        <button class="btn btn-accent" id="refresh-btn" onclick="loadRotas()">Refresh Schedule</button>
-      </div>
-    </div>
 
-    <!-- Schedule Grid Table -->
-    <div class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Service / Time</th>
-            <th>Role</th>
-            <th>Assigned Person(s)</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody id="rotas-table-body">
-          <tr>
-            <td colspan="5" style="text-align:center; padding: 20px;">Loading database rotas...</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- 3. EDIT ASSIGNMENT MODAL -->
-  <div class="modal-overlay" id="edit-modal">
-    <div class="modal-content">
-      <h3 style="margin-bottom:1rem; color:var(--primary);">Edit Assignment</h3>
-      <p id="modal-details" style="font-size:0.9rem; color:var(--text-muted); margin-bottom:1rem;"></p>
-      
-      <form id="edit-form" action="javascript:void(0);" onsubmit="handleEditSubmit(event)">
-        <input type="hidden" id="modal-rota-id">
-        <div class="form-group">
-          <label for="modal-assigned">Assigned Member(s)</label>
-          <input type="text" id="modal-assigned" required>
-        </div>
-        <div class="modal-actions">
-          <button type="button" class="btn" style="background:#cbd5e0; color:#2d3748;" id="modal-cancel" onclick="closeEditModal()">Cancel</button>
-          <button type="submit" class="btn">Save Assignment</button>
-        </div>
-      </form>
-    </div>
+      <button type="submit" class="btn">Access Rotas</button>
+      <div id="error-message" class="error-box"></div>
+    </form>
   </div>
 
   <script>
-    // --- SUPABASE & AUTH CONFIGURATION ---
-    const SUPABASE_URL = "https://ojzwujpahfjmaeisnfez.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_87n6hxMnH7uZENhXmNaikw_fCVVQWqZ";
     const SECRET_PASSCODE = "1234";
 
-    let supabase = null;
-
-    function getSupabase() {
-      if (!supabase && window.supabase) {
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-      }
-      return supabase;
+    // Auto-redirect if already logged in
+    if (localStorage.getItem('cbc_user_name')) {
+      window.location.href = "rotas.html";
     }
 
-    let allRotas = [];
-
-    // --- INITIALIZATION ---
-    window.addEventListener('DOMContentLoaded', () => {
-      // 1. Check URL search parameters fallback
-      const urlParams = new URLSearchParams(window.location.search);
-      const urlName = urlParams.get('visitor_name');
-      const urlPass = urlParams.get('secret_code');
-
-      if (urlName && urlPass === SECRET_PASSCODE) {
-        sessionStorage.setItem('cbc_user_name', urlName);
-        showDashboard(urlName);
-        return;
-      }
-
-      // 2. Check session storage
-      const savedUser = sessionStorage.getItem('cbc_user_name');
-      if (savedUser) {
-        showDashboard(savedUser);
-      }
-      
-      setInterval(pingDatabase, 240000);
-
-      const searchInput = document.getElementById('search-input');
-      if (searchInput) {
-        searchInput.addEventListener('input', () => {
-          renderTable();
-          updatePersonalDuties();
-        });
-      }
-
-      const roleFilter = document.getElementById('role-filter');
-      if (roleFilter) {
-        roleFilter.addEventListener('change', renderTable);
-      }
-    });
-
-    // --- AUTHENTICATION HANDLERS ---
     function handleLogin(event) {
-      if (event) {
-        event.preventDefault();
-        event.stopPropagation();
-      }
-
-      const userNameInput = document.getElementById('user-name');
-      const passcodeInput = document.getElementById('passcode');
+      event.preventDefault();
+      const userName = document.getElementById('user-name').value.trim();
+      const enteredPasscode = document.getElementById('passcode').value.trim();
       const errorBox = document.getElementById('error-message');
-
-      // Fall back to URL params if inputs are empty
-      const urlParams = new URLSearchParams(window.location.search);
-      const userName = userNameInput.value.trim() || urlParams.get('visitor_name') || '';
-      const enteredPasscode = passcodeInput.value.trim() || urlParams.get('secret_code') || '';
 
       if (!userName) {
         errorBox.innerText = "Please enter your name.";
@@ -526,183 +186,9 @@
         return;
       }
 
-      errorBox.style.display = "none";
-      sessionStorage.setItem('cbc_user_name', userName);
-      showDashboard(userName);
-    }
-
-    function handleLogout() {
-      sessionStorage.removeItem('cbc_user_name');
-      window.history.replaceState({}, document.title, window.location.pathname);
-      document.getElementById('app-container').style.display = 'none';
-      document.getElementById('login-container').style.display = 'flex';
-      document.getElementById('passcode').value = '';
-    }
-
-    function showDashboard(userName) {
-      document.getElementById('login-container').style.display = 'none';
-      document.getElementById('app-container').style.display = 'block';
-      document.getElementById('logged-user-label').innerText = userName;
-      document.getElementById('search-input').value = userName;
-      loadRotas();
-    }
-
-    // --- FETCH ROTAS FROM SUPABASE ---
-    async function loadRotas() {
-      const tbody = document.getElementById('rotas-table-body');
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 20px;">Fetching latest schedule...</td></tr>';
-
-      const client = getSupabase();
-      if (!client) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:red; padding:20px;">Database library is initializing or blocked by browser extensions. Try reloading page.</td></tr>';
-        return;
-      }
-
-      try {
-        const { data, error } = await client
-          .from('rotas')
-          .select('*')
-          .order('date', { ascending: true });
-
-        if (error) throw error;
-
-        allRotas = data || [];
-        populateRoleFilter(allRotas);
-        renderTable();
-        updatePersonalDuties();
-
-      } catch (err) {
-        console.error("Error loading rotas:", err);
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:red; padding:20px;">Unable to fetch rotas: ${err.message}</td></tr>`;
-      }
-    }
-
-    // --- RENDER TABLE GRID ---
-    function renderTable() {
-      const tbody = document.getElementById('rotas-table-body');
-      const searchVal = document.getElementById('search-input').value.toLowerCase().trim();
-      const roleVal = document.getElementById('role-filter').value;
-
-      tbody.innerHTML = '';
-
-      const filtered = allRotas.filter(row => {
-        const matchesRole = (roleVal === 'ALL' || row.role === roleVal || row.service === roleVal);
-        return matchesRole;
-      });
-
-      if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 20px;">No rota assignments found.</td></tr>';
-        return;
-      }
-
-      filtered.forEach(row => {
-        const tr = document.createElement('tr');
-        const assigned = row.assigned_persons || row.person || 'Unassigned';
-        
-        if (searchVal && assigned.toLowerCase().includes(searchVal)) {
-          tr.classList.add('highlight-row');
-        }
-
-        tr.innerHTML = `
-          <td><strong>${row.date || 'N/A'}</strong></td>
-          <td>${row.service || row.time || 'Sunday Service'}</td>
-          <td>${row.role || 'Volunteer'}</td>
-          <td>${assigned}</td>
-          <td>
-            <button class="action-btn" onclick="openEditModal(${row.id}, '${escapeHtml(row.role || '')}', '${escapeHtml(assigned)}')">Edit</button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    // --- PERSONAL DUTIES SUMMARY ---
-    function updatePersonalDuties() {
-      const currentUserName = sessionStorage.getItem('cbc_user_name') || '';
-      const listEl = document.getElementById('my-duties-list');
-      const titleEl = document.getElementById('my-duties-title');
-
-      titleEl.innerText = `${currentUserName}'s Upcoming Duties`;
-
-      if (!currentUserName) {
-        listEl.innerHTML = '<li>Enter your name in search to view personal duties.</li>';
-        return;
-      }
-
-      const userDuties = allRotas.filter(r => {
-        const person = (r.assigned_persons || r.person || '').toLowerCase();
-        return person.includes(currentUserName.toLowerCase());
-      });
-
-      if (userDuties.length === 0) {
-        listEl.innerHTML = '<li>No upcoming scheduled duties found for your name.</li>';
-      } else {
-        listEl.innerHTML = userDuties.map(d => `
-          <li>📅 <strong>${d.date}</strong> - ${d.role || 'Duty'} (${d.service || 'Service'})</li>
-        `).join('');
-      }
-    }
-
-    // --- POPULATE ROLE FILTER ---
-    function populateRoleFilter(data) {
-      const roleFilter = document.getElementById('role-filter');
-      const roles = new Set();
-      
-      data.forEach(item => {
-        if (item.role) roles.add(item.role);
-      });
-
-      roleFilter.innerHTML = '<option value="ALL">All Roles & Services</option>';
-      roles.forEach(role => {
-        const opt = document.createElement('option');
-        opt.value = role;
-        opt.textContent = role;
-        roleFilter.appendChild(opt);
-      });
-    }
-
-    // --- EDIT MODAL HANDLERS ---
-    window.openEditModal = function(id, role, currentAssigned) {
-      document.getElementById('modal-rota-id').value = id;
-      document.getElementById('modal-details').innerText = `Role: ${role}`;
-      document.getElementById('modal-assigned').value = currentAssigned;
-      document.getElementById('edit-modal').style.display = 'flex';
-    };
-
-    function closeEditModal() {
-      document.getElementById('edit-modal').style.display = 'none';
-    }
-
-    async function handleEditSubmit(event) {
-      if (event) event.preventDefault();
-      const id = document.getElementById('modal-rota-id').value;
-      const newAssigned = document.getElementById('modal-assigned').value.trim();
-
-      const client = getSupabase();
-      if (!client) return;
-
-      const { error } = await client
-        .from('rotas')
-        .update({ assigned_persons: newAssigned })
-        .eq('id', id);
-
-      if (error) {
-        alert("Failed to update assignment: " + error.message);
-      } else {
-        closeEditModal();
-        loadRotas();
-      }
-    }
-
-    async function pingDatabase() {
-      const client = getSupabase();
-      if (client) {
-        await client.from('rotas').select('id').limit(1);
-      }
-    }
-
-    function escapeHtml(str) {
-      return str.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+      // Save user session and navigate to dashboard page
+      localStorage.setItem('cbc_user_name', userName);
+      window.location.href = "rotas.html";
     }
   </script>
 </body>
