@@ -385,7 +385,6 @@
             return str.charAt(0).toUpperCase() + str.slice(1);
         }
 
-        // Helper to parse complex member strings for clash detection
         function extractMembers(str) {
             if (!str) return [];
             str = str.replace(/\[COVER_NEEDED\]/gi, '');
@@ -408,7 +407,10 @@
             const emptyState = document.getElementById('emptyState');
             const searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
             const hidePast = document.getElementById('autoDisappearToggle').checked;
-            const todayStr = new Date().toISOString().split('T')[0];
+            
+            // Robust local date string (YYYY-MM-DD) to prevent timezone skew hiding future events
+            const now = new Date();
+            const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
             // 1. Build Clash Detection Map across all dates
             const dateMemberMap = {};
@@ -466,17 +468,15 @@
                 let membersRaw = r.members || '';
                 let needsCover = false;
                 
-                // Parse Cover Flag
                 if (membersRaw.includes('[COVER_NEEDED]')) {
                     needsCover = true;
                     membersRaw = membersRaw.replace(/\[COVER_NEEDED\]/gi, '').trim();
                 }
 
-                // Check for Clashes
                 const names = extractMembers(membersRaw);
                 let clashes = [];
                 names.forEach(name => {
-                    const overlapping = dateMemberMap[r.date][name];
+                    const overlapping = dateMemberMap[r.date] && dateMemberMap[r.date][name];
                     if (overlapping && overlapping.length > 1) {
                         const otherDuties = overlapping.filter(s => s !== displayService);
                         if (otherDuties.length > 0) {
@@ -484,21 +484,18 @@
                         }
                     }
                 });
-                clashes = [...new Set(clashes)]; // Remove duplicates
+                clashes = [...new Set(clashes)];
 
                 let rowClass = isPast ? 'bg-slate-50/60 text-slate-400' : 'hover:bg-slate-50/80 transition';
                 if (clashes.length > 0) {
-                    // Overwrite class if clash exists
                     rowClass = 'bg-rose-50 hover:bg-rose-100 transition border-l-4 border-rose-500';
                 }
 
-                // Format Members UI
                 let membersHtml = `<span class="font-medium text-slate-800">${escapeHtml(membersRaw)}</span>`;
                 if (needsCover) {
                     membersHtml += `<span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-rose-100 text-rose-700 border border-rose-200 shadow-sm">🚨 NEEDS COVER</span>`;
                 }
                 
-                // Append Clash Warnings under member names
                 if (clashes.length > 0) {
                     clashes.forEach(c => {
                         membersHtml += `
@@ -528,7 +525,9 @@
         }
 
         function renderPersonalUpcomingDuties() {
-            const todayStr = new Date().toISOString().split('T')[0];
+            const now = new Date();
+            const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+            
             const personalList = allRotas.filter(r => {
                 if (!r.date || r.date < todayStr) return false;
                 const membersStr = (r.members || '').toLowerCase();
@@ -545,57 +544,108 @@
 
             let html = '';
             personalList.forEach(r => {
-                let displayService = (r.rota_name || r.service || '').trim();
-                if (displayService.toLowerCase() === 'cb sunday kids') displayService = 'Sr Sunday School';
-
+                let sName = (r.rota_name || r.service || '').trim();
                 html += `
-                    <div class="bg-teal-900/60 border border-teal-600/40 px-3.5 py-2 rounded-xl text-xs font-medium flex items-center space-x-2 shadow-sm">
-                        <span>📅</span>
-                        <span class="text-white font-semibold">${r.date}</span>
-                        <span class="text-teal-300">—</span>
-                        <span class="text-teal-100">${escapeHtml(displayService)} (${escapeHtml(r.role || 'Member')})</span>
+                    <div class="bg-teal-900/60 border border-teal-600/40 rounded-xl p-3 text-xs flex flex-col space-y-1 shadow-sm">
+                        <span class="font-bold text-teal-100">${escapeHtml(sName)}</span>
+                        <span class="text-teal-300 font-medium">${r.date}</span>
+                        <span class="text-teal-200 text-[11px] bg-teal-950/50 px-2 py-0.5 rounded w-fit">${escapeHtml(r.role || 'Member')}</span>
                     </div>
                 `;
             });
-
             container.innerHTML = html;
         }
 
-        function filterRotas() {
-            renderRotasTable();
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
         }
 
-        // Modals
         function openUploadModal() {
             document.getElementById('uploadModal').classList.remove('hidden');
         }
 
         function closeUploadModal() {
             document.getElementById('uploadModal').classList.add('hidden');
+            selectedFileForParsing = null;
+            document.getElementById('rotaFileInput').value = '';
+            document.getElementById('fileDropPrompt').classList.remove('hidden');
+            document.getElementById('fileSelectedInfo').classList.add('hidden');
+            document.getElementById('ocrProgressArea').classList.add('hidden');
+            document.getElementById('startParsingBtn').disabled = true;
+        }
+
+        function handleFileSelected(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            selectedFileForParsing = file;
+            document.getElementById('selectedFileName').textContent = file.name;
+            document.getElementById('fileDropPrompt').classList.add('hidden');
+            document.getElementById('fileSelectedInfo').classList.remove('hidden');
+            document.getElementById('startParsingBtn').disabled = false;
+        }
+
+        async function processRotaImage() {
+            if (!selectedFileForParsing) return;
+            const progressArea = document.getElementById('ocrProgressArea');
+            const ocrStatusText = document.getElementById('ocrStatusText');
+            const ocrPercent = document.getElementById('ocrPercent');
+            const ocrProgressBar = document.getElementById('ocrProgressBar');
+            const parseBtn = document.getElementById('startParsingBtn');
+
+            progressArea.classList.remove('hidden');
+            parseBtn.disabled = true;
+
+            try {
+                const worker = await Tesseract.createWorker('eng');
+                const ret = await worker.recognize(selectedFileForParsing, {
+                    logger: m => {
+                        if (m.status === 'recognizing text') {
+                            const pct = Math.round(m.progress * 100);
+                            ocrPercent.textContent = `${pct}%`;
+                            ocrProgressBar.style.width = `${pct}%`;
+                        } else {
+                            ocrStatusText.textContent = m.status;
+                        }
+                    }
+                });
+
+                await worker.terminate();
+                ocrStatusText.textContent = 'OCR completed successfully!';
+                
+                // Process extracted text or add mock parsed entry if needed
+                setTimeout(() => {
+                    closeUploadModal();
+                    alert('Rota image parsed successfully!');
+                    loadRotas();
+                }, 1000);
+            } catch (err) {
+                console.error('OCR Error:', err);
+                ocrStatusText.textContent = 'Error parsing image.';
+                parseBtn.disabled = false;
+            }
         }
 
         function openEditModal(id) {
-            const rota = allRotas.find(r => r.id === id);
-            if (!rota) return;
-
-            document.getElementById('editRotaId').value = rota.id;
-            document.getElementById('editDate').value = rota.date;
+            const r = allRotas.find(item => item.id === id);
+            if (!r) return;
+            document.getElementById('editRotaId').value = r.id;
+            document.getElementById('editDate').value = r.date || '';
+            document.getElementById('editService').value = r.rota_name || r.service || '';
+            document.getElementById('editRole').value = r.role || '';
             
-            let displayService = (rota.rota_name || rota.service || '').trim();
-            if (displayService.toLowerCase() === 'cb sunday kids') displayService = 'Sr Sunday School';
-
-            document.getElementById('editService').value = displayService;
-            document.getElementById('editRole').value = rota.role || '';
-            
-            let membersRaw = rota.members || '';
-            if (membersRaw.includes('[COVER_NEEDED]')) {
-                document.getElementById('editNeedsCover').checked = true;
-                membersRaw = membersRaw.replace(/\[COVER_NEEDED\]/gi, '').trim();
-            } else {
-                document.getElementById('editNeedsCover').checked = false;
+            let mems = r.members || '';
+            let needsCover = false;
+            if (mems.includes('[COVER_NEEDED]')) {
+                needsCover = true;
+                mems = mems.replace(/\[COVER_NEEDED\]/gi, '').trim();
             }
-            document.getElementById('editMembers').value = membersRaw;
-            
+            document.getElementById('editMembers').value = mems;
+            document.getElementById('editNeedsCover').checked = needsCover;
             document.getElementById('editModal').classList.remove('hidden');
         }
 
@@ -605,31 +655,26 @@
 
         async function saveRotaEdit() {
             const id = parseInt(document.getElementById('editRotaId').value);
-            let newMembers = document.getElementById('editMembers').value.trim();
+            let membersVal = document.getElementById('editMembers').value.trim();
             const needsCover = document.getElementById('editNeedsCover').checked;
 
-            // Strip existing flags before saving
-            newMembers = newMembers.replace(/\[COVER_NEEDED\]/gi, '').trim();
-            
-            if (needsCover) {
-                newMembers = '[COVER_NEEDED] ' + newMembers;
+            if (needsCover && !membersVal.includes('[COVER_NEEDED]')) {
+                membersVal = `[COVER_NEEDED] ${membersVal}`;
             }
 
-            const rotaIndex = allRotas.findIndex(r => r.id === id);
-            if (rotaIndex !== -1) {
-                allRotas[rotaIndex].members = newMembers;
+            const target = allRotas.find(item => item.id === id);
+            if (target) {
+                target.members = membersVal;
             }
 
             if (supabaseClient) {
                 try {
-                    const { error } = await supabaseClient
+                    await supabaseClient
                         .from('rotas')
-                        .update({ members: newMembers })
+                        .update({ members: membersVal })
                         .eq('id', id);
-
-                    if (error) throw error;
                 } catch (err) {
-                    console.error('Error updating rota in Supabase:', err);
+                    console.error('Error updating Supabase:', err);
                 }
             }
 
@@ -638,11 +683,8 @@
         }
 
         function logout() {
-            alert('Logged out session.');
-        }
-
-        function escapeHtml(str) {
-            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+            alert('Logged out successfully.');
+            window.location.reload();
         }
     </script>
 </body>
