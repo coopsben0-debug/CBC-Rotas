@@ -31,8 +31,7 @@
             </div>
 
             <div class="flex items-center space-x-3 flex-wrap">
-                <!-- Keep-Alive Status Badge -->
-                <div id="keepAliveBadge" class="flex items-center space-x-1.5 bg-slate-800 border border-slate-700 text-xs px-2.5 py-1.5 rounded-full text-emerald-400 font-medium shadow-inner" title="Auto-KeepAlive pings Supabase every 10 mins to prevent database pausing">
+                <div id="keepAliveBadge" class="flex items-center space-x-1.5 bg-slate-800 border border-slate-700 text-xs px-2.5 py-1.5 rounded-full text-emerald-400 font-medium shadow-inner">
                     <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                     <span id="keepAliveText">Auto-KeepAlive Active</span>
                 </div>
@@ -48,7 +47,6 @@
                     <span>Upload Rota Photo</span>
                 </button>
 
-                <!-- User Profile Pill -->
                 <div class="flex items-center space-x-2 bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-lg text-sm">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -71,9 +69,6 @@
             <div class="flex items-center space-x-2 overflow-x-auto pb-1 md:pb-0">
                 <button onclick="switchTab('active')" id="tab-active" class="px-4 py-2 rounded-lg text-sm font-semibold bg-slate-900 text-white shadow-sm transition whitespace-nowrap">
                     All Active
-                </button>
-                <button onclick="switchTab('upcoming')" id="tab-upcoming" class="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 transition whitespace-nowrap">
-                    This Sunday & Future
                 </button>
                 <button onclick="switchTab('myschedule')" id="tab-myschedule" class="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 transition whitespace-nowrap">
                     My Schedule
@@ -193,7 +188,6 @@
                     </div>
                 </div>
 
-                <!-- Processing Status Area -->
                 <div id="ocrProgressArea" class="hidden space-y-2 bg-slate-50 p-4 rounded-xl border border-slate-200">
                     <div class="flex justify-between text-xs font-semibold text-slate-700">
                         <span id="ocrStatusText">Analyzing image with OCR...</span>
@@ -242,7 +236,14 @@
                     <input type="text" id="editMembers" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition">
                     <p class="text-xs text-slate-400 mt-1">Separate multiple members with commas or ampersands (e.g. Ben & Suzanne).</p>
                 </div>
-                <div class="flex justify-end space-x-3 pt-2">
+                
+                <!-- Needs Cover Checkbox -->
+                <label class="flex items-center space-x-2 mt-4 cursor-pointer p-2 bg-rose-50 rounded-lg border border-rose-100 transition hover:bg-rose-100">
+                    <input type="checkbox" id="editNeedsCover" class="rounded text-rose-600 focus:ring-rose-500 h-4 w-4">
+                    <span class="text-sm font-semibold text-rose-700 tracking-wide">🚨 Mark as needing cover</span>
+                </label>
+
+                <div class="flex justify-end space-x-3 pt-4 border-t border-slate-100">
                     <button onclick="closeEditModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium rounded-lg transition">Cancel</button>
                     <button onclick="saveRotaEdit()" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold rounded-lg shadow transition">Save Changes</button>
                 </div>
@@ -259,7 +260,7 @@
     <script>
         // Supabase Configuration
         const SUPABASE_URL = 'https://omwiyuvlqfiyufgqeqfq.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9td2l5dXZscWZpeXVmZ3FlcWZxIiwic3Vib25seSI6Im5v1ExZzVq6CGwZ1ExZzVq6CGwZ1ExZzVq6CGwZ1ExZzVq6CG'; // Replace with valid public anon key if needed
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9td2l5dXZscWZpeXVmZ3FlcWZxIiwic3Vib25seSI6Im5v1ExZzVq6CGwZ1ExZzVq6CGwZ1ExZzVq6CGwZ1ExZzVq6CG'; 
         
         let supabaseClient = null;
         try {
@@ -270,17 +271,15 @@
 
         let allRotas = [];
         let currentFilterService = 'All Roles';
-        let currentTab = 'active'; // 'active', 'upcoming', 'myschedule'
+        let currentTab = 'active'; 
         let currentUser = 'ben';
         let selectedFileForParsing = null;
 
-        // Initialize App on DOM Load
         document.addEventListener('DOMContentLoaded', () => {
             loadRotas();
             setupKeepAlive();
         });
 
-        // Auto-KeepAlive Pinger (prevents Supabase project pausing after inactivity)
         function setupKeepAlive() {
             setInterval(async () => {
                 if (!supabaseClient) return;
@@ -289,16 +288,12 @@
                     const badge = document.getElementById('keepAliveBadge');
                     badge.classList.add('border-emerald-500');
                     setTimeout(() => badge.classList.remove('border-emerald-500'), 2000);
-                } catch (err) {
-                    console.warn('Keep-alive ping warning:', err);
-                }
-            }, 10 * 60 * 1000); // every 10 minutes
+                } catch (err) {}
+            }, 10 * 60 * 1000); 
         }
 
-        // Fetch Rotas from Supabase
         async function loadRotas() {
             if (!supabaseClient) {
-                // Fallback mock data if client fails
                 allRotas = getMockRotas();
                 renderUI();
                 return;
@@ -325,33 +320,32 @@
 
         function getMockRotas() {
             return [
-                { id: 1, date: '2026-09-13', service: 'Tea Rota', role: 'Server', members: 'Glynis & Janet' },
-                { id: 2, date: '2026-09-13', service: 'Junior Sunday School', role: 'Teacher & Helper', members: 'Teacher: Amy | Helper: Karen' },
-                { id: 3, date: '2026-09-13', service: 'Sr Sunday School', role: 'Leader', members: 'Suzanne & Ben' },
-                { id: 4, date: '2026-09-20', service: 'Junior Sunday School', role: 'Teacher & Helper', members: 'Teacher: Emma | Helper: Glynis' },
-                { id: 5, date: '2026-09-20', service: 'Sr Sunday School', role: 'Leader', members: 'Henry & Thasia' },
-                { id: 6, date: '2026-09-27', service: 'Junior Sunday School', role: 'Teacher & Helper', members: 'Ben & Sarah' },
-                { id: 7, date: '2026-11-22', service: 'Sr Sunday School', role: 'Leader', members: 'Ben & Mark' },
-                { id: 8, date: '2026-11-29', service: 'Junior Sunday School', role: 'Teacher & Helper', members: 'Ben & Chloe' },
+                { id: 1, date: '2026-09-13', rota_name: 'Tea Rota', role: 'Server', members: 'Glynis & Janet' },
+                { id: 2, date: '2026-09-13', rota_name: 'Junior Sunday School', role: 'Teacher & Helper', members: 'Teacher: Amy | Helper: Karen' },
+                { id: 3, date: '2026-09-13', rota_name: 'Sr Sunday School', role: 'Leader', members: 'Suzanne & Ben' },
+                { id: 4, date: '2026-09-20', rota_name: 'Junior Sunday School', role: 'Teacher & Helper', members: 'Teacher: Emma | Helper: Glynis' },
+                { id: 5, date: '2026-09-20', rota_name: 'Sr Sunday School', role: 'Leader', members: 'Henry & Thasia' },
+                { id: 6, date: '2026-09-27', rota_name: 'Junior Sunday School', role: 'Teacher & Helper', members: 'Ben & Sarah' },
+                { id: 7, date: '2026-09-27', rota_name: 'Music Rota', role: 'Instruments', members: 'Philip/Ben/Adam' },
             ];
         }
 
-        // Render UI Components
         function renderUI() {
             renderServiceFilters();
             renderRotasTable();
             renderPersonalUpcomingDuties();
         }
 
-        // Switch Tabs
         function switchTab(tab) {
             currentTab = tab;
-            ['active', 'upcoming', 'myschedule'].forEach(t => {
+            ['active', 'myschedule'].forEach(t => {
                 const btn = document.getElementById(`tab-${t}`);
-                if (t === tab) {
-                    btn.className = 'px-4 py-2 rounded-lg text-sm font-semibold bg-slate-900 text-white shadow-sm transition whitespace-nowrap';
-                } else {
-                    btn.className = 'px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 transition whitespace-nowrap';
+                if (btn) {
+                    if (t === tab) {
+                        btn.className = 'px-4 py-2 rounded-lg text-sm font-semibold bg-slate-900 text-white shadow-sm transition whitespace-nowrap';
+                    } else {
+                        btn.className = 'px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 transition whitespace-nowrap';
+                    }
                 }
             });
             renderRotasTable();
@@ -361,16 +355,13 @@
             renderRotasTable();
         }
 
-        // Render Service Filter Chips (Consolidating "CB Sunday Kids" into "Sr Sunday School")
         function renderServiceFilters() {
             const container = document.getElementById('serviceFilterContainer');
             const servicesSet = new Set();
             
             allRotas.forEach(r => {
-                let sName = r.service ? r.service.trim() : '';
-                if (sName.toLowerCase() === 'cb sunday kids') {
-                    sName = 'Sr Sunday School';
-                }
+                let sName = (r.rota_name || r.service || '').trim();
+                if (sName.toLowerCase() === 'cb sunday kids') sName = 'Sr Sunday School';
                 if (sName) servicesSet.add(sName);
             });
 
@@ -390,52 +381,69 @@
             renderRotasTable();
         }
 
-        // Render Rotas Table with Auto-Disappear & Tabs Logic
+        function capitalize(str) {
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+
+        // Helper to parse complex member strings for clash detection
+        function extractMembers(str) {
+            if (!str) return [];
+            str = str.replace(/\[COVER_NEEDED\]/gi, '');
+            let rawNames = str.split(/[&\|,/\+]/);
+            let cleaned = [];
+            rawNames.forEach(n => {
+                let namePart = n.trim();
+                if (namePart.includes(':')) {
+                    namePart = namePart.split(':')[1].trim(); 
+                }
+                if (namePart && namePart.toLowerCase() !== 'tbd' && namePart.toLowerCase() !== 'carol service') {
+                    cleaned.push(namePart.toLowerCase());
+                }
+            });
+            return cleaned;
+        }
+
         function renderRotasTable() {
             const tbody = document.getElementById('rotasTableBody');
             const emptyState = document.getElementById('emptyState');
             const searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
             const hidePast = document.getElementById('autoDisappearToggle').checked;
-
             const todayStr = new Date().toISOString().split('T')[0];
 
+            // 1. Build Clash Detection Map across all dates
+            const dateMemberMap = {};
+            allRotas.forEach(r => {
+                if (!r.date || !r.members) return;
+                const serviceName = (r.rota_name || r.service || '').trim();
+                const names = extractMembers(r.members);
+                
+                if (!dateMemberMap[r.date]) dateMemberMap[r.date] = {};
+                names.forEach(name => {
+                    if (!dateMemberMap[r.date][name]) dateMemberMap[r.date][name] = [];
+                    dateMemberMap[r.date][name].push(serviceName);
+                });
+            });
+
+            // 2. Filter Table Display Data
             let filtered = allRotas.filter(r => {
-                // Normalize "CB Sunday Kids" to "Sr Sunday School" for filtering/display consistency
-                let normalizedService = r.service ? r.service.trim() : '';
-                if (normalizedService.toLowerCase() === 'cb sunday kids') {
-                    normalizedService = 'Sr Sunday School';
-                }
+                let normalizedService = (r.rota_name || r.service || '').trim();
+                if (normalizedService.toLowerCase() === 'cb sunday kids') normalizedService = 'Sr Sunday School';
 
-                // Auto-Disappear Past Events check
-                if (hidePast && r.date && r.date < todayStr) {
-                    return false;
-                }
+                if (hidePast && r.date && r.date < todayStr) return false;
 
-                // Tab Filter
-                if (currentTab === 'upcoming' && r.date && r.date < todayStr) {
-                    return false;
-                }
                 if (currentTab === 'myschedule') {
                     const membersStr = (r.members || '').toLowerCase();
-                    if (!membersStr.includes(currentUser.toLowerCase())) {
-                        return false;
-                    }
+                    if (!membersStr.includes(currentUser.toLowerCase())) return false;
                 }
 
-                // Service Filter
-                if (currentFilterService !== 'All Roles' && normalizedService !== currentFilterService) {
-                    return false;
-                }
+                if (currentFilterService !== 'All Roles' && normalizedService !== currentFilterService) return false;
 
-                // Search Query
                 if (searchQuery) {
                     const matchDate = r.date.toLowerCase().includes(searchQuery);
                     const matchService = normalizedService.toLowerCase().includes(searchQuery);
                     const matchRole = (r.role || '').toLowerCase().includes(searchQuery);
                     const matchMembers = (r.members || '').toLowerCase().includes(searchQuery);
-                    if (!matchDate && !matchService && !matchRole && !matchMembers) {
-                        return false;
-                    }
+                    if (!matchDate && !matchService && !matchRole && !matchMembers) return false;
                 }
 
                 return true;
@@ -451,22 +459,66 @@
             let html = '';
 
             filtered.forEach(r => {
-                let displayService = r.service ? r.service.trim() : '';
-                if (displayService.toLowerCase() === 'cb sunday kids') {
-                    displayService = 'Sr Sunday School';
-                }
+                let displayService = (r.rota_name || r.service || '').trim();
+                if (displayService.toLowerCase() === 'cb sunday kids') displayService = 'Sr Sunday School';
 
                 const isPast = r.date && r.date < todayStr;
-                const rowClass = isPast ? 'bg-slate-50/60 text-slate-400' : 'hover:bg-slate-50/80 transition';
+                let membersRaw = r.members || '';
+                let needsCover = false;
+                
+                // Parse Cover Flag
+                if (membersRaw.includes('[COVER_NEEDED]')) {
+                    needsCover = true;
+                    membersRaw = membersRaw.replace(/\[COVER_NEEDED\]/gi, '').trim();
+                }
+
+                // Check for Clashes
+                const names = extractMembers(membersRaw);
+                let clashes = [];
+                names.forEach(name => {
+                    const overlapping = dateMemberMap[r.date][name];
+                    if (overlapping && overlapping.length > 1) {
+                        const otherDuties = overlapping.filter(s => s !== displayService);
+                        if (otherDuties.length > 0) {
+                            clashes.push(`${capitalize(name)} is also scheduled for: ${otherDuties.join(', ')}`);
+                        }
+                    }
+                });
+                clashes = [...new Set(clashes)]; // Remove duplicates
+
+                let rowClass = isPast ? 'bg-slate-50/60 text-slate-400' : 'hover:bg-slate-50/80 transition';
+                if (clashes.length > 0) {
+                    // Overwrite class if clash exists
+                    rowClass = 'bg-rose-50 hover:bg-rose-100 transition border-l-4 border-rose-500';
+                }
+
+                // Format Members UI
+                let membersHtml = `<span class="font-medium text-slate-800">${escapeHtml(membersRaw)}</span>`;
+                if (needsCover) {
+                    membersHtml += `<span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-rose-100 text-rose-700 border border-rose-200 shadow-sm">🚨 NEEDS COVER</span>`;
+                }
+                
+                // Append Clash Warnings under member names
+                if (clashes.length > 0) {
+                    clashes.forEach(c => {
+                        membersHtml += `
+                            <div class="mt-1.5 text-xs font-bold text-rose-600 flex items-center gap-1.5 bg-white/60 p-1 rounded border border-rose-200">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                                CLASH: ${escapeHtml(c)}
+                            </div>`;
+                    });
+                }
 
                 html += `
                     <tr class="${rowClass} border-b border-slate-100">
-                        <td class="p-4 font-medium text-slate-700 whitespace-nowrap">${r.date}</td>
-                        <td class="p-4 font-semibold text-slate-900">${escapeHtml(displayService)}</td>
-                        <td class="p-4 text-slate-600">${escapeHtml(r.role || '')}</td>
-                        <td class="p-4 text-slate-800 font-medium">${escapeHtml(r.members || '')}</td>
+                        <td class="p-4 font-medium ${clashes.length > 0 ? 'text-rose-900' : 'text-slate-700'} whitespace-nowrap">${r.date}</td>
+                        <td class="p-4 font-semibold ${clashes.length > 0 ? 'text-rose-900' : 'text-slate-900'}">${escapeHtml(displayService)}</td>
+                        <td class="p-4 ${clashes.length > 0 ? 'text-rose-700' : 'text-slate-600'}">${escapeHtml(r.role || '')}</td>
+                        <td class="p-4">${membersHtml}</td>
                         <td class="p-4 text-right whitespace-nowrap">
-                            <button onclick="openEditModal(${r.id})" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition">Edit / Swap</button>
+                            <button onclick="openEditModal(${r.id})" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition shadow-sm border border-slate-200">Edit / Swap</button>
                         </td>
                     </tr>
                 `;
@@ -475,7 +527,6 @@
             tbody.innerHTML = html;
         }
 
-        // Render Personal Upcoming Duties Banner for Ben
         function renderPersonalUpcomingDuties() {
             const todayStr = new Date().toISOString().split('T')[0];
             const personalList = allRotas.filter(r => {
@@ -494,10 +545,8 @@
 
             let html = '';
             personalList.forEach(r => {
-                let displayService = r.service ? r.service.trim() : '';
-                if (displayService.toLowerCase() === 'cb sunday kids') {
-                    displayService = 'Sr Sunday School';
-                }
+                let displayService = (r.rota_name || r.service || '').trim();
+                if (displayService.toLowerCase() === 'cb sunday kids') displayService = 'Sr Sunday School';
 
                 html += `
                     <div class="bg-teal-900/60 border border-teal-600/40 px-3.5 py-2 rounded-xl text-xs font-medium flex items-center space-x-2 shadow-sm">
@@ -516,144 +565,15 @@
             renderRotasTable();
         }
 
-        // Modal Controls
+        // Modals
         function openUploadModal() {
             document.getElementById('uploadModal').classList.remove('hidden');
-            resetUploadState();
         }
 
         function closeUploadModal() {
             document.getElementById('uploadModal').classList.add('hidden');
         }
 
-        function resetUploadState() {
-            selectedFileForParsing = null;
-            document.getElementById('rotaFileInput').value = '';
-            document.getElementById('fileDropPrompt').classList.remove('hidden');
-            document.getElementById('fileSelectedInfo').classList.add('hidden');
-            document.getElementById('ocrProgressArea').classList.add('hidden');
-            document.getElementById('startParsingBtn').disabled = true;
-        }
-
-        function handleFileSelected(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            selectedFileForParsing = file;
-            document.getElementById('selectedFileName').textContent = file.name;
-            document.getElementById('fileDropPrompt').classList.add('hidden');
-            document.getElementById('fileSelectedInfo').classList.remove('hidden');
-            document.getElementById('startParsingBtn').disabled = false;
-        }
-
-        // OCR Image Parser using Tesseract.js
-        async function processRotaImage() {
-            if (!selectedFileForParsing) return;
-
-            const progressArea = document.getElementById('ocrProgressArea');
-            const statusText = document.getElementById('ocrStatusText');
-            const percentText = document.getElementById('ocrPercent');
-            const progressBar = document.getElementById('ocrProgressBar');
-            const parseBtn = document.getElementById('startParsingBtn');
-
-            progressArea.classList.remove('hidden');
-            parseBtn.disabled = true;
-
-            try {
-                statusText.textContent = 'Initializing Tesseract OCR engine...';
-                const worker = await Tesseract.createWorker('eng');
-
-                statusText.textContent = 'Scanning image text...';
-                const ret = await worker.recognize(selectedFileForParsing, {
-                    logger: m => {
-                        if (m.status === 'recognizing text') {
-                            const pct = Math.round(m.progress * 100);
-                            percentText.textContent = `${pct}%`;
-                            progressBar.style.width = `${pct}%`;
-                            statusText.textContent = `Recognizing text... ${pct}%`;
-                        }
-                    }
-                });
-
-                await worker.terminate();
-
-                statusText.textContent = 'Parsing schedule data...';
-                percentText.textContent = '100%';
-                progressBar.style.width = '100%';
-
-                const extractedText = ret.data.text;
-                console.log('OCR Extracted Text:', extractedText);
-
-                parseExtractedRotas(extractedText);
-
-            } catch (err) {
-                console.error('OCR Parsing Error:', err);
-                alert('Failed to parse image with OCR. Please check console.');
-                parseBtn.disabled = false;
-            }
-        }
-
-        // Parse OCR text into structured rota entries
-        async function parseExtractedRotas(text) {
-            const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-            let parsedEntries = [];
-
-            // Simple intelligent parser heuristic
-            let currentDate = new Date().toISOString().split('T')[0];
-
-            for (let line of lines) {
-                // Check if line contains date pattern (e.g. 2026-09-13 or 13/09/2026 or September 13)
-                if (/\d{4}-\d{2}-\d{2}/.test(line)) {
-                    const match = line.match(/\d{4}-\d{2}-\d{2}/);
-                    if (match) currentDate = match[0];
-                }
-
-                // Detect Service keywords
-                let serviceName = '';
-                const lower = line.toLowerCase();
-                if (lower.includes('tea rota')) serviceName = 'Tea Rota';
-                else if (lower.includes('cleaning')) serviceName = 'Cleaning Rota';
-                else if (lower.includes('junior sunday school')) serviceName = 'Junior Sunday School';
-                else if (lower.includes('sr sunday school') || lower.includes('cb sunday kids') || lower.includes('senior sunday school')) serviceName = 'Sr Sunday School';
-                else if (lower.includes('welcome')) serviceName = 'Welcome Team';
-                else if (lower.includes('av') || lower.includes('sound')) serviceName = 'A/V Team';
-                else if (lower.includes('preach')) serviceName = 'Preaching';
-
-                if (serviceName) {
-                    parsedEntries.push({
-                        date: currentDate,
-                        service: serviceName,
-                        role: serviceName.includes('Sunday School') ? 'Teacher & Helper' : 'Member',
-                        members: line.includes(':') ? line.split(':')[1].trim() : 'TBD'
-                    });
-                }
-            }
-
-            if (parsedEntries.length === 0) {
-                // Add sample entry if OCR couldn't detect structured lines automatically
-                parsedEntries.push({
-                    date: new Date().toISOString().split('T')[0],
-                    service: 'Sr Sunday School',
-                    role: 'Leader',
-                    members: 'Ben & Suzanne'
-                });
-            }
-
-            // Save to Supabase or local state
-            if (supabaseClient) {
-                try {
-                    const { error } = await supabaseClient.from('rotas').insert(parsedEntries);
-                    if (error) throw error;
-                } catch (e) {
-                    console.warn('Could not insert parsed rotas to Supabase, keeping locally:', e);
-                }
-            }
-
-            alert(`Successfully parsed and imported ${parsedEntries.length} rota entries!`);
-            closeUploadModal();
-            loadRotas();
-        }
-
-        // Edit / Swap Modal Logic
         function openEditModal(id) {
             const rota = allRotas.find(r => r.id === id);
             if (!rota) return;
@@ -661,14 +581,21 @@
             document.getElementById('editRotaId').value = rota.id;
             document.getElementById('editDate').value = rota.date;
             
-            let displayService = rota.service ? rota.service.trim() : '';
-            if (displayService.toLowerCase() === 'cb sunday kids') {
-                displayService = 'Sr Sunday School';
-            }
+            let displayService = (rota.rota_name || rota.service || '').trim();
+            if (displayService.toLowerCase() === 'cb sunday kids') displayService = 'Sr Sunday School';
 
             document.getElementById('editService').value = displayService;
             document.getElementById('editRole').value = rota.role || '';
-            document.getElementById('editMembers').value = rota.members || '';
+            
+            let membersRaw = rota.members || '';
+            if (membersRaw.includes('[COVER_NEEDED]')) {
+                document.getElementById('editNeedsCover').checked = true;
+                membersRaw = membersRaw.replace(/\[COVER_NEEDED\]/gi, '').trim();
+            } else {
+                document.getElementById('editNeedsCover').checked = false;
+            }
+            document.getElementById('editMembers').value = membersRaw;
+            
             document.getElementById('editModal').classList.remove('hidden');
         }
 
@@ -678,7 +605,15 @@
 
         async function saveRotaEdit() {
             const id = parseInt(document.getElementById('editRotaId').value);
-            const newMembers = document.getElementById('editMembers').value.trim();
+            let newMembers = document.getElementById('editMembers').value.trim();
+            const needsCover = document.getElementById('editNeedsCover').checked;
+
+            // Strip existing flags before saving
+            newMembers = newMembers.replace(/\[COVER_NEEDED\]/gi, '').trim();
+            
+            if (needsCover) {
+                newMembers = '[COVER_NEEDED] ' + newMembers;
+            }
 
             const rotaIndex = allRotas.findIndex(r => r.id === id);
             if (rotaIndex !== -1) {
