@@ -300,13 +300,33 @@
             }
 
             try {
-                const { data, error } = await supabaseClient
-                    .from('rotas')
-                    .select('*')
-                    .order('date', { ascending: true });
+                let allData = [];
+                let rangeSize = 1000;
+                let from = 0;
+                let fetchMore = true;
 
-                if (error) throw error;
-                allRotas = data || [];
+                // Paginate through Supabase results to bypass row limits past 1,000 rows
+                while (fetchMore) {
+                    const { data, error } = await supabaseClient
+                        .from('rotas')
+                        .select('*')
+                        .order('date', { ascending: true })
+                        .range(from, from + rangeSize - 1);
+
+                    if (error) throw error;
+
+                    if (data && data.length > 0) {
+                        allData = allData.concat(data);
+                        from += rangeSize;
+                        if (data.length < rangeSize) {
+                            fetchMore = false;
+                        }
+                    } else {
+                        fetchMore = false;
+                    }
+                }
+
+                allRotas = allData;
                 if (allRotas.length === 0) {
                     allRotas = getMockRotas();
                 }
@@ -488,7 +508,6 @@
 
                 let rowClass = isPast ? 'bg-slate-50/60 text-slate-400' : 'hover:bg-slate-50/80 transition';
                 if (clashes.length > 0) {
-                    // Overwrite class if clash exists
                     rowClass = 'bg-rose-50 hover:bg-rose-100 transition border-l-4 border-rose-500';
                 }
 
@@ -608,7 +627,6 @@
             let newMembers = document.getElementById('editMembers').value.trim();
             const needsCover = document.getElementById('editNeedsCover').checked;
 
-            // Strip existing flags before saving
             newMembers = newMembers.replace(/\[COVER_NEEDED\]/gi, '').trim();
             
             if (needsCover) {
