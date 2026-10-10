@@ -24,7 +24,7 @@
     <form id="login-form" onsubmit="handleLogin(event); return false;" class="space-y-4 text-left">
       <div>
         <label for="user-name" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Your Name</label>
-        <input type="text" id="user-name" placeholder="e.g. Ben Cooper" required class="w-full px-4 py-2.5 bg-sky-50/50 border border-slate-300 rounded-lg text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#38b2ac]">
+        <input type="text" id="user-name" placeholder="e.g. Ben or Colin" required class="w-full px-4 py-2.5 bg-sky-50/50 border border-slate-300 rounded-lg text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#38b2ac]">
       </div>
 
       <div>
@@ -41,8 +41,12 @@
   </div>
 
   <script>
+    // Turso Config Embedded for Verification & Optional Future DB Login Checks
+    const TURSO_URL = 'https://cbc-rota-coopsben0-debug.aws-eu-west-1.turso.io';
+    const TURSO_TOKEN = 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3OTE2NzQ2ODYsImlkIjoiMDFhMTI4MWQtYmMwMS03ZWNmLTlhZWMtMzRiNmI0YWQzOGY1Iiwia2lkIjoiRGl5ZFV0d0owWW9SM0p6RTlIeFE5aHZZWGtyZzlCRkRoajIzcG9pNjEtWSIsInJpZCI6IjBkNGZhNDQyLTdlOTEtNDg2NS1iZDM2LWMwYmVhZTNlMjhmZiJ9._TYe8zjOBZRQXZJvoaABhol7Qc1LXcpAqc6A7-M4na3Hc7D38bGgDlwl2HGl_pWRRPfJ1SmQOnXTe44s37ZCCAlib';
     const SECRET_PASSCODE = "1234";
 
+    // Auto-redirect if already logged in
     if (localStorage.getItem('cbc_user_name')) {
       window.location.href = "rotas.html";
     }
@@ -65,6 +69,7 @@
         return;
       }
 
+      // Save user session and navigate to dashboard page
       localStorage.setItem('cbc_user_name', userName);
       window.location.href = "rotas.html";
     }
