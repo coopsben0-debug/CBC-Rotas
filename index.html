@@ -4,166 +4,45 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CBC Rotas - Login</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --bg-dark: #0f2b48;
-      --card-bg: #ffffff;
-      --primary: #0f2b48;
-      --primary-hover: #1a365d;
-      --accent: #38b2ac;
-      --text-main: #2d3748;
-      --text-muted: #718096;
-      --light-blue: #ebf8ff;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: var(--bg-dark);
-      color: var(--text-main);
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-    }
-
-    .card {
-      background: var(--card-bg);
-      padding: 2.5rem;
-      border-radius: 12px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-      width: 100%;
-      max-width: 420px;
-      text-align: center;
-    }
-
-    .logo-container {
-      width: 70px;
-      height: 70px;
-      background: var(--accent);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 1.25rem auto;
-    }
-
-    .logo-container svg {
-      width: 36px;
-      height: 36px;
-      fill: white;
-    }
-
-    h1 {
-      font-size: 1.6rem;
-      color: var(--primary);
-      margin-bottom: 0.25rem;
-    }
-
-    p.subtitle {
-      color: var(--text-muted);
-      font-size: 0.9rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .form-group {
-      text-align: left;
-      margin-bottom: 1.25rem;
-    }
-
-    label {
-      display: block;
-      font-size: 0.75rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: #4a5568;
-      margin-bottom: 0.4rem;
-    }
-
-    input[type="text"],
-    input[type="password"] {
-      width: 100%;
-      padding: 0.75rem;
-      border: 1px solid #cbd5e0;
-      border-radius: 6px;
-      font-size: 0.95rem;
-      background-color: var(--light-blue);
-      color: #2d3748;
-    }
-
-    input:focus {
-      outline: none;
-      border-color: #3182ce;
-      box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
-    }
-
-    .btn {
-      width: 100%;
-      padding: 0.85rem;
-      background-color: var(--primary);
-      color: white;
-      border: none;
-      border-radius: 6px;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background-color 0.2s;
-    }
-
-    .btn:hover {
-      background-color: var(--primary-hover);
-    }
-
-    .error-box {
-      display: none;
-      margin-top: 1.25rem;
-      padding: 0.75rem;
-      background-color: #fff5f5;
-      border: 1px solid #feb2b2;
-      border-radius: 6px;
-      color: #c53030;
-      font-size: 0.85rem;
-    }
+    body { font-family: 'Inter', sans-serif; }
   </style>
 </head>
-<body>
+<body class="bg-[#0f2b48] text-slate-800 min-h-screen flex items-center justify-center p-4">
 
-  <div class="card">
-    <div class="logo-container">
-      <svg viewBox="0 0 24 24">
-        <path d="M12 2L4 7v13h16V7l-8-5zm6 16H6V8.5l6-3.75 6 3.75V18z"/>
-      </svg>
+  <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md text-center border border-slate-200">
+    <!-- Church Logo -->
+    <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 p-2 shadow-inner border border-slate-200">
+      <img src="cbc logo.webp" alt="CBC Logo" class="w-full h-full object-contain rounded-full" onerror="this.onerror=null; this.src='https://via.placeholder.com/80?text=CBC';">
     </div>
-    <h1>CBC Rotas</h1>
-    <p class="subtitle">Craigavon Baptist Church Rota Management</p>
 
-    <form id="login-form" onsubmit="handleLogin(event); return false;">
-      <div class="form-group">
-        <label for="user-name">Your Name</label>
-        <input type="text" id="user-name" autocomplete="off" placeholder="Enter your full name" required>
+    <h1 class="text-2xl font-bold text-[#0f2b48]">CBC Rota Management</h1>
+    <p class="text-xs text-slate-500 mb-6 uppercase tracking-wider font-medium">Craigavon Baptist Church</p>
+
+    <form id="login-form" onsubmit="handleLogin(event); return false;" class="space-y-4 text-left">
+      <div>
+        <label for="user-name" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Your Name</label>
+        <input type="text" id="user-name" placeholder="e.g. Ben Cooper" required class="w-full px-4 py-2.5 bg-sky-50/50 border border-slate-300 rounded-lg text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#38b2ac]">
       </div>
 
-      <div class="form-group">
-        <label for="passcode">Passcode</label>
-        <input type="password" id="passcode" autocomplete="current-password" placeholder="Enter secret passcode" required>
+      <div>
+        <label for="passcode" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Passcode</label>
+        <input type="password" id="passcode" placeholder="Enter church passcode" required class="w-full px-4 py-2.5 bg-sky-50/50 border border-slate-300 rounded-lg text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#38b2ac]">
       </div>
 
-      <button type="submit" class="btn">Access Rotas</button>
-      <div id="error-message" class="error-box"></div>
+      <button type="submit" class="w-full py-3 bg-[#0f2b48] hover:bg-[#1a365d] text-white text-sm font-semibold rounded-lg shadow-md transition duration-200">
+        Access Church Rotas
+      </button>
+
+      <div id="error-message" class="hidden p-3 bg-rose-50 border border-rose-200 rounded-lg text-rose-600 text-xs text-center font-medium"></div>
     </form>
   </div>
 
   <script>
     const SECRET_PASSCODE = "1234";
 
-    // Auto-redirect if already logged in
     if (localStorage.getItem('cbc_user_name')) {
       window.location.href = "rotas.html";
     }
@@ -176,17 +55,16 @@
 
       if (!userName) {
         errorBox.innerText = "Please enter your name.";
-        errorBox.style.display = "block";
+        errorBox.classList.remove('hidden');
         return;
       }
 
       if (enteredPasscode !== SECRET_PASSCODE) {
         errorBox.innerText = "Incorrect passcode. Please try again.";
-        errorBox.style.display = "block";
+        errorBox.classList.remove('hidden');
         return;
       }
 
-      // Save user session and navigate to dashboard page
       localStorage.setItem('cbc_user_name', userName);
       window.location.href = "rotas.html";
     }
