@@ -150,8 +150,8 @@
             loadDailyVerse();
         });
 
-        // Turso REST API Client
-        async function runTursoQuery(sql, args = []) {
+        // Fixed Turso REST API Client (Properly parses Turso result objects)
+        async function runTursoQuery(sql) {
             try {
                 const response = await fetch(`${TURSO_URL}/v2/pipeline`, {
                     method: 'POST',
@@ -161,25 +161,24 @@
                     },
                     body: JSON.stringify({
                         requests: [
-                            {
-                                type: 'execute',
-                                stmt: {
-                                    sql: sql,
-                                    args: args.map(v => ({ type: typeof v === 'number' ? 'integer' : 'text', value: String(v) }))
-                                }
-                            },
+                            { type: 'execute', stmt: { sql: sql } },
                             { type: 'close' }
                         ]
                     })
                 });
 
                 const data = await response.json();
-                if (!data.results[0] || data.results[0].type === 'error') return [];
+                if (!data.results || !data.results[0] || data.results[0].type === 'error') return [];
 
-                const cols = data.results[0].response.result.cols.map(c => c.name);
-                return data.results[0].response.result.rows.map(row => {
+                const resObj = data.results[0].response.result;
+                if (!resObj || !resObj.cols || !resObj.rows) return [];
+
+                const cols = resObj.cols.map(c => c.name);
+                return resObj.rows.map(row => {
                     let obj = {};
-                    row.forEach((cell, idx) => obj[cols[idx]] = cell.value);
+                    row.forEach((cell, idx) => {
+                        obj[cols[idx]] = cell ? cell.value : null;
+                    });
                     return obj;
                 });
             } catch (err) {
@@ -309,11 +308,16 @@
                 return true;
             });
 
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-slate-400">No matching rotas found. Uncheck "HIDE PAST DATES" or clear search filters.</td></tr>`;
+                return;
+            }
+
             tbody.innerHTML = filtered.map(r => {
                 const members = r.assigned_members.split(/[&,]/).map(m => m.trim().toLowerCase());
                 let hasClash = false;
                 members.forEach(m => {
-                    if (clashMap[r.date][m] && clashMap[r.date][m].length > 1) hasClash = true;
+                    if (clashMap[r.date] && clashMap[r.date][m] && clashMap[r.date][m].length > 1) hasClash = true;
                 });
 
                 return `
