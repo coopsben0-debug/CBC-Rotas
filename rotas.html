@@ -94,7 +94,7 @@
                                 <th class="p-4 w-36">Date</th>
                                 <th class="p-4">Category</th>
                                 <th class="p-4">Role</th>
-                                <th class="p-4">Assigned Member(s) & Lessons</th>
+                                <th class="p-4">Assigned Member(s) & Details</th>
                                 <th class="p-4 text-right w-28">Action</th>
                             </tr>
                         </thead>
@@ -128,7 +128,7 @@
     <script>
         // Turso Configuration
         const TURSO_URL = 'https://cbc-rota-coopsben0-debug.aws-eu-west-1.turso.io';
-        const TURSO_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3OTE2NzQ2ODYsImlkIjoiMDFhMTI4MWQtYmMwMS03ZWNmLTlhZWMtMzRiNmI0YWQzOGY1Iiwia2lkIjoiRGl5ZFV0d0owWW9SM0p6RTlIeFE5aHZZWGtyZzlCRkRoajIzcG9pNjEtWSIsInJpZCI6IjBkNGZhNDQyLTdlOTEtNDg2NS1iZDM2LWMwYmVhZTNlMjhmZiJ9._TYe8zjOBZRQXZJvoaABhol7Qc1LXcpAqc6A7-M4na3Hc7D38bGgDlwl2HGl_pWRRPfJ1SmQOnXTe44s37ZCCAlib';
+        const TURSO_TOKEN = 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3OTE2NzQ2ODYsImlkIjoiMDFhMTI4MWQtYmMwMS03ZWNmLTlhZWMtMzRiNmI0YWQzOGY1Iiwia2lkIjoiRGl5ZFV0d0owWW9SM0p6RTlIeFE5aHZZWGtyZzlCRkRoajIzcG9pNjEtWSIsInJpZCI6IjBkNGZhNDQyLTdlOTEtNDg2NS1iZDM2LWMwYmVhZTNlMjhmZiJ9._TYe8zjOBZRQXZJvoaABhol7Qc1LXcpAqc6A7-M4na3Hc7D38bGgDlwl2HGl_pWRRPfJ1SmQOnXTe44s37ZCCAlib';
 
         const ROTA_CATEGORIES = [
             'Tea Rota', 'Worship', 'Preaching', 'Senior Sunday School',
@@ -189,15 +189,30 @@
         }
 
         async function loadDataFromTurso() {
-            allRotas = await runTursoQuery("SELECT * FROM rotas ORDER BY date ASC;");
-            allEvents = await runTursoQuery("SELECT * FROM events ORDER BY date ASC;");
-            
-            if (allRotas.length === 0) {
-                allRotas = [
-                    { id: 1, date: '2026-10-18', category: 'Worship', role: 'Guitar', assigned_members: currentUser, lesson_title: 'Test Lesson' }
-                ];
+            try {
+                const rotasData = await runTursoQuery("SELECT * FROM rotas ORDER BY date ASC;");
+                const eventsData = await runTursoQuery("SELECT * FROM events ORDER BY date ASC;");
+
+                if (rotasData && rotasData.length > 0) {
+                    allRotas = rotasData.map(r => ({
+                        id: r.id,
+                        date: r.date || '',
+                        category: r.category || r.rota_name || 'General',
+                        role: r.role || 'Member',
+                        assigned_members: r.assigned_members || r.members || '',
+                        passage: r.passage || '',
+                        lesson_title: r.lesson_title || '',
+                        memory_verse: r.memory_verse || ''
+                    }));
+                } else {
+                    allRotas = [];
+                }
+
+                allEvents = eventsData || [];
+                renderUI();
+            } catch (err) {
+                console.error('Error loading Turso data:', err);
             }
-            renderUI();
         }
 
         function renderCategoryFilters() {
@@ -256,7 +271,7 @@
                 <div class="bg-white/10 border border-white/20 px-3 py-1.5 rounded-lg text-xs flex items-center space-x-2">
                     <span class="font-bold text-[#38b2ac]">${r.date}</span>
                     <span>—</span>
-                    <span>${r.category} (${r.role || 'Member'})</span>
+                    <span>${r.category} (${r.role})</span>
                 </div>
             `).join('');
         }
