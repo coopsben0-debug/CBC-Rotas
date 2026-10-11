@@ -43,7 +43,7 @@
         <div class="flex flex-wrap items-center justify-between gap-4 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
             <div class="flex items-center space-x-2 overflow-x-auto">
                 <button onclick="switchTab('main')" id="tab-main" class="px-4 py-2 rounded-lg text-sm font-semibold bg-[#0f2b48] text-white transition">
-                    Main Rotas
+                    Sunday Rotas View
                 </button>
                 <button onclick="switchTab('myschedule')" id="tab-myschedule" class="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 transition">
                     My Schedule
@@ -72,12 +72,12 @@
             <div id="personalDutiesList" class="flex flex-wrap gap-2.5"></div>
         </div>
 
-        <!-- ROTA VIEW -->
-        <div id="view-rotas" class="space-y-4">
+        <!-- ROTA VIEW (Grouped by Sunday) -->
+        <div id="view-rotas" class="space-y-6">
             <!-- Search & Filters -->
             <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-3">
                 <div class="flex flex-col md:flex-row gap-4 justify-between items-center">
-                    <input type="text" id="searchInput" oninput="renderRotasTable()" placeholder="Search duty, member, or lesson..." class="w-full md:w-80 px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#38b2ac]">
+                    <input type="text" id="searchInput" oninput="renderRotasBySunday()" placeholder="Search duty, member, or lesson..." class="w-full md:w-80 px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#38b2ac]">
                     <button onclick="loadDataFromTurso()" class="px-4 py-2 bg-[#0f2b48] text-white text-xs font-semibold rounded-lg hover:bg-[#1a365d] transition">
                         Refresh Data
                     </button>
@@ -85,23 +85,8 @@
                 <div id="categoryFilters" class="flex flex-wrap gap-1.5 pt-1"></div>
             </div>
 
-            <!-- Table -->
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs font-bold uppercase tracking-wider">
-                                <th class="p-4 w-36">Date</th>
-                                <th class="p-4">Category</th>
-                                <th class="p-4">Role</th>
-                                <th class="p-4">Assigned Member(s) & Details</th>
-                                <th class="p-4 text-right w-28">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="rotasTableBody" class="divide-y divide-slate-100 text-sm"></tbody>
-                    </table>
-                </div>
-            </div>
+            <!-- Sundays Container -->
+            <div id="sundaysContainer" class="space-y-6"></div>
         </div>
 
         <!-- EVENTS VIEW -->
@@ -113,6 +98,35 @@
         </div>
 
     </main>
+
+    <!-- Action Modal (Swap / Edit / Request Cover) -->
+    <div id="actionModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full overflow-hidden border border-slate-200">
+            <div class="bg-[#0f2b48] px-6 py-4 flex justify-between items-center text-white">
+                <h3 class="font-bold text-base">Update Rota Duty</h3>
+                <button onclick="closeActionModal()" class="text-slate-400 hover:text-white">✕</button>
+            </div>
+            <div class="p-6 space-y-4">
+                <input type="hidden" id="editRotaId">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Date & Category</label>
+                    <div id="modalDetailsLabel" class="text-sm font-semibold text-[#0f2b48]"></div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Assigned Member(s)</label>
+                    <input type="text" id="editMembersInput" class="w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-lg text-sm text-slate-800 focus:ring-2 focus:ring-[#38b2ac]">
+                </div>
+                <label class="flex items-center space-x-2 p-2.5 bg-rose-50 border border-rose-200 rounded-lg cursor-pointer">
+                    <input type="checkbox" id="editNeedsCoverCheck" class="rounded text-rose-600 h-4 w-4">
+                    <span class="text-xs font-bold text-rose-700">🚨 Request Cover / Mark as Unavailable</span>
+                </label>
+                <div class="flex justify-end space-x-2 pt-2">
+                    <button onclick="closeActionModal()" class="px-4 py-2 bg-slate-100 text-slate-700 text-xs font-semibold rounded-lg">Cancel</button>
+                    <button onclick="saveRotaAction()" class="px-4 py-2 bg-[#0f2b48] text-white text-xs font-semibold rounded-lg hover:bg-[#1a365d]">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Daily Bible Verse Footer -->
     <footer class="bg-white border-t border-slate-200 py-6 mt-auto text-center space-y-2">
@@ -126,7 +140,6 @@
     </footer>
 
     <script>
-        // Updated Turso Configuration with New Token
         const TURSO_URL = 'https://cbc-rota-coopsben0-debug.aws-eu-west-1.turso.io';
         const TURSO_TOKEN = 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3OTE2NzcyNjQsImlkIjoiMDFhMTI4MWQtYmMwMS03ZWNmLTlhZWMtMzRiNmI0YWQzOGY1Iiwia2lkIjoiRGl5ZFV0d0owWW9SM0p6RTlIeFE5aHZZWGtyZzlCRkRoajIzcG9pNjEtWSIsInJpZCI6IjBkNGZhNDQyLTdlOTEtNDg2NS1iZDM2LWMwYmVhZTNlMjhmZiJ9.OPYoqqbK6fTO6FXFgZPG0E-vooUxnj5rH6QYSeAOBGwHfT1zfy-EbiKoAte6ntLjgaAUZsemMJ8n6Kx3PQY_Ag';
 
@@ -141,6 +154,7 @@
         let currentTab = 'main';
         let currentCategoryFilter = 'All';
         let currentUser = localStorage.getItem('cbc_user_name') || 'User';
+        let userFirstName = currentUser.trim().split(' ')[0].toLowerCase();
 
         document.getElementById('currentUserLabel').textContent = currentUser;
 
@@ -150,8 +164,7 @@
             loadDailyVerse();
         });
 
-        // Turso REST API Client
-        async function runTursoQuery(sql) {
+        async function runTursoQuery(sql, args = []) {
             try {
                 const response = await fetch(`${TURSO_URL}/v2/pipeline`, {
                     method: 'POST',
@@ -161,7 +174,13 @@
                     },
                     body: JSON.stringify({
                         requests: [
-                            { type: 'execute', stmt: { sql: sql } },
+                            { 
+                                type: 'execute', 
+                                stmt: { 
+                                    sql: sql,
+                                    args: args.map(v => ({ type: typeof v === 'number' ? 'integer' : 'text', value: String(v) }))
+                                } 
+                            },
                             { type: 'close' }
                         ]
                     })
@@ -176,9 +195,7 @@
                 const cols = resObj.cols.map(c => c.name);
                 return resObj.rows.map(row => {
                     let obj = {};
-                    row.forEach((cell, idx) => {
-                        obj[cols[idx]] = cell ? cell.value : null;
-                    });
+                    row.forEach((cell, idx) => { obj[cols[idx]] = cell ? cell.value : null; });
                     return obj;
                 });
             } catch (err) {
@@ -201,12 +218,10 @@
                         assigned_members: r.assigned_members || r.members || '',
                         passage: r.passage || '',
                         lesson_title: r.lesson_title || '',
-                        memory_verse: r.memory_verse || ''
+                        memory_verse: r.memory_verse || '',
+                        needs_cover: r.needs_cover || 0
                     }));
-                } else {
-                    allRotas = [];
                 }
-
                 allEvents = eventsData || [];
                 renderUI();
             } catch (err) {
@@ -226,7 +241,7 @@
         function setCategoryFilter(cat) {
             currentCategoryFilter = cat;
             renderCategoryFilters();
-            renderRotasTable();
+            renderUI();
         }
 
         function switchTab(tab) {
@@ -242,20 +257,24 @@
             document.getElementById('view-events').classList.toggle('hidden', tab !== 'events');
 
             if (tab === 'events') renderEvents();
-            else renderRotasTable();
+            else renderUI();
         }
 
         function renderUI() {
             renderPersonalSchedule();
             if (currentTab === 'events') renderEvents();
-            else renderRotasTable();
+            else renderRotasBySunday();
+        }
+
+        function matchesUser(assignedStr) {
+            if (!assignedStr) return false;
+            return assignedStr.toLowerCase().includes(userFirstName);
         }
 
         function renderPersonalSchedule() {
             const today = new Date().toISOString().split('T')[0];
             const myUpcoming = allRotas.filter(r => 
-                r.date >= today && 
-                r.assigned_members.toLowerCase().includes(currentUser.toLowerCase())
+                r.date >= today && matchesUser(r.assigned_members)
             );
 
             document.getElementById('personalDutyCount').textContent = `${myUpcoming.length} upcoming`;
@@ -275,27 +294,16 @@
             `).join('');
         }
 
-        function renderRotasTable() {
-            const tbody = document.getElementById('rotasTableBody');
+        function renderRotasBySunday() {
+            const container = document.getElementById('sundaysContainer');
             const search = document.getElementById('searchInput').value.toLowerCase();
             const hidePast = document.getElementById('autoDisappearToggle').checked;
             const today = new Date().toISOString().split('T')[0];
 
-            // Clash Map across categories on the same date
-            const clashMap = {};
-            allRotas.forEach(r => {
-                const members = r.assigned_members.split(/[&,]/).map(m => m.trim().toLowerCase());
-                members.forEach(m => {
-                    if (!m) return;
-                    if (!clashMap[r.date]) clashMap[r.date] = {};
-                    if (!clashMap[r.date][m]) clashMap[r.date][m] = [];
-                    clashMap[r.date][m].push(r.category);
-                });
-            });
-
+            // 1. Filter rotas based on search, tabs, and past dates
             const filtered = allRotas.filter(r => {
                 if (hidePast && r.date < today) return false;
-                if (currentTab === 'myschedule' && !r.assigned_members.toLowerCase().includes(currentUser.toLowerCase())) return false;
+                if (currentTab === 'myschedule' && !matchesUser(r.assigned_members)) return false;
                 if (currentCategoryFilter !== 'All' && r.category !== currentCategoryFilter) return false;
                 
                 if (search) {
@@ -309,35 +317,115 @@
             });
 
             if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-slate-400">No matching rotas found. Uncheck "HIDE PAST DATES" or clear search filters.</td></tr>`;
+                container.innerHTML = `<div class="bg-white p-8 rounded-xl shadow-sm border border-slate-200 text-center text-slate-400">No matching rotas found. Uncheck "HIDE PAST DATES" or clear search filters.</div>`;
                 return;
             }
 
-            tbody.innerHTML = filtered.map(r => {
-                const members = r.assigned_members.split(/[&,]/).map(m => m.trim().toLowerCase());
-                let hasClash = false;
+            // 2. Group by Date (Sunday)
+            const groupedByDate = {};
+            filtered.forEach(r => {
+                if (!groupedByDate[r.date]) groupedByDate[r.date] = [];
+                groupedByDate[r.date].push(r);
+            });
+
+            // 3. Build Clash Map for each date
+            const clashMap = {};
+            allRotas.forEach(r => {
+                const members = r.assigned_members.split(/[&,|]/).map(m => m.trim().toLowerCase());
                 members.forEach(m => {
-                    if (clashMap[r.date] && clashMap[r.date][m] && clashMap[r.date][m].length > 1) hasClash = true;
+                    if (!m) return;
+                    if (!clashMap[r.date]) clashMap[r.date] = {};
+                    if (!clashMap[r.date][m]) clashMap[r.date][m] = [];
+                    clashMap[r.date][m].push(r.category);
                 });
+            });
+
+            // 4. Render Sunday Cards in chronological order
+            const sortedDates = Object.keys(groupedByDate).sort();
+
+            container.innerHTML = sortedDates.map(date => {
+                const duties = groupedByDate[date];
+                
+                // Format Date nicely (e.g., Sunday, 11 Oct 2026)
+                const dateObj = new Date(date);
+                const dateFormatted = !isNaN(dateObj) ? dateObj.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' }) : date;
+
+                const dutyRows = duties.map(r => {
+                    const members = r.assigned_members.split(/[&,|]/).map(m => m.trim().toLowerCase());
+                    let hasClash = false;
+                    members.forEach(m => {
+                        if (clashMap[r.date] && clashMap[r.date][m] && clashMap[r.date][m].length > 1) hasClash = true;
+                    });
+
+                    return `
+                        <div class="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b last:border-b-0 border-slate-100 ${hasClash ? 'bg-rose-50/70 border-l-4 border-rose-500' : 'hover:bg-slate-50/60'} transition">
+                            <div class="space-y-1">
+                                <div class="flex items-center space-x-2">
+                                    <span class="font-bold text-[#0f2b48] text-sm">${r.category}</span>
+                                    <span class="text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded">${r.role || 'Member'}</span>
+                                    ${r.needs_cover ? '<span class="px-2 py-0.5 bg-rose-100 text-rose-700 text-xs font-bold rounded border border-rose-200">🚨 NEEDS COVER</span>' : ''}
+                                </div>
+                                <div class="text-sm font-medium text-slate-800">${r.assigned_members}</div>
+                                ${r.lesson_title ? `<div class="text-xs text-[#38b2ac] font-bold">📖 Lesson: ${r.lesson_title}</div>` : ''}
+                                ${r.passage ? `<div class="text-xs text-slate-500">📜 Passage: ${r.passage}</div>` : ''}
+                                ${r.memory_verse ? `<div class="text-xs text-amber-600 font-medium">💡 Verse: ${r.memory_verse}</div>` : ''}
+                                ${hasClash ? '<div class="text-xs font-bold text-rose-600">🚨 Double Booking Clash Detected on this date</div>' : ''}
+                            </div>
+                            <button onclick="openActionModal(${r.id})" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg border border-slate-200 shadow-sm whitespace-nowrap">
+                                Swap / Edit
+                            </button>
+                        </div>
+                    `;
+                }).join('');
 
                 return `
-                    <tr class="${hasClash ? 'bg-rose-50 border-l-4 border-rose-500' : 'hover:bg-slate-50'} border-b border-slate-100">
-                        <td class="p-4 font-bold text-slate-700 whitespace-nowrap">${r.date}</td>
-                        <td class="p-4 font-semibold text-[#0f2b48]">${r.category}</td>
-                        <td class="p-4 text-slate-600">${r.role || '—'}</td>
-                        <td class="p-4 font-medium text-slate-800">
-                            <div>${r.assigned_members}</div>
-                            ${r.lesson_title ? `<div class="text-xs text-[#38b2ac] font-bold mt-1">📖 Lesson: ${r.lesson_title}</div>` : ''}
-                            ${r.passage ? `<div class="text-xs text-slate-500">📜 Passage: ${r.passage}</div>` : ''}
-                            ${r.memory_verse ? `<div class="text-xs text-amber-600 font-medium">💡 Verse: ${r.memory_verse}</div>` : ''}
-                            ${hasClash ? '<span class="block text-xs font-bold text-rose-600 mt-1">🚨 Double Booking Clash Detected</span>' : ''}
-                        </td>
-                        <td class="p-4 text-right whitespace-nowrap">
-                            <button onclick="alert('Swap option requested')" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded">Swap</button>
-                        </td>
-                    </tr>
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                        <div class="bg-gradient-to-r from-[#0f2b48] to-[#1a365d] px-5 py-3 text-white flex justify-between items-center">
+                            <h3 class="font-bold text-sm tracking-wide flex items-center space-x-2">
+                                <span>📅</span>
+                                <span>${dateFormatted}</span>
+                            </h3>
+                            <span class="text-xs bg-[#38b2ac]/20 text-[#38b2ac] px-2.5 py-1 rounded-full font-semibold border border-[#38b2ac]/40">${duties.length} duties</span>
+                        </div>
+                        <div class="divide-y divide-slate-100">
+                            ${dutyRows}
+                        </div>
+                    </div>
                 `;
             }).join('');
+        }
+
+        function openActionModal(id) {
+            const item = allRotas.find(r => r.id === id);
+            if (!item) return;
+
+            document.getElementById('editRotaId').value = item.id;
+            document.getElementById('modalDetailsLabel').textContent = `${item.date} — ${item.category}`;
+            document.getElementById('editMembersInput').value = item.assigned_members;
+            document.getElementById('editNeedsCoverCheck').checked = item.needs_cover == 1;
+
+            document.getElementById('actionModal').classList.remove('hidden');
+        }
+
+        function closeActionModal() {
+            document.getElementById('actionModal').classList.add('hidden');
+        }
+
+        async function saveRotaAction() {
+            const id = parseInt(document.getElementById('editRotaId').value);
+            const newMembers = document.getElementById('editMembersInput').value.trim();
+            const needsCover = document.getElementById('editNeedsCoverCheck').checked ? 1 : 0;
+
+            const item = allRotas.find(r => r.id === id);
+            if (item) {
+                item.assigned_members = newMembers;
+                item.needs_cover = needsCover;
+            }
+
+            closeActionModal();
+            renderUI();
+
+            await runTursoQuery("UPDATE rotas SET assigned_members = ?, needs_cover = ? WHERE id = ?;", [newMembers, needsCover, id]);
         }
 
         function renderEvents() {
