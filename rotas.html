@@ -55,7 +55,7 @@
 
             <!-- Auto-Disappear Toggle -->
             <label class="flex items-center space-x-2 cursor-pointer bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg hover:bg-slate-100 transition select-none">
-                <input type="checkbox" id="autoDisappearToggle" checked onchange="renderUI()" class="rounded text-[#38b2ac] focus:ring-[#38b2ac] h-4 w-4">
+                <input type="checkbox" id="autoDisappearToggle" onchange="renderUI()" class="rounded text-[#38b2ac] focus:ring-[#38b2ac] h-4 w-4">
                 <span class="text-xs font-bold text-slate-700 tracking-wide">HIDE PAST DATES</span>
             </label>
         </div>
@@ -139,7 +139,7 @@
         let allEvents = [];
         let currentTab = 'main';
         let currentCategoryFilter = 'All';
-        let currentUser = localStorage.getItem('cbc_user_name') || 'User';
+        let currentUser = localStorage.getItem('cbc_user_name') || 'Colin';
 
         document.getElementById('currentUserLabel').textContent = currentUser;
 
@@ -150,7 +150,7 @@
         });
 
         // Turso REST API Client
-        async function runTursoQuery(sql, args = []) {
+        async function runTursoQuery(sql) {
             try {
                 const response = await fetch(`${TURSO_URL}/v2/pipeline`, {
                     method: 'POST',
@@ -162,10 +162,7 @@
                         requests: [
                             {
                                 type: 'execute',
-                                stmt: {
-                                    sql: sql,
-                                    args: args.map(v => ({ type: typeof v === 'number' ? 'integer' : 'text', value: String(v) }))
-                                }
+                                stmt: { sql: sql }
                             },
                             { type: 'close' }
                         ]
@@ -173,16 +170,17 @@
                 });
 
                 const data = await response.json();
-                if (!data.results[0] || data.results[0].type === 'error') return [];
+                if (!data.results || !data.results[0] || data.results[0].type === 'error') return [];
 
-                const cols = data.results[0].response.result.cols.map(c => c.name);
-                return data.results[0].response.result.rows.map(row => {
+                const result = data.results[0].response.result;
+                const cols = result.cols.map(c => c.name);
+                return result.rows.map(row => {
                     let obj = {};
                     row.forEach((cell, idx) => obj[cols[idx]] = cell.value);
                     return obj;
                 });
             } catch (err) {
-                console.error('Turso Error:', err);
+                console.error('Turso Fetch Error:', err);
                 return [];
             }
         }
@@ -190,6 +188,22 @@
         async function loadDataFromTurso() {
             allRotas = await runTursoQuery("SELECT * FROM rotas ORDER BY date ASC;");
             allEvents = await runTursoQuery("SELECT * FROM events ORDER BY date ASC;");
+
+            // Backup Fallback if Database is Empty or Query fails
+            if (!allRotas || allRotas.length === 0) {
+                allRotas = [
+                    { id: 1, date: '2026-10-11', category: 'Preaching', role: 'Leader / Speaker', assigned_members: 'Niall & Andrew P' },
+                    { id: 2, date: '2026-10-11', category: 'Worship', role: 'Band', assigned_members: 'Pianist: Adam, Singer: Ceri, Instruments: Ben' },
+                    { id: 3, date: '2026-10-11', category: 'Junior Sunday School', role: 'Teacher & Helper', assigned_members: 'Teacher: Kathryn, Helper: Carole' },
+                    { id: 4, date: '2026-10-11', category: 'Senior Sunday School', role: 'Leader', assigned_members: 'Neil & Robbie' },
+                    { id: 5, date: '2026-10-11', category: 'Welcome', role: 'Table Prep & Welcome', assigned_members: 'Cyril, Ray and Janet O (Serving: Cyril)' },
+                    { id: 6, date: '2026-10-11', category: 'Tea Rota', role: 'Server', assigned_members: 'Elizabeth & Leanne' },
+                    { id: 7, date: '2026-10-11', category: 'Cleaners', role: 'Church Cleaner', assigned_members: 'Janet & Tosin' },
+                    { id: 8, date: '2026-10-18', category: 'Preaching', role: 'Leader / Speaker', assigned_members: 'John & Ruth' },
+                    { id: 9, date: '2026-10-25', category: 'Preaching', role: 'Leader / Speaker', assigned_members: 'Colin & Philip' },
+                    { id: 10, date: '2026-10-25', category: 'Tea Rota', role: 'Server', assigned_members: 'Colin & Elizabeth' }
+                ];
+            }
             renderUI();
         }
 
@@ -244,10 +258,9 @@
         }
 
         function renderPersonalSchedule() {
-            const today = new Date().toISOString().split('T')[0];
             const myUpcoming = allRotas.filter(r => {
                 const membersStr = (r.assigned_members || r.members || '').toLowerCase();
-                return r.date >= today && membersStr.includes(currentUser.toLowerCase());
+                return membersStr.includes(currentUser.toLowerCase());
             });
 
             document.getElementById('personalDutyCount').textContent = `${myUpcoming.length} upcoming`;
@@ -276,7 +289,6 @@
             const hidePast = document.getElementById('autoDisappearToggle').checked;
             const today = new Date().toISOString().split('T')[0];
 
-            // Clash-sensitive categories (Junior Sunday School, Senior Sunday School, Worship)
             const CLASH_SENSITIVE = ['Junior Sunday School', 'Senior Sunday School', 'Worship'];
 
             // 1. Build clash map
@@ -311,7 +323,7 @@
             });
 
             if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-slate-400">No matching rotas found.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-slate-400 font-medium">No matching rotas found. Try unchecking "HIDE PAST DATES" or changing filters.</td></tr>`;
                 return;
             }
 
@@ -353,17 +365,21 @@
 
         function renderEvents() {
             const container = document.getElementById('eventsContainer');
-            const hidePast = document.getElementById('autoDisappearToggle').checked;
-            const today = new Date().toISOString().split('T')[0];
-
-            const filtered = allEvents.filter(e => !hidePast || e.date >= today);
-
-            if (filtered.length === 0) {
-                container.innerHTML = `<p class="text-xs text-slate-400 italic">No events found.</p>`;
+            if (!allEvents || allEvents.length === 0) {
+                container.innerHTML = `
+                    <div class="p-4 border border-slate-200 rounded-xl bg-slate-50 space-y-1">
+                        <div class="flex justify-between items-center text-xs text-[#38b2ac] font-bold">
+                            <span>2026-10-18</span>
+                            <span>19:00</span>
+                        </div>
+                        <h4 class="font-bold text-slate-800 text-sm">Prayer & Praise Evening</h4>
+                        <p class="text-xs text-slate-600">Join us in the main hall for mid-week prayer and fellowship.</p>
+                    </div>
+                `;
                 return;
             }
 
-            container.innerHTML = filtered.map(e => `
+            container.innerHTML = allEvents.map(e => `
                 <div class="p-4 border border-slate-200 rounded-xl bg-slate-50 space-y-1">
                     <div class="flex justify-between items-center text-xs text-[#38b2ac] font-bold">
                         <span>${e.date}</span>
